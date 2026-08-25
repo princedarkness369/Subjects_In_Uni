@@ -1,0 +1,1621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Information Retrieval — Master Study Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --primary-dark: #1d4ed8;
+    --secondary: #0d9488;
+    --accent: #8b5cf6;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --card-border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+    --radius: 16px;
+  }
+
+  body.dark {
+    --primary: #3b82f6;
+    --primary-light: rgba(59, 130, 246, 0.15);
+    --primary-dark: #60a5fa;
+    --secondary: #14b8a6;
+    --accent: #a78bfa;
+    --bg: #0b0f19;
+    --card: #151c2c;
+    --card-border: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  .brand-title {
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .nav-tabs {
+    display: flex;
+    background: var(--bg);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    gap: 2px;
+  }
+
+  .tab-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tab-btn:hover {
+    color: var(--text);
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--card-border);
+    padding: 7px 14px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .search-trigger:hover {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+
+  .kbd {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .theme-toggle {
+    border: 1px solid var(--card-border);
+    background: var(--bg);
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--card);
+    border-color: var(--primary);
+  }
+
+  /* Main Layout */
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 32px 20px 80px;
+    flex: 1;
+  }
+
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.25s ease-in-out;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Section Intro Banner */
+  .page-banner {
+    margin-bottom: 28px;
+  }
+
+  .page-banner h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .page-banner p {
+    color: var(--text-muted);
+    font-size: 14.5px;
+  }
+
+  /* Pills & Filters */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .chip {
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .chip:hover, .chip.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 26px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .badge-section {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .summary-text {
+    font-size: 14.5px;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    header { flex-direction: column; gap: 12px; align-items: stretch; }
+    .nav-tabs { overflow-x: auto; }
+    .header-actions { justify-content: space-between; }
+  }
+
+  .block-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  .label-blue { color: var(--primary); }
+  .label-red { color: #ef4444; }
+  .label-amber { color: #f59e0b; }
+  .label-purple { color: #8b5cf6; }
+  .label-green { color: #10b981; }
+
+  ul.bullet-list {
+    list-style: none;
+  }
+
+  ul.bullet-list li {
+    font-size: 13.5px;
+    color: var(--text);
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 7px;
+    line-height: 1.5;
+  }
+
+  ul.bullet-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+  }
+
+  .label-red + ul.bullet-list li::before { color: #ef4444; }
+  .label-amber + ul.bullet-list li::before { color: #f59e0b; }
+
+  .kw-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .kw {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--card-border);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .revision-box {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--card-border);
+  }
+
+  .revision-item {
+    background: rgba(16, 185, 129, 0.08);
+    border-left: 3px solid #10b981;
+    padding: 10px 14px;
+    border-radius: 0 10px 10px 0;
+    font-size: 13.5px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  /* Concepts Tab */
+  .concept-card {
+    border-left: 4px solid var(--primary);
+  }
+
+  .concept-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .importance-stars {
+    color: #f59e0b;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .box-simple {
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .box-trick {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px dashed var(--accent);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Comparisons Tab */
+  .comparison-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+  }
+
+  .comparison-table th {
+    background: var(--bg);
+    padding: 14px 18px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text);
+  }
+
+  .comparison-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: top;
+    color: var(--text);
+  }
+
+  .comparison-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .comparison-table td:first-child {
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 22%;
+    background: var(--bg);
+  }
+
+  /* Flashcards Tab */
+  .flashcard-wrapper {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  .flashcard-container {
+    perspective: 1000px;
+    height: 280px;
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+
+  .flashcard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .flashcard.flipped {
+    transform: rotateY(180deg);
+  }
+
+  .flashcard-front, .flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--card);
+    border: 2px solid var(--card-border);
+  }
+
+  .flashcard-back {
+    transform: rotateY(180deg);
+    background: var(--primary-light);
+    border-color: var(--primary);
+  }
+
+  .fc-hint {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .fc-text {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.5;
+    margin: auto 0;
+  }
+
+  .fc-back-text {
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.6;
+    margin: auto 0;
+    color: var(--text);
+  }
+
+  .fc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .fc-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .btn {
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover {
+    background: var(--bg);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    color: white;
+  }
+
+  .progress-tracker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    padding: 12px 18px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+  }
+
+  .progress-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: var(--bg);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* Search Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .search-modal {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    width: 100%;
+    max-width: 640px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin: 0 16px;
+  }
+
+  .search-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .search-modal-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+  }
+
+  .search-results {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .search-result-item {
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    margin-bottom: 4px;
+  }
+
+  .search-result-item:hover {
+    background: var(--bg);
+  }
+
+  .search-result-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .search-result-snippet {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 24px;
+    border-top: 1px solid var(--card-border);
+    background: var(--card);
+    margin-top: auto;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">IR</div>
+    <div>
+      <div class="brand-title">Information Retrieval</div>
+      <div class="brand-subtitle">Master Exam Study Hub</div>
+    </div>
+  </div>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('summaries')">📖 Summaries</button>
+    <button class="tab-btn" onclick="switchTab('concepts')">💡 Concepts</button>
+    <button class="tab-btn" onclick="switchTab('comparisons')">⚖️ Comparisons</button>
+    <button class="tab-btn" onclick="switchTab('flashcards')">🎴 Flashcards</button>
+  </nav>
+
+  <div class="header-actions">
+    <button class="search-trigger" onclick="openSearch()">
+      🔍 Search... <span class="kbd">⌘K</span>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">🌙</button>
+  </div>
+</header>
+
+<main>
+  <!-- TAB 1: SUMMARIES -->
+  <div id="tab-summaries" class="tab-content active">
+    <div class="page-banner">
+      <h2>Smart Section Summaries</h2>
+      <p>Exam-ready recaps of all lecture sections — read this for high-level mastery.</p>
+    </div>
+
+    <div class="filter-bar" id="summaryToc"></div>
+    <div id="summaryCards"></div>
+  </div>
+
+  <!-- TAB 2: CONCEPTS -->
+  <div id="tab-concepts" class="tab-content">
+    <div class="page-banner">
+      <h2>Core Concepts & Key Terms</h2>
+      <p>Comprehensive definitions, simple explanations, and memory tricks for every topic.</p>
+    </div>
+
+    <div class="filter-bar" id="conceptSectionFilter"></div>
+    <div id="conceptCards"></div>
+  </div>
+
+  <!-- TAB 3: COMPARISONS -->
+  <div id="tab-comparisons" class="tab-content">
+    <div class="page-banner">
+      <h2>Feature & Model Comparisons</h2>
+      <p>Side-by-side breakdowns of high-yield exam comparison questions.</p>
+    </div>
+
+    <div id="comparisonCards"></div>
+  </div>
+
+  <!-- TAB 4: FLASHCARDS -->
+  <div id="tab-flashcards" class="tab-content">
+    <div class="page-banner">
+      <h2>Interactive Flashcards</h2>
+      <p>Test your active recall before the exam. Click card to flip!</p>
+    </div>
+
+    <div class="progress-tracker">
+      <div style="font-size: 13px; font-weight: 700; color: var(--text-muted);">
+        Progress: <span id="fcCardNum" style="color: var(--primary);">1</span> / <span id="fcTotalNum">30</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="fcProgressBar"></div>
+      </div>
+      <button class="btn" onclick="shuffleFlashcards()" style="padding: 6px 12px; font-size: 12px;">🔀 Shuffle</button>
+    </div>
+
+    <div class="filter-bar" id="flashcardSectionFilter" style="justify-content: center;"></div>
+
+    <div class="flashcard-wrapper">
+      <div class="flashcard-container" onclick="flipFlashcard()">
+        <div class="flashcard" id="flashcardElem">
+          <div class="flashcard-front">
+            <div class="fc-hint" id="fcFrontSection">SECTION</div>
+            <div class="fc-text" id="fcFrontText">Question loading...</div>
+            <div class="fc-footer">
+              <span id="fcTypeBadge">Definition</span>
+              <span>Click to flip 🔄</span>
+            </div>
+          </div>
+          <div class="flashcard-back">
+            <div class="fc-hint" style="color: var(--secondary);">ANSWER & REASONING</div>
+            <div class="fc-back-text" id="fcBackText">Answer loading...</div>
+            <div class="fc-footer">
+              <span>Verified Course Material</span>
+              <span>Click to flip back 🔄</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fc-controls">
+        <button class="btn" onclick="prevFlashcard()">← Previous</button>
+        <button class="btn btn-primary" onclick="nextFlashcard()">Next Card →</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Search Modal -->
+<div class="modal-overlay" id="searchModal" onclick="closeSearchOnOverlay(event)">
+  <div class="search-modal">
+    <div class="search-modal-header">
+      🔍
+      <input type="text" class="search-modal-input" id="searchInput" placeholder="Search concepts, formulas, rules..." oninput="handleSearchInput()">
+      <button class="btn" onclick="closeSearch()" style="padding: 4px 10px; font-size: 12px;">ESC</button>
+    </div>
+    <div class="search-results" id="searchResults">
+      <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13.5px;">
+        Type to search across concepts, summaries, comparisons, and flashcards...
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Built directly from lecture materials — Complete IR Study Hub.</footer>
+
+<script>
+// --- DATA DEFINITIONS ---
+const summaries = [
+  {
+    id: 'foundations',
+    title: 'Foundations of IR',
+    quickSummary: 'IR means finding relevant material from large, usually unstructured, text collections. It rests on two assumptions (a collection + a goal), follows a "classic search model" from user task to results, and is judged with precision and recall.',
+    importantConcepts: ['Definition of Information Retrieval','Collection & Goal (basic assumptions)','Classic search model: task → info need → query → results','Precision and Recall'],
+    commonMistakes: ['Confusing the "query" with the "information need" — they can diverge (misconception, misformulation).','Mixing up precision (about the retrieved set) with recall (about the full relevant set).'],
+    professorFocus: ['The distinction between user task, information need, and query.','The exact wording of precision vs. recall.'],
+    keywordsToMemorize: ['information need','collection','misconception','misformulation','precision','recall'],
+    lastMinuteRevision: ['IR = unstructured text + information need + large collection.','Task → Info Need (misconception risk) → Query (misformulation risk) → Results.','Precision = relevant among retrieved. Recall = retrieved among relevant.']
+  },
+  {
+    id: 'term-document-matrices',
+    title: 'Term–Document Matrices',
+    quickSummary: 'A term-document incidence matrix marks with 1/0 whether each term appears in each document. Boolean queries can be answered with bitwise AND on these 0/1 vectors, but at real scale the matrix becomes far too large and sparse to store directly.',
+    importantConcepts: ['Term-document incidence matrix (rows = terms, columns = documents)','Incidence vectors and bitwise AND for Boolean queries','Why the full matrix becomes infeasible at scale (sparsity)'],
+    commonMistakes: ['Thinking a bigger matrix is just "slower" — it actually becomes physically too large to store.','Forgetting to complement (flip) the vector for a NOT term before ANDing.'],
+    professorFocus: ['The Shakespeare "Brutus AND Caesar BUT NOT Calpurnia" example.','The scale numbers: N=1M docs, M=500K terms, half-a-trillion cell matrix.'],
+    keywordsToMemorize: ['incidence matrix','0/1 vector','bitwise AND','sparse matrix'],
+    lastMinuteRevision: ['1 = term is in the document, 0 = it is not.','AND queries = bitwise AND across term vectors (complement for NOT).','Matrix is mostly 0s at scale → this motivates the inverted index.']
+  },
+  {
+    id: 'inverted-index-section',
+    title: 'The Inverted Index',
+    quickSummary: 'The inverted index only records, for each term, which documents contain it — solving the sparsity problem. It is built via a Tokenizer → Linguistic modules → Indexer pipeline, with text processing steps (tokenization, normalization, stemming, stop words) cleaning the text along the way, then sorted into a Dictionary and Postings.',
+    importantConcepts: ['Inverted index (term → list of docIDs)','Variable-size postings lists','Index construction pipeline (Tokenizer, Linguistic modules, Indexer)','Text processing: tokenization, normalization, stemming, stop words','Indexer steps: token sequence → sort → dictionary & postings'],
+    commonMistakes: ['Assuming postings lists can be fixed-size arrays (they must grow as new documents are added).','Forgetting that sorting (by term, then docID) is the "core indexing step."','Treating stop word removal as mandatory — the lecture says "we may omit... or not."'],
+    professorFocus: ['Why the inverted index is "the key data structure underlying modern IR."','Why postings must be sorted by docID (it enables fast merging later).','The four text-processing steps and one example for each.'],
+    keywordsToMemorize: ['inverted index','docID','postings list','dictionary','tokenization','stemming','stop words'],
+    lastMinuteRevision: ['Inverted index = word → list of documents (not document → list of words).','Pipeline: Tokenizer → Linguistic modules → Indexer.','Text processing: cut it (tokenize), match it (normalize), root it (stem), maybe drop it (stop words).','Postings are always sorted by docID.']
+  },
+  {
+    id: 'query-processing-section',
+    title: 'Query Processing',
+    quickSummary: 'Boolean AND queries are answered by merging (intersecting) two sorted postings lists in O(x+y) time. For multi-term AND queries, processing terms in order of increasing document frequency (smallest list first) minimizes work.',
+    importantConcepts: ['The merge algorithm for AND queries','Why sorted postings enable O(x+y) merging','Query optimization by document frequency'],
+    commonMistakes: ['Forgetting that the O(x+y) efficiency depends entirely on postings being sorted by docID.','Not processing the smallest postings list first when optimizing multi-term AND queries.'],
+    professorFocus: ['The two-pointer walk-through of the merge algorithm.','The (Calpurnia AND Brutus) AND Caesar reordering example.'],
+    keywordsToMemorize: ['merge','O(x+y)','sorted postings','document frequency','query optimization'],
+    lastMinuteRevision: ['Merge = walk two sorted lists with two pointers, keep matches.','O(x+y) time, crucially depends on sorted-by-docID postings.','Always AND starting with the smallest postings list.']
+  },
+  {
+    id: 'boolean-model-section',
+    title: 'The Boolean Retrieval Model',
+    quickSummary: 'Boolean retrieval answers queries built from AND/OR/NOT with a precise match/no-match per document. It was the dominant commercial model for three decades and still powers systems like email, library catalogs, macOS Spotlight, and WestLaw (legal search), even though it lacks any notion of ranking.',
+    importantConcepts: ['Definition and precision of the Boolean model','Real systems using Boolean search','WestLaw example with proximity operators','General merges (AND NOT, OR NOT, arbitrary Boolean formulas)'],
+    commonMistakes: ['Assuming SPACE always means AND — in WestLaw-style queries, SPACE means OR (disjunction).','Assuming Boolean search is obsolete — professionals still prefer it for its precision.'],
+    professorFocus: ['The definition: "views each document as a set of words" and "is precise: document matches condition or not."','The WestLaw proximity operator examples (/3, /S, /P).'],
+    keywordsToMemorize: ['Boolean query','AND OR NOT','exact match','WestLaw','proximity operators'],
+    lastMinuteRevision: ['Boolean retrieval = exact match/no-match, no ranking.','Primary commercial tool for 3 decades; still used in email, library catalogs, Spotlight, WestLaw.','In WestLaw queries: SPACE = OR, not AND.']
+  },
+  {
+    id: 'phrase-positional-section',
+    title: 'Phrase Queries & Positional Indexes',
+    quickSummary: 'Phrase queries require exact word order. Biword indexes were a first attempt (fast for two-word phrases, but prone to false positives and index blowup). Positional indexes — which store exact word positions — are the standard solution today, also enabling proximity queries, at the cost of roughly 2–4x more storage.',
+    importantConcepts: ['Phrase queries','Biword indexes and extended biwords','Positional indexes','Proximity queries','Positional index size / rules of thumb','Combination schemes'],
+    commonMistakes: ['Thinking biword indexes can handle proximity queries — they cannot; only positional indexes can.','Forgetting that longer phrases via biwords can produce false positives (no direct doc verification).'],
+    professorFocus: ['Why positional indexes became the standard despite the storage cost.','The distinction between phrase queries (exact order) and proximity queries ("/k" words apart).'],
+    keywordsToMemorize: ['phrase query','biword index','positional index','proximity query','2-4x storage'],
+    lastMinuteRevision: ['Phrase query = exact word order required.','Biword index = fast but false positives + index blowup; no proximity support.','Positional index = stores exact positions; standard solution; ~2–4x larger; supports proximity.']
+  },
+  {
+    id: 'structured-section',
+    title: 'Structured vs. Unstructured Data',
+    quickSummary: 'Structured data lives in tables and supports exact/range queries; unstructured (free text) data supports keyword and concept queries. Almost no data is truly unstructured — hidden zones (like Title/Bullets) enable semi-structured search. This section also introduces the move beyond Boolean toward ranked retrieval using evidence like term frequency.',
+    importantConcepts: ['Structured vs. unstructured data','Semi-structured data (zones, wildcard search)','Evidence accumulation and ranking search results'],
+    commonMistakes: ['Assuming text documents are fully unstructured — most have identifiable zones (Title, Author, Body).','Assuming Boolean retrieval already ranks results — it only includes or excludes documents.'],
+    professorFocus: ['The Employee/Manager/Salary table example for structured queries.','The open questions raised about semi-structured search: how to process "about," how to rank results.'],
+    keywordsToMemorize: ['structured data','unstructured data','semi-structured data','zones','term frequency','ranking'],
+    lastMinuteRevision: ['Structured = tables + exact/range queries. Unstructured = free text + keyword/concept queries.','Semi-structured = zones within text (e.g., Title, Bullets) enable more precise search.','Ranking needs term frequency + proximity — this is where the course heads next.']
+  }
+];
+
+const concepts = [
+  {
+    id: 'information-retrieval',
+    section: 'Foundations of IR',
+    name: 'Information Retrieval (IR)',
+    definition: 'Information Retrieval (IR) is finding material (usually documents) of an unstructured nature (usually text) that satisfies an information need from within large collections (usually stored on computers).',
+    simpleExplanation: 'IR is the science of helping someone find the right documents out of a huge pile, based on what they actually need to know.',
+    whyImportant: 'It is the foundation of web search and almost every "search box" you use daily.',
+    mainGoal: 'Satisfy a user\'s information need by retrieving relevant material from a large collection.',
+    examples: ['Web search', 'E-mail search', 'Searching your laptop', 'Corporate knowledge bases', 'Legal information retrieval'],
+    keywords: ['information need', 'unstructured text', 'large collections', 'search'],
+    memoryTrick: 'IR = "I need info, Retrieve it" — from a big messy pile of text.',
+    importance: 5
+  },
+  {
+    id: 'ir-basic-assumptions',
+    section: 'Foundations of IR',
+    name: 'Basic Assumptions of IR',
+    definition: 'IR assumes a Collection (a set of documents, treated as static for the moment) and a Goal (retrieve documents relevant to the user\'s information need that help complete a task).',
+    simpleExplanation: 'Before building a search system, IR starts from two building blocks: a fixed pile of documents (the collection) and a purpose (help the user finish a task, not just match words).',
+    whyImportant: 'These two assumptions frame every technique that follows — indexing, ranking, and evaluation all exist to serve this goal.',
+    mainGoal: 'Retrieve documents that are relevant and help the user complete their task.',
+    examples: ['A static set of Shakespeare plays used as a collection in the lecture examples'],
+    keywords: ['collection', 'static collection', 'relevance', 'task completion'],
+    memoryTrick: 'Collection = the haystack. Goal = find the useful needles, not just any needle.',
+    importance: 3
+  },
+  {
+    id: 'classic-search-model',
+    section: 'Foundations of IR',
+    name: 'The Classic Search Model',
+    definition: 'A pipeline that starts with a user task, becomes an information need, gets turned into a query, is run against a search engine over a collection, and produces results — with query refinement looping back in.',
+    simpleExplanation: 'You have a real-world task (e.g., "get rid of mice nicely"), which becomes an info need ("how to remove mice without killing them"), which you turn into a query ("how trap mice alive"). Each translation step can go wrong.',
+    whyImportant: 'It shows why search often fails: not because the engine is bad, but because the user\'s task got misunderstood (misconception) or the query poorly expresses the need (misformulation).',
+    mainGoal: 'Trace how a real need is transformed into a searchable query, and back into useful results.',
+    examples: ['Task: get rid of mice in a politically correct way → Info need: info about removing mice without killing them → Query: "how trap mice alive"'],
+    keywords: ['user task', 'information need', 'query', 'misconception', 'misformulation', 'query refinement'],
+    memoryTrick: 'Task → Need → Query: each arrow is a place things can go wrong.',
+    importance: 4
+  },
+  {
+    id: 'precision-recall',
+    section: 'Foundations of IR',
+    name: 'Precision and Recall',
+    definition: 'Precision is the fraction of retrieved documents that are relevant to the user\'s information need. Recall is the fraction of relevant documents in the collection that are actually retrieved.',
+    simpleExplanation: 'Precision asks "of what I gave you, how much was useful?" Recall asks "of everything useful that exists, how much did I actually find?"',
+    whyImportant: 'These are the two basic ways the lecture introduces for judging how good the retrieved documents are.',
+    mainGoal: 'Measure the quality of a set of retrieved documents.',
+    examples: ['Precise definitions and measurements are noted as being covered later in the course.'],
+    keywords: ['precision', 'recall', 'relevance', 'retrieved documents'],
+    memoryTrick: 'PRecision = Precise about what you handed back. REcall = REmembering everything relevant that\'s out there.',
+    importance: 5
+  },
+  {
+    id: 'term-document-matrix',
+    section: 'Term–Document Matrices',
+    name: 'Term-Document Incidence Matrix',
+    definition: 'A matrix where rows are terms and columns are documents (plays), with a 1 if the play contains the word and 0 otherwise.',
+    simpleExplanation: 'Imagine a big grid: one row per word, one column per document. You put a 1 wherever that word appears in that document, 0 otherwise.',
+    whyImportant: 'It is the first, most literal way to represent "which words appear in which documents" — and the starting point before showing why it doesn\'t scale.',
+    mainGoal: 'Represent, for every term and every document, whether the term occurs in that document.',
+    examples: ['Which plays of Shakespeare contain the words Brutus AND Caesar but NOT Calpurnia?'],
+    keywords: ['term-document matrix', 'incidence matrix', '0/1 matrix', 'Shakespeare example'],
+    memoryTrick: 'Rows = words, Columns = documents, Cell = "is it in there? 1 or 0."',
+    importance: 4
+  },
+  {
+    id: 'incidence-vectors',
+    section: 'Term–Document Matrices',
+    name: 'Incidence Vectors & Bitwise Operations',
+    definition: 'Each term has a 0/1 vector (one bit per document). To answer a Boolean query, take the vectors for the relevant terms (complementing any NOT terms) and combine them with a bitwise AND.',
+    simpleExplanation: 'Each word gets its own row of 1s and 0s. To find documents with "Brutus AND Caesar but NOT Calpurnia," you flip Calpurnia\'s vector and AND all three rows together.',
+    whyImportant: 'It demonstrates, very concretely, how Boolean search can be computed using simple bit operations.',
+    mainGoal: 'Answer a Boolean query by combining the incidence vectors of its terms.',
+    examples: ['110100 AND 110111 AND 101111 = 100100 (Brutus AND Caesar AND NOT Calpurnia)'],
+    keywords: ['incidence vector', 'bitwise AND', 'complement', 'Boolean query answer'],
+    memoryTrick: 'Line up the bit-rows and AND straight down the column.',
+    importance: 3
+  },
+  {
+    id: 'sparse-matrix-problem',
+    section: 'Term–Document Matrices',
+    name: "Why We Can't Build the Full Matrix (Sparsity)",
+    definition: 'For N = 1 million documents (~1000 words each) and M = 500K distinct terms, the full matrix would be 500K × 1M — half a trillion cells — even though it has no more than 1 billion 1s.',
+    simpleExplanation: 'With real-world numbers, the grid becomes gigantic (half a trillion cells) but almost all of it is 0. Storing the whole grid wastes enormous space for almost no information.',
+    whyImportant: 'This sparsity problem is the direct motivation for inventing the inverted index.',
+    mainGoal: 'Show why a dense matrix representation is impractical at real scale.',
+    examples: ['500K terms × 1M documents = 500 billion cells, but at most 1 billion are 1s'],
+    keywords: ['sparse matrix', 'scale', 'N documents', 'M terms', 'storage waste'],
+    memoryTrick: 'Half a trillion cells, but 99.8%+ empty space.',
+    importance: 4
+  },
+  {
+    id: 'inverted-index',
+    section: 'The Inverted Index',
+    name: 'The Inverted Index',
+    definition: 'For each term t, store a list of all documents (identified by docID) that contain t. Described as "the key data structure underlying modern IR."',
+    simpleExplanation: 'Instead of a giant grid, just keep — for every word — a short list of which documents contain it. No need to record all the 0s.',
+    whyImportant: 'This is explicitly called the key data structure underlying modern IR.',
+    mainGoal: 'Only record where a term DOES occur, avoiding the storage waste of a full sparse matrix.',
+    examples: ['Brutus → 1, 2, 4, 11, 31, 45, 173', 'Caesar → 1, 2, 4, 5, 6, 16, 57'],
+    keywords: ['inverted index', 'docID', 'dictionary', 'postings list'],
+    memoryTrick: 'Instead of "document → words," it\'s "word → documents" — inverted!',
+    importance: 5
+  },
+  {
+    id: 'postings-lists',
+    section: 'The Inverted Index',
+    name: 'Variable-Size Postings Lists',
+    definition: 'Because the number of documents containing a term varies and can grow, postings lists must be variable-size — implemented on disk as continuous runs or in memory as linked lists / dynamic arrays.',
+    simpleExplanation: 'You can\'t use a fixed-size list for each word\'s document list because it might need to grow when new documents are added.',
+    whyImportant: 'Solves the concrete storage layout problem for dynamic document collections.',
+    mainGoal: 'Store a growable list of docIDs per term efficiently.',
+    examples: ['Postings are sorted by docID, which is needed for efficient merging.'],
+    keywords: ['postings list', 'linked list', 'variable-length array', 'sorted by docID'],
+    memoryTrick: 'Fixed-size shelf vs. expandable list — postings need to expand.',
+    importance: 3
+  },
+  {
+    id: 'index-construction',
+    section: 'The Inverted Index',
+    name: 'Inverted Index Construction Pipeline',
+    definition: 'Documents pass through a Tokenizer (produces token stream), then Linguistic modules (produce modified tokens), then an Indexer (builds the inverted index).',
+    simpleExplanation: 'Three stages: (1) chop text into tokens, (2) clean/normalize tokens linguistically, (3) build the index mapping tokens to docIDs.',
+    whyImportant: 'This is the concrete assembly line that turns raw text into a searchable inverted index.',
+    mainGoal: 'Convert raw documents into a queryable inverted index.',
+    examples: ['"Friends, Romans..." → tokens: Friends, Romans → modified tokens: friend, roman'],
+    keywords: ['tokenizer', 'linguistic modules', 'indexer', 'token stream'],
+    memoryTrick: 'Tokenizer chops → Linguistic modules clean → Indexer files away.',
+    importance: 4
+  },
+  {
+    id: 'text-processing-steps',
+    section: 'The Inverted Index',
+    name: 'Initial Stages of Text Processing',
+    definition: 'Tokenization (cut character sequence into word tokens), Normalization (map text and query terms to same form), Stemming (root form matching), Stop words (optionally omit common words).',
+    simpleExplanation: 'Before indexing, text is cleaned up in four ways: split words, normalize (U.S.A. -> USA), stem (authorize -> authoriz), and optionally drop tiny stop words (the, a, to).',
+    whyImportant: 'Without this cleanup, a search for "USA" would miss documents containing "U.S.A."',
+    mainGoal: 'Prepare raw text so that matching terms are recognized as the same.',
+    examples: ['Tokenization: handling "John\'s"', 'Normalization: U.S.A. = USA', 'Stemming: authorize / authorization', 'Stop words: the, a, to'],
+    keywords: ['tokenization', 'normalization', 'stemming', 'stop words'],
+    memoryTrick: 'Cut it, match it, root it, (maybe) drop the tiny ones.',
+    importance: 5
+  },
+  {
+    id: 'indexer-steps',
+    section: 'The Inverted Index',
+    name: 'Indexer Steps: Sort & Split',
+    definition: 'Build sequence of (token, docID) pairs, sort them by term and then docID (the core indexing step), merge multiple entries in same doc, split into Dictionary and Postings.',
+    simpleExplanation: 'List all (word, document) pairs, sort by word then docID, merge duplicates and split into Dictionary (terms + document frequencies) and Postings (docIDs).',
+    whyImportant: 'Sorting is called the "core indexing step" — it turns a scattered list into an organized, searchable index.',
+    mainGoal: 'Transform raw token stream into organized dictionary and postings structure.',
+    examples: ['Doc 1: "I did enact Julius Caesar..." / Doc 2: "The noble Brutus..."'],
+    keywords: ['token sequence', 'sorting', 'dictionary', 'postings', 'document frequency'],
+    memoryTrick: 'Collect pairs → Sort them → Split into Dictionary + Postings.',
+    importance: 4
+  },
+  {
+    id: 'query-processing-and',
+    section: 'Query Processing',
+    name: 'Query Processing: AND (Merge Algorithm)',
+    definition: 'To process "Brutus AND Caesar": locate Brutus in dictionary and get postings, locate Caesar and get postings, then merge (intersect) the two lists.',
+    simpleExplanation: 'Look up each word\'s document list, then find which documents appear in BOTH lists.',
+    whyImportant: 'This merge algorithm is the core operation that makes Boolean AND queries fast.',
+    mainGoal: 'Efficiently find documents common to postings lists.',
+    examples: ['Brutus: 2,4,8,16,32 | Caesar: 1,2,3,5,8 → merge matches: 2, 8'],
+    keywords: ['AND query', 'merge', 'intersect', 'postings retrieval'],
+    memoryTrick: 'AND = intersection = walk both lists, keep matches.',
+    importance: 5
+  },
+  {
+    id: 'the-merge',
+    section: 'Query Processing',
+    name: 'The Merge (Linear-Time Intersection)',
+    definition: 'Walking through two postings lists simultaneously (both sorted by docID) lets you intersect them in linear time: O(x+y) for lists of length x and y.',
+    simpleExplanation: 'Because both lists are sorted by docID, you walk them like two queues with two pointers, moving forward and recording matches — no backtracking!',
+    whyImportant: 'Crucially depends on postings being sorted by docID — enables O(x+y) runtime.',
+    mainGoal: 'Intersect two postings lists as efficiently as possible.',
+    examples: ['Brutus: 2,4,8,16 and Caesar: 1,2,3,5,8 → matches at 2 and 8'],
+    keywords: ['O(x+y)', 'linear time', 'sorted postings', 'two-pointer merge'],
+    memoryTrick: 'Two sorted lists + two pointers = one fast pass.',
+    importance: 5
+  },
+  {
+    id: 'boolean-retrieval-model',
+    section: 'The Boolean Retrieval Model',
+    name: 'The Boolean Retrieval Model',
+    definition: 'Queries are Boolean expressions (AND, OR, NOT); each document is viewed as a set of words, and the model is precise (match or no-match).',
+    simpleExplanation: 'Search using AND/OR/NOT formulas. Every document gets a clean yes-or-no match answer. No partial credit or ranking.',
+    whyImportant: 'Primary commercial retrieval tool for three decades; still widely used.',
+    mainGoal: 'Give exact, unambiguous match/no-match answer to logical queries.',
+    examples: ['Email search', 'Library catalog', 'macOS Spotlight'],
+    keywords: ['Boolean query', 'AND OR NOT', 'exact match', 'set of words'],
+    memoryTrick: 'Boolean = black-and-white search (in or out).',
+    importance: 5
+  },
+  {
+    id: 'westlaw-example',
+    section: 'The Boolean Retrieval Model',
+    name: 'WestLaw: Real Boolean System',
+    definition: 'Largest commercial legal search service (700k users, tens of TBs), where users rely on Boolean queries with proximity operators like /3 (within 3 words) or /S (same sentence).',
+    simpleExplanation: 'A real, large legal search engine where lawyers write precise Boolean queries because they need exact control.',
+    whyImportant: 'Shows Boolean search is still preferred by professionals for high precision.',
+    mainGoal: 'Illustrate professional large-scale Boolean search.',
+    examples: ['LIMIT! /3 STATUTE ACTION /S FEDERAL /2 TORT /3 CLAIM'],
+    keywords: ['WestLaw', 'proximity operators', '/3', '/S', 'legal search'],
+    memoryTrick: 'WestLaw = lawyers who love exact logic.',
+    importance: 3
+  },
+  {
+    id: 'query-optimization',
+    section: 'The Boolean Retrieval Model',
+    name: 'Query Optimization (Processing Order)',
+    definition: 'For a multi-term AND query, process terms in order of increasing document frequency — start with the smallest postings list first.',
+    simpleExplanation: 'Start with the rarest word first, because intersecting with a small list quickly shrinks candidate results.',
+    whyImportant: 'Directly uses document frequency stored in the dictionary to optimize queries.',
+    mainGoal: 'Minimize total work done when merging multi-term queries.',
+    examples: ['Brutus AND Calpurnia AND Caesar → run as (Calpurnia AND Brutus) AND Caesar because Calpurnia has smallest list'],
+    keywords: ['document frequency', 'increasing frequency order', 'query optimization'],
+    memoryTrick: 'Smallest list first — prunes the most, the fastest.',
+    importance: 4
+  },
+  {
+    id: 'phrase-queries',
+    section: 'Phrase Queries & Positional Indexes',
+    name: 'Phrase Queries',
+    definition: 'Queries that must match an exact sequence of words, such as "stanford university" as a phrase.',
+    simpleExplanation: 'Care about exact word order and adjacency, not just word presence.',
+    whyImportant: 'One of the most effective advanced search features users rely on.',
+    mainGoal: 'Match documents containing exact word sequence.',
+    examples: ['"stanford university" should NOT match "I went to university at Stanford"'],
+    keywords: ['phrase query', 'exact sequence', 'word order'],
+    memoryTrick: 'Phrase queries care about ORDER.',
+    importance: 4
+  },
+  {
+    id: 'biword-indexes',
+    section: 'Phrase Queries & Positional Indexes',
+    name: 'Biword Indexes',
+    definition: 'Index every consecutive pair of terms as a single dictionary entry ("biword").',
+    simpleExplanation: 'Index adjacent pairs of words as single terms to make 2-word phrase lookups instant.',
+    whyImportant: 'A first attempt at phrase queries, but limited.',
+    mainGoal: 'Fast two-word phrase lookups.',
+    examples: ['"Friends, Romans, Countrymen" → biwords: "friends romans", "romans countrymen"'],
+    keywords: ['biword', 'consecutive term pairs', 'false positives', 'index blowup'],
+    memoryTrick: 'Biword = treat "word1 word2" as one term.',
+    importance: 3
+  },
+  {
+    id: 'positional-indexes',
+    section: 'Phrase Queries & Positional Indexes',
+    name: 'Positional Indexes',
+    definition: 'Postings store exact word position(s) within each document: <docID: pos1, pos2, ...>.',
+    simpleExplanation: 'Instead of just recording which document a word is in, record the exact position number in that document.',
+    whyImportant: 'The standard solution used today for phrase and proximity queries.',
+    mainGoal: 'Support phrase and proximity queries of any length.',
+    examples: ['<be: 993427; doc1: 7,18,33; doc4: 17,191,291>'],
+    keywords: ['positional index', 'word position', 'doc:position lists'],
+    memoryTrick: 'Not just which document, but which exact spot.',
+    importance: 5
+  },
+  {
+    id: 'proximity-queries',
+    section: 'Phrase Queries & Positional Indexes',
+    name: 'Proximity Queries',
+    definition: 'Queries like "STATUTE /3 FEDERAL" where /k means "within k words of each other".',
+    simpleExplanation: 'Match terms within k words of each other. Supported by positional indexes, NOT biwords.',
+    whyImportant: 'Allows flexible distance-based searching.',
+    mainGoal: 'Match terms within specified distance k.',
+    examples: ['STATUTE /3 FEDERAL (within 3 words)'],
+    keywords: ['proximity query', '/k operator', 'within k words'],
+    memoryTrick: 'Phrase = right next to each other. Proximity = within k words.',
+    importance: 3
+  },
+  {
+    id: 'positional-index-size',
+    section: 'Phrase Queries & Positional Indexes',
+    name: 'Positional Index Size (Rule of Thumb)',
+    definition: 'Positional indexes are 2–4x larger than non-positional indexes, taking ~35–50% of original text volume.',
+    simpleExplanation: 'Storing word positions takes noticeable extra disk space (2-4x), but worth it for query power.',
+    whyImportant: 'Quantifies the storage trade-off for positional indexes.',
+    mainGoal: 'Estimate extra storage needed for positional indexing.',
+    examples: ['Web page: <1000 terms; Books/filings: 100k terms'],
+    keywords: ['index size', '2-4x larger', '35-50% text volume'],
+    memoryTrick: '2-4x bigger, ~35-50% of original text.',
+    importance: 3
+  },
+  {
+    id: 'structured-vs-unstructured-data',
+    section: 'Structured vs. Unstructured Data',
+    name: 'Structured vs. Unstructured Data',
+    definition: 'Structured data lives in tables allowing exact/range queries; unstructured data is free text allowing keyword/concept queries.',
+    simpleExplanation: 'Structured = table with columns (like SQL). Unstructured = plain text articles and web pages.',
+    whyImportant: 'Fundamental distinction between database search and IR text search.',
+    mainGoal: 'Distinguish data paradigms in storage and search.',
+    examples: ['Structured: Salary < 60000 AND Manager = Smith', 'Unstructured: "pages dealing with drug abuse"'],
+    keywords: ['structured data', 'unstructured data', 'tables', 'free text'],
+    memoryTrick: 'Structured = spreadsheet exact filter. Unstructured = free text keyword.',
+    importance: 5
+  },
+  {
+    id: 'semi-structured-data',
+    section: 'Structured vs. Unstructured Data',
+    name: 'Semi-Structured Data',
+    definition: 'Text containing identifiable zones (Title, Author, Body) allowing zoned search like "Title contains data AND Bullets contain search".',
+    simpleExplanation: 'Free text that has internal sections/zones you can target.',
+    whyImportant: 'Bridges structured database search and unstructured IR search.',
+    mainGoal: 'Exploit document zones for precise text search.',
+    examples: ['Title contains data AND Bullets contain search'],
+    keywords: ['semi-structured data', 'zones', 'title/author/body'],
+    memoryTrick: 'Almost nothing is 100% unstructured — slides have Titles and Bullets.',
+    importance: 3
+  }
+];
+
+const comparisons = [
+  {
+    id: 'precision-vs-recall',
+    title: 'Precision vs. Recall',
+    leftName: 'Precision',
+    rightName: 'Recall',
+    rows: [
+      { label: 'Definition', left: 'Fraction of retrieved documents that are relevant.', right: 'Fraction of relevant documents in collection that are retrieved.' },
+      { label: 'Purpose', left: 'Measures how "clean" the retrieved set is.', right: 'Measures how "complete" the retrieved set is.' },
+      { label: 'Core Question', left: 'Of what I returned, how much is useful?', right: 'Of everything useful, how much did I return?' },
+      { label: 'Focus', left: 'The retrieved set.', right: 'The full relevant set in the collection.' }
+    ],
+    keyDifferences: [
+      'Precision looks at the retrieved documents; recall looks at the relevant documents in the whole collection.',
+      'Both judge quality of retrieved results.'
+    ]
+  },
+  {
+    id: 'structured-vs-unstructured',
+    title: 'Structured vs. Unstructured Data',
+    leftName: 'Structured Data',
+    rightName: 'Unstructured Data',
+    rows: [
+      { label: 'Definition', left: 'Information organized in tables (rows & columns).', right: 'Free text with no table structure.' },
+      { label: 'Query Style', left: 'Numerical range and exact-match queries.', right: 'Keyword queries and concept queries.' },
+      { label: 'Example Query', left: 'Salary < 60000 AND Manager = Smith', right: 'Web pages dealing with drug abuse' },
+      { label: 'Domain', left: 'Databases (SQL)', right: 'Information Retrieval (IR)' }
+    ],
+    keyDifferences: [
+      'Structured data supports precise exact conditions; unstructured relies on keyword matching.',
+      'Semi-structured data bridges the two by exploiting zones (Title, Bullets).'
+    ]
+  },
+  {
+    id: 'query-vs-information-need',
+    title: 'Query vs. Information Need',
+    leftName: 'Information Need',
+    rightName: 'Query',
+    rows: [
+      { label: 'Definition', left: 'What the user actually needs to know.', right: 'The words typed into the search box.' },
+      { label: 'Origin', left: 'Formed from the user task.', right: 'Formed from the information need.' },
+      { label: 'Risk Factor', left: 'Misconception (misunderstanding the task).', right: 'Misformulation (poor wording).' }
+    ],
+    keyDifferences: [
+      'The information need is the underlying goal; the query is its (possibly imperfect) string expression.',
+      'Search engines only see the query, not the true information need.'
+    ]
+  },
+  {
+    id: 'biword-vs-positional-index',
+    title: 'Biword Index vs. Positional Index',
+    leftName: 'Biword Index',
+    rightName: 'Positional Index',
+    rows: [
+      { label: 'Definition', left: 'Indexes consecutive pairs of terms as single dictionary terms.', right: 'Stores exact position numbers of terms inside documents.' },
+      { label: 'Capability', left: 'Answers two-word phrases instantly.', right: 'Answers phrase and proximity queries of any length.' },
+      { label: 'Storage', left: 'Dictionary blowup.', right: '2–4x larger postings lists.' },
+      { label: 'Proximity Support', left: 'No', right: 'Yes (/k operators)' }
+    ],
+    keyDifferences: [
+      'Biwords are a simple first attempt; positional indexes are the standard solution used today.',
+      'They can be combined: mixed scheme speeds up common phrases while preserving space.'
+    ]
+  }
+];
+
+const flashcards = [
+  { id: 'fc-1', section: 'Foundations of IR', type: 'Definition', front: 'What is Information Retrieval (IR)?', back: 'Finding material (usually documents) of an unstructured nature (usually text) that satisfies an information need from within large collections.' },
+  { id: 'fc-2', section: 'Foundations of IR', type: 'Examples', front: 'Name 4 examples of IR beyond web search.', back: 'E-mail search, laptop search, corporate knowledge bases, legal IR (WestLaw).' },
+  { id: 'fc-3', section: 'Foundations of IR', type: 'Concept', front: 'What is "misconception" vs "misformulation"?', back: 'Misconception = info need misunderstands the user task. Misformulation = query poorly expresses the info need.' },
+  { id: 'fc-4', section: 'Foundations of IR', type: 'Formula', front: 'Precision vs. Recall definitions?', back: 'Precision = (Relevant & Retrieved) / Retrieved. Recall = (Relevant & Retrieved) / Total Relevant.' },
+  { id: 'fc-5', section: 'Term–Document Matrices', type: 'Concept', front: 'How does bitwise AND answer Boolean queries on incidence vectors?', back: 'Takes 0/1 vectors for terms (complementing NOT terms) and performs bitwise AND across bits.' },
+  { id: 'fc-6', section: 'Term–Document Matrices', type: 'Scale', front: 'Why fail to build full matrix at scale?', back: 'N=1M docs, M=500K terms -> 500B cells, but <1B 1s. Matrix is 99.8% empty space (sparse).' },
+  { id: 'fc-7', section: 'The Inverted Index', type: 'Definition', front: 'What is an Inverted Index?', back: 'For each term, a stored list of all docIDs containing it. "The key data structure of modern IR."' },
+  { id: 'fc-8', section: 'The Inverted Index', type: 'Pipeline', front: 'Name 3 stages of index construction pipeline.', back: 'Tokenizer -> Linguistic Modules -> Indexer.' },
+  { id: 'fc-9', section: 'The Inverted Index', type: 'Pipeline', front: 'What are 4 initial text processing steps?', back: 'Tokenization, Normalization, Stemming, Stop word removal.' },
+  { id: 'fc-10', section: 'Query Processing', type: 'Algorithm', front: 'Time complexity of merging two sorted postings lists of size x and y?', back: 'O(x+y) linear time using two pointers. Crucially depends on postings sorted by docID.' },
+  { id: 'fc-11', section: 'Query Processing', type: 'Optimization', front: 'What is the optimal processing order for multi-term AND queries?', back: 'Process terms in order of INCREASING document frequency (smallest postings list first).' },
+  { id: 'fc-12', section: 'The Boolean Model', type: 'Trivia', front: 'In WestLaw queries, what does SPACE between terms mean?', back: 'Disjunction (OR) — NOT conjunction (AND).' },
+  { id: 'fc-13', section: 'Phrase Queries', type: 'Comparison', front: 'Can Biword indexes answer proximity queries like /3?', back: 'NO. Only Positional Indexes can answer proximity queries.' },
+  { id: 'fc-14', section: 'Phrase Queries', type: 'Rule of Thumb', front: 'How much larger is a positional index compared to non-positional?', back: '2–4 times as large (roughly 35–50% of original text volume).' }
+];
+
+// --- APP STATE & UI CONTROLS ---
+let activeTab = 'summaries';
+let currentFcIndex = 0;
+let currentFcList = [...flashcards];
+
+function initApp() {
+  renderSummaries();
+  renderConcepts();
+  renderComparisons();
+  renderFlashcards();
+  setupKeyboardShortcuts();
+}
+
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+  if (targetBtn) targetBtn.classList.add('active');
+  
+  const targetContent = document.getElementById(`tab-${tabId}`);
+  if (targetContent) targetContent.classList.add('active');
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+}
+
+// --- RENDER SUMMARIES ---
+function renderSummaries() {
+  const tocEl = document.getElementById('summaryToc');
+  const cardsEl = document.getElementById('summaryCards');
+  
+  tocEl.innerHTML = summaries.map(s => `
+    <button class="chip" onclick="scrollToElem('${s.id}')">${s.title}</button>
+  `).join('');
+
+  cardsEl.innerHTML = summaries.map(s => `
+    <div class="card" id="${s.id}">
+      <div class="card-header">
+        <div class="card-title">${s.title}</div>
+        <div class="badge-section">Section Summary</div>
+      </div>
+      <p class="summary-text">${s.quickSummary}</p>
+      
+      <div class="grid-2">
+        <div>
+          <div class="block-label label-blue">📘 Important Concepts</div>
+          <ul class="bullet-list">${s.importantConcepts.map(i => `<li>${i}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <div class="block-label label-red">⚠️ Common Mistakes</div>
+          <ul class="bullet-list">${s.commonMistakes.map(i => `<li>${i}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <div class="block-label label-amber">👁️ Professor Focus</div>
+          <ul class="bullet-list">${s.professorFocus.map(i => `<li>${i}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <div class="block-label label-purple">🏷️ Keywords to Memorize</div>
+          <div class="kw-wrap">${s.keywordsToMemorize.map(k => `<span class="kw">${k}</span>`).join('')}</div>
+        </div>
+      </div>
+
+      <div class="revision-box">
+        <div class="block-label label-green">⚡ Last-Minute Revision</div>
+        ${s.lastMinuteRevision.map(r => `<div class="revision-item">${r}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- RENDER CONCEPTS ---
+function renderConcepts(filterSection = 'All') {
+  const filterEl = document.getElementById('conceptSectionFilter');
+  const cardsEl = document.getElementById('conceptCards');
+
+  const sections = ['All', ...new Set(concepts.map(c => c.section))];
+  
+  filterEl.innerHTML = sections.map(sec => `
+    <button class="chip ${sec === filterSection ? 'active' : ''}" onclick="renderConcepts('${sec}')">${sec}</button>
+  `).join('');
+
+  const filtered = filterSection === 'All' ? concepts : concepts.filter(c => c.section === filterSection);
+
+  cardsEl.innerHTML = filtered.map(c => `
+    <div class="card concept-card" id="concept-${c.id}">
+      <div class="card-header">
+        <div>
+          <div class="card-title">${c.name}</div>
+          <div class="concept-meta">
+            <span class="badge-section">${c.section}</span>
+            <span class="importance-stars" title="Exam Importance">${'★'.repeat(c.importance)}${'☆'.repeat(5 - c.importance)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="box-simple">💡 <strong>In Plain English:</strong> ${c.simpleExplanation}</div>
+
+      <p class="summary-text"><strong>Definition:</strong> ${c.definition}</p>
+
+      ${c.memoryTrick ? `<div class="box-trick">🧠 <strong>Memory Trick:</strong> ${c.memoryTrick}</div>` : ''}
+
+      <div class="grid-2">
+        <div>
+          <div class="block-label label-blue">🎯 Main Goal</div>
+          <p style="font-size: 13.5px; color: var(--text);">${c.mainGoal}</p>
+        </div>
+        <div>
+          <div class="block-label label-purple">📌 Keywords</div>
+          <div class="kw-wrap">${c.keywords.map(k => `<span class="kw">${k}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- RENDER COMPARISONS ---
+function renderComparisons() {
+  const cardsEl = document.getElementById('comparisonCards');
+  cardsEl.innerHTML = comparisons.map(c => `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">${c.title}</div>
+        <div class="badge-section">Comparison Table</div>
+      </div>
+
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature / Aspect</th>
+              <th style="color: var(--primary);">${c.leftName}</th>
+              <th style="color: var(--secondary);">${c.rightName}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${c.rows.map(r => `
+              <tr>
+                <td>${r.label}</td>
+                <td>${r.left}</td>
+                <td>${r.right}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="revision-box">
+        <div class="block-label label-green">🔑 Key Distinctions</div>
+        <ul class="bullet-list">
+          ${c.keyDifferences.map(d => `<li>${d}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- FLASHCARDS LOGIC ---
+function renderFlashcards(filterSec = 'All') {
+  const filterEl = document.getElementById('flashcardSectionFilter');
+  const sections = ['All', ...new Set(flashcards.map(f => f.section))];
+  
+  filterEl.innerHTML = sections.map(sec => `
+    <button class="chip ${sec === filterSec ? 'active' : ''}" onclick="filterFlashcards('${sec}')">${sec}</button>
+  `).join('');
+
+  if (filterSec === 'All') {
+    currentFcList = [...flashcards];
+  } else {
+    currentFcList = flashcards.filter(f => f.section === filterSec);
+  }
+  currentFcIndex = 0;
+  updateFlashcardUI();
+}
+
+function filterFlashcards(sec) {
+  renderFlashcards(sec);
+}
+
+function updateFlashcardUI() {
+  if (currentFcList.length === 0) return;
+  const card = currentFcList[currentFcIndex];
+  
+  document.getElementById('flashcardElem').classList.remove('flipped');
+  setTimeout(() => {
+    document.getElementById('fcFrontSection').innerText = card.section;
+    document.getElementById('fcFrontText').innerText = card.front;
+    document.getElementById('fcBackText').innerText = card.back;
+    document.getElementById('fcTypeBadge').innerText = card.type;
+    document.getElementById('fcCardNum').innerText = currentFcIndex + 1;
+    document.getElementById('fcTotalNum').innerText = currentFcList.length;
+    
+    const pct = ((currentFcIndex + 1) / currentFcList.length) * 100;
+    document.getElementById('fcProgressBar').style.width = `${pct}%`;
+  }, 150);
+}
+
+function flipFlashcard() {
+  document.getElementById('flashcardElem').classList.toggle('flipped');
+}
+
+function nextFlashcard() {
+  if (currentFcIndex < currentFcList.length - 1) {
+    currentFcIndex++;
+    updateFlashcardUI();
+  }
+}
+
+function prevFlashcard() {
+  if (currentFcIndex > 0) {
+    currentFcIndex--;
+    updateFlashcardUI();
+  }
+}
+
+function shuffleFlashcards() {
+  for (let i = currentFcList.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [currentFcList[i], currentFcList[j]] = [currentFcList[j], currentFcList[i]];
+  }
+  currentFcIndex = 0;
+  updateFlashcardUI();
+}
+
+// --- GLOBAL SEARCH LOGIC ---
+function openSearch() {
+  document.getElementById('searchModal').classList.add('open');
+  document.getElementById('searchInput').focus();
+}
+
+function closeSearch() {
+  document.getElementById('searchModal').classList.remove('open');
+}
+
+function closeSearchOnOverlay(e) {
+  if (e.target.id === 'searchModal') closeSearch();
+}
+
+function handleSearchInput() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const resultsEl = document.getElementById('searchResults');
+  
+  if (!q) {
+    resultsEl.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13.5px;">Type to search across concepts, summaries, comparisons, and flashcards...</div>`;
+    return;
+  }
+
+  let html = '';
+
+  // Match Concepts
+  const matchedConcepts = concepts.filter(c => c.name.toLowerCase().includes(q) || c.definition.toLowerCase().includes(q) || c.keywords.some(k => k.toLowerCase().includes(q)));
+  matchedConcepts.forEach(c => {
+    html += `
+      <div class="search-result-item" onclick="jumpTo('concepts', 'concept-${c.id}')">
+        <div class="search-result-title">
+          <span>💡 ${c.name}</span>
+          <span class="badge-section">${c.section}</span>
+        </div>
+        <div class="search-result-snippet">${c.simpleExplanation}</div>
+      </div>
+    `;
+  });
+
+  // Match Summaries
+  const matchedSummaries = summaries.filter(s => s.title.toLowerCase().includes(q) || s.quickSummary.toLowerCase().includes(q));
+  matchedSummaries.forEach(s => {
+    html += `
+      <div class="search-result-item" onclick="jumpTo('summaries', '${s.id}')">
+        <div class="search-result-title">
+          <span>📖 ${s.title}</span>
+          <span class="badge-section">Summary</span>
+        </div>
+        <div class="search-result-snippet">${s.quickSummary}</div>
+      </div>
+    `;
+  });
+
+  if (!html) {
+    html = `<div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13.5px;">No matches found for "${q}"</div>`;
+  }
+
+  resultsEl.innerHTML = html;
+}
+
+function jumpTo(tabId, elemId) {
+  closeSearch();
+  switchTab(tabId);
+  setTimeout(() => scrollToElem(elemId), 100);
+}
+
+function scrollToElem(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setupKeyboardShortcuts() {
+  window.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+    }
+    if (e.key === 'Escape') {
+      closeSearch();
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
