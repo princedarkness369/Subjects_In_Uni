@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP Fundamentals Exam — exam.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;
+  --bg-alt:#12151d;
+  --surface:#171b26;
+  --surface-2:#1e2330;
+  --border:#2a3040;
+  --text:#e8e9f1;
+  --text-dim:#9aa1b5;
+  --accent:#8892bf;
+  --accent-2:#6c5ce7;
+  --accent-soft:rgba(136,146,191,.16);
+  --success:#3ddc97;
+  --success-soft:rgba(61,220,151,.14);
+  --danger:#ff6b81;
+  --danger-soft:rgba(255,107,129,.14);
+  --warning:#ffc857;
+  --code-bg:#0a0c11;
+  --code-keyword:#c792ea;
+  --code-string:#9fca6b;
+  --code-comment:#5c6370;
+  --code-variable:#82aaff;
+  --code-tag:#ff9e64;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --dot-red:#ff5f56;--dot-yellow:#ffbd2e;--dot-green:#27c93f;
+}
+[data-theme="light"]{
+  --bg:#f3f4f9;
+  --bg-alt:#eceef5;
+  --surface:#ffffff;
+  --surface-2:#f5f6fb;
+  --border:#e0e3ee;
+  --text:#1b1e27;
+  --text-dim:#5b6272;
+  --accent-soft:rgba(108,92,231,.10);
+  --shadow:0 10px 26px rgba(30,34,60,.10);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 620px at 85% -10%, var(--accent-soft), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(108,92,231,.10), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Manrope',sans-serif;
+  min-height:100vh;
+  transition:background .3s ease,color .3s ease;
+}
+h1,h2,h3,.display{font-family:'Sora',sans-serif;}
+code,.mono,.code-window,input[type=text]{font-family:'JetBrains Mono',monospace;}
+.app{max-width:1000px;margin:0 auto;padding:28px 20px 70px;}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.2px;}
+.brand .tag{color:var(--accent);}
+.brand .blink{display:inline-block;width:9px;background:var(--accent-2);margin-left:1px;animation:blink 1s steps(1) infinite;}
+@keyframes blink{50%{opacity:0;}}
+.icon-btn{
+  background:var(--surface);border:1px solid var(--border);color:var(--text);
+  width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.2s;font-size:1.05rem;
+}
+.icon-btn:hover{border-color:var(--accent);transform:translateY(-1px);}
+
+/* ---------- editor window chrome (signature element) ---------- */
+.code-window{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  margin-bottom:22px;
+}
+.window-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);
+}
+.dot{width:11px;height:11px;border-radius:50%;}
+.dot.r{background:var(--dot-red);}.dot.y{background:var(--dot-yellow);}.dot.g{background:var(--dot-green);}
+.window-tab{
+  margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-dim);
+  background:var(--bg-alt);padding:4px 12px;border-radius:7px 7px 0 0;border:1px solid var(--border);border-bottom:none;
+}
+.window-body{padding:26px;}
+@media(max-width:600px){.window-body{padding:18px;}}
+
+/* ---------- hero / start screen ---------- */
+.hero-title{font-size:2.1rem;font-weight:800;margin:0 0 8px;line-height:1.2;}
+.hero-title .php-accent{color:var(--accent);}
+.hero-sub{color:var(--text-dim);font-size:1rem;margin:0 0 22px;max-width:60ch;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:14px 16px;}
+.stat-card .num{font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent);}
+.stat-card .lbl{font-size:.78rem;color:var(--text-dim);margin-top:2px;}
+.topic-chips{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 26px;}
+.chip{background:var(--bg-alt);border:1px solid var(--border);color:var(--text-dim);font-size:.76rem;padding:5px 11px;border-radius:999px;}
+.btn{
+  border:none;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;font-size:.92rem;
+  padding:13px 26px;border-radius:10px;transition:.2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 8px 20px rgba(108,92,231,.30);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(108,92,231,.40);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;}
+
+/* ---------- exam screen ---------- */
+.exam-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap;}
+.timer{
+  font-family:'JetBrains Mono',monospace;font-weight:600;background:var(--surface-2);
+  border:1px solid var(--border);padding:8px 14px;border-radius:9px;font-size:.92rem;display:flex;gap:8px;align-items:center;
+}
+.timer.low{color:var(--danger);border-color:var(--danger);}
+.progress-wrap{flex:1;min-width:160px;}
+.progress-bar-bg{height:9px;background:var(--bg-alt);border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .3s;}
+.progress-text{font-size:.75rem;color:var(--text-dim);margin-top:5px;}
+
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.badge{font-size:.72rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--text-dim);background:var(--bg-alt);}
+.badge.cat{color:var(--accent);border-color:var(--accent);}
+.badge.diff-easy{color:var(--success);border-color:var(--success);}
+.badge.diff-medium{color:var(--warning);border-color:var(--warning);}
+.badge.diff-hard{color:var(--danger);border-color:var(--danger);}
+
+.q-text{font-size:1.08rem;font-weight:600;margin:0 0 16px;line-height:1.55;}
+pre.snippet{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:.86rem;line-height:1.6;margin:0 0 18px;color:var(--text);
+}
+.kw{color:var(--code-keyword);}.str{color:var(--code-string);}.cm{color:var(--code-comment);font-style:italic;}
+.vr{color:var(--code-variable);}.tg{color:var(--code-tag);font-weight:600;}
+
+.options{display:flex;flex-direction:column;gap:10px;}
+.option{
+  display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:10px;padding:13px 15px;cursor:pointer;transition:.15s;font-size:.94rem;
+}
+.option:hover{border-color:var(--accent);}
+.option input{accent-color:var(--accent-2);width:16px;height:16px;flex-shrink:0;}
+.option.selected{border-color:var(--accent-2);background:var(--accent-soft);}
+.option .letter{
+  width:26px;height:26px;border-radius:7px;background:var(--bg-alt);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-dim);flex-shrink:0;
+}
+.text-answer{
+  width:100%;padding:13px 15px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.95rem;outline:none;
+}
+.text-answer:focus{border-color:var(--accent-2);}
+.hint{color:var(--text-dim);font-size:.78rem;margin-top:8px;}
+
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:10px;flex-wrap:wrap;}
+.qnav{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:7px;margin:18px 0 4px;}
+.qnav .qn{
+  aspect-ratio:1;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;font-size:.74rem;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:.15s;
+}
+.qnav .qn:hover{border-color:var(--accent);}
+.qnav .qn.answered{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+.qnav .qn.current{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border-color:transparent;}
+
+/* ---------- results ---------- */
+.score-hero{text-align:center;padding:10px 0 4px;}
+.score-ring{
+  width:150px;height:150px;border-radius:50%;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  background:conic-gradient(var(--accent) calc(var(--pct)*1%), var(--bg-alt) 0);
+}
+.score-ring::before{content:"";position:absolute;inset:10px;background:var(--surface);border-radius:50%;}
+.score-ring .val{position:relative;z-index:1;font-family:'Sora',sans-serif;font-weight:800;font-size:1.6rem;}
+.score-ring .val small{display:block;font-size:.7rem;color:var(--text-dim);font-weight:500;}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;}
+@media(max-width:640px){.result-grid{grid-template-columns:repeat(2,1fr);}}
+.result-card{background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:16px;text-align:center;}
+.result-card .n{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;}
+.result-card.correct .n{color:var(--success);}
+.result-card.wrong .n{color:var(--danger);}
+.result-card .l{font-size:.76rem;color:var(--text-dim);margin-top:3px;}
+
+/* ---------- review ---------- */
+.review-item{border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;background:var(--surface-2);}
+.review-item.is-correct{border-left:4px solid var(--success);}
+.review-item.is-wrong{border-left:4px solid var(--danger);}
+.ans-line{padding:9px 12px;border-radius:8px;font-size:.88rem;margin-top:8px;display:flex;gap:8px;}
+.ans-line.your-wrong{background:var(--danger-soft);color:var(--danger);}
+.ans-line.your-right{background:var(--success-soft);color:var(--success);}
+.ans-line.correct-line{background:var(--success-soft);color:var(--success);}
+.explain{margin-top:10px;padding:12px 14px;background:var(--bg-alt);border-radius:8px;font-size:.86rem;color:var(--text-dim);border:1px dashed var(--border);}
+.explain b{color:var(--text);}
+
+.screen{display:none;}
+.screen.active{display:block;}
+.small-note{font-size:.78rem;color:var(--text-dim);text-align:center;margin-top:16px;}
+::selection{background:var(--accent-2);color:#fff;}
+@media(max-width:640px){.hero-title{font-size:1.5rem;} .btn{width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand"><span class="tag">&lt;?php</span>&nbsp;Exam<span class="blink">&nbsp;</span></div>
+    <button class="icon-btn" id="themeToggle" title="Toggle dark / light mode">🌙</button>
+  </div>
+
+  <!-- START SCREEN -->
+  <section id="screen-start" class="screen active">
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab">index.php</span></div>
+      <div class="window-body">
+        <h1 class="hero-title"><span class="php-accent">&lt;?php</span> PHP Fundamentals Exam</h1>
+        <p class="hero-sub">A complete interactive assessment covering everything from opening tags to control structures — no arrays, no OOP, just the essentials. Every attempt pulls a fresh, shuffled set of questions from a bank of over 130.</p>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="num" id="statCount">30</div><div class="lbl">Questions</div></div>
+          <div class="stat-card"><div class="num">13</div><div class="lbl">Question Types</div></div>
+          <div class="stat-card"><div class="num">40</div><div class="lbl">Minutes</div></div>
+          <div class="stat-card"><div class="num">28</div><div class="lbl">Topics Covered</div></div>
+        </div>
+        <div class="topic-chips" id="topicChips"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="startBtn">▶ Start Exam</button>
+        </div>
+        <p class="small-note">Timer starts as soon as you begin. You can navigate freely between questions before submitting.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAM SCREEN -->
+  <section id="screen-exam" class="screen">
+    <div class="exam-head">
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">0 / 30 answered</div>
+      </div>
+      <div class="timer" id="timerBox">⏱ <span id="timerText">40:00</span></div>
+    </div>
+
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab" id="qTab">question_01.php</span></div>
+      <div class="window-body">
+        <div class="q-meta">
+          <span class="badge cat" id="qCategory">Multiple Choice</span>
+          <span class="badge" id="qTopic">Variables</span>
+          <span class="badge diff-easy" id="qDifficulty">easy</span>
+        </div>
+        <p class="q-text" id="qText">Question text</p>
+        <pre class="snippet" id="qCode" style="display:none;"></pre>
+        <div id="qOptions" class="options"></div>
+        <div id="qTextInputWrap" style="display:none;">
+          <input type="text" class="text-answer" id="qTextInput" placeholder="Type your answer here…" autocomplete="off">
+          <div class="hint">Short, exact answers are graded automatically (e.g. a keyword, a value, a function name).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="prevBtn">← Previous</button>
+      <span class="small-note" id="qIndicator" style="margin:0;"></span>
+      <button class="btn btn-primary" id="nextBtn">Next →</button>
+    </div>
+
+    <div class="qnav" id="qNav"></div>
+
+    <div class="btn-row" style="margin-top:18px;justify-content:center;">
+      <button class="btn btn-primary" id="submitBtn">✔ Submit Exam</button>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section id="screen-results" class="screen">
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab">results.php</span></div>
+      <div class="window-body">
+        <div class="score-hero">
+          <div class="score-ring" id="scoreRing" style="--pct:0;">
+            <div class="val" id="scorePct">0%<small>score</small></div>
+          </div>
+          <h2 id="scoreHeadline">Let's see how you did</h2>
+        </div>
+        <div class="result-grid">
+          <div class="result-card correct"><div class="n" id="rCorrect">0</div><div class="l">Correct</div></div>
+          <div class="result-card wrong"><div class="n" id="rWrong">0</div><div class="l">Wrong</div></div>
+          <div class="result-card"><div class="n" id="rTotal">0</div><div class="l">Total Questions</div></div>
+          <div class="result-card"><div class="n" id="rTime">00:00</div><div class="l">Time Taken</div></div>
+        </div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-primary" id="reviewBtn">📖 Review Answers</button>
+          <button class="btn btn-ghost" id="retryBtn">🔁 Retry Exam</button>
+          <button class="btn btn-ghost" id="newExamBtn">🆕 Generate New Exam</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW SCREEN -->
+  <section id="screen-review" class="screen">
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab">review.php</span></div>
+      <div class="window-body">
+        <h2 style="margin-top:0;">Detailed Review</h2>
+        <p class="hero-sub" style="margin-bottom:0;">Every question, your answer, the correct answer, and why — mistakes highlighted in red, correct answers in green.</p>
+      </div>
+    </div>
+    <div id="reviewList"></div>
+    <div class="btn-row" style="justify-content:center;margin-top:6px;">
+      <button class="btn btn-primary" id="backToResultsBtn">← Back to Results</button>
+      <button class="btn btn-ghost" id="retryBtn2">🔁 Retry Exam</button>
+      <button class="btn btn-ghost" id="newExamBtn2">🆕 Generate New Exam</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK (130+ questions) — chapter 1 of PHP only
+   Categories match the 13 required question types.
+   mode: "options" -> multiple choice / true-false / fix-code /
+         find-error / complete / which-correct / debug / logic /
+         coderead / miniproblem (all auto-graded by matching text)
+         "text" -> fill-in-blank / predict-output / short-answer
+   ========================================================= */
+const BANK = [
+// ---------- PHP opening & closing tags ----------
+{topic:"PHP Tags",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which of the following correctly opens a block of PHP code?",
+ options:["<?php","<php>","<?php?>","php>"],correct:"<?php",
+ exp:"PHP code blocks must start with the exact tag <?php. Anything else is not recognized as a valid opening tag."},
+
+{topic:"PHP Tags",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: If a file contains only PHP code, it is best practice to omit the closing ?> tag.",
+ options:["True","False"],correct:"True",
+ exp:"Omitting the closing tag in pure-PHP files prevents accidental whitespace or newlines after ?> from being sent to the browser, which can cause 'headers already sent' errors."},
+
+{topic:"PHP Tags",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code so it correctly opens a PHP block: ____ echo 'Hi'; ?>",
+ accept:["<?php"],
+ exp:"Every PHP block begins with <?php. Without it, the code would be treated as plain text/HTML."},
+
+{topic:"PHP Tags",difficulty:"medium",category:"Code Reading",mode:"options",
+ code:"<h1>Welcome</h1>\n<?php\n  echo 'Hello User';\n?>\n<p>End of page</p>",
+ q:"What will the browser display for this file?",
+ options:["Welcome (as a heading), then \"Hello User\", then \"End of page\" (as a paragraph)",
+          "Only \"Hello User\" is shown, the HTML is ignored",
+          "A parse error because HTML cannot surround PHP tags",
+          "Nothing is displayed"],
+ correct:"Welcome (as a heading), then \"Hello User\", then \"End of page\" (as a paragraph)",
+ exp:"PHP can be freely mixed with HTML. Everything outside <?php ?> is sent to the browser as-is, and the PHP block just outputs its echo statement in place."},
+
+{topic:"PHP Tags",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet is a valid, standard way to start a PHP script?",
+ options:["<?php\n  $x = 1;\n?>","<% $x = 1; %>","<script php>$x = 1;<\/script>","# $x = 1;"],
+ correct:"<?php\n  $x = 1;\n?>",
+ exp:"The standard, always-available tag pair in PHP is <?php ... ?>. The other syntaxes are either from other languages or invalid."},
+
+// ---------- Variables ----------
+{topic:"Variables",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Every PHP variable name must begin with which symbol?",
+ options:["$","@","#","&"],correct:"$",
+ exp:"PHP variables are always written with a leading dollar sign, e.g. $name, followed by the identifier."},
+
+{topic:"Variables",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: PHP variable names are case-sensitive, so $Name and $name are different variables.",
+ options:["True","False"],correct:"True",
+ exp:"PHP variables are case-sensitive. $Name, $NAME, and $name are treated as three completely separate variables."},
+
+{topic:"Variables",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the statement to create a variable named age holding 10: $____ = 10;",
+ accept:["age"],
+ exp:"The variable identifier goes right after the dollar sign, so $age = 10; creates a variable called age."},
+
+{topic:"Variables",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$x = 5;\n$y = $x;\n$x = 10;\necho $y;",
+ q:"What is printed?",
+ accept:["5"],
+ exp:"$y copies the value of $x (5) at the moment of assignment. Later changing $x to 10 does not affect $y, since PHP variables hold values by copy, not by reference."},
+
+{topic:"Variables",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"$Name = \"Ali\";\necho $name;",
+ q:"What happens when this code runs?",
+ options:["A warning/notice about an undefined variable $name is shown, since $Name and $name are different variables",
+          "It prints \"Ali\" normally",
+          "It throws a fatal syntax error",
+          "It automatically corrects the case and prints \"Ali\""],
+ correct:"A warning/notice about an undefined variable $name is shown, since $Name and $name are different variables",
+ exp:"Because variable names are case-sensitive, $name was never defined — only $Name was. PHP emits a warning/notice and treats the value as null/empty."},
+
+// ---------- Naming variables ----------
+{topic:"Naming Variables",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which of these is a valid PHP variable name?",
+ options:["$name1","$1name","$-name","$ name"],correct:"$name1",
+ exp:"Variable names must start with a letter or underscore (after the $), followed by letters, digits, or underscores. $1name starts with a digit, and spaces/hyphens are not allowed."},
+
+{topic:"Naming Variables",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: A PHP variable name can start with a number, like $7up.",
+ options:["True","False"],correct:"False",
+ exp:"Variable names must start with a letter or an underscore. Starting with a digit is invalid and causes a parse error."},
+
+{topic:"Naming Variables",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$2ndValue = 5;\necho $2ndValue;",
+ q:"What is wrong with this code?",
+ options:["The variable name starts with a digit, which is not allowed",
+          "You cannot use the word 'Value' in a variable name",
+          "Variables cannot start with a dollar sign",
+          "Nothing is wrong; it runs fine"],
+ correct:"The variable name starts with a digit, which is not allowed",
+ exp:"$2ndValue begins with the number 2, which violates PHP's naming rule that identifiers must start with a letter or underscore. This causes a parse error."},
+
+{topic:"Naming Variables",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Besides a letter, what other character is allowed as the FIRST character of a variable name (after the $ sign)? (one word)",
+ accept:["underscore","_"],
+ exp:"PHP variable names may start with a letter or an underscore (_), then any combination of letters, digits, and underscores."},
+
+// ---------- Data Types ----------
+{topic:"Data Types",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What data type is the value 3.14 in PHP?",
+ options:["float (double)","integer","string","boolean"],correct:"float (double)",
+ exp:"Numbers with a decimal point are stored as the float (or double) type in PHP."},
+
+{topic:"Data Types",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"echo gettype(true);",
+ q:"What is printed?",
+ accept:["boolean"],
+ exp:"gettype() reports PHP's internal type name for booleans as \"boolean\", not \"bool\"."},
+
+{topic:"Data Types",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: The keywords TRUE, True, and true are all treated the same way in PHP.",
+ options:["True","False"],correct:"True",
+ exp:"Unlike variable names, PHP's built-in keywords (true, false, null, etc.) are case-insensitive."},
+
+{topic:"Data Types",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"$x = \"5\" + 3;\necho $x;",
+ q:"What is printed?",
+ accept:["8"],
+ exp:"When a numeric string like \"5\" is used with the + operator, PHP converts it to a number automatically, so \"5\" + 3 becomes 5 + 3 = 8."},
+
+{topic:"Data Types",difficulty:"hard",category:"Code Reading",mode:"options",
+ code:"var_dump(1 == \"1\");\nvar_dump(1 === \"1\");",
+ q:"What do these two lines output?",
+ options:["bool(true) then bool(false)","bool(true) then bool(true)","bool(false) then bool(false)","A fatal error"],
+ correct:"bool(true) then bool(false)",
+ exp:"== compares only values after type juggling, so 1 == \"1\" is true. === also compares type, and an integer is never identical to a string, so it is false."},
+
+// ---------- Constants ----------
+{topic:"Constants",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function is the classic way to create a constant in PHP?",
+ options:["define()","isset()","strlen()","empty()"],correct:"define()",
+ exp:"define(\"NAME\", value) creates a named constant. (The const keyword is another way, but define() is the classic function form.)"},
+
+{topic:"Constants",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: Constants are written with a leading dollar sign, just like variables.",
+ options:["True","False"],correct:"False",
+ exp:"Constants have no dollar sign — you simply write their name, e.g. echo PI; not echo $PI;."},
+
+{topic:"Constants",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"define(____, \"1.0.0\");\necho VERSION;",
+ q:"Which option correctly completes the blank so VERSION is defined?",
+ options:["\"VERSION\"","VERSION","'$VERSION'","VERSION()"],correct:"\"VERSION\"",
+ exp:"define() expects the constant's name as a string in the first argument: define(\"VERSION\", \"1.0.0\");"},
+
+{topic:"Constants",difficulty:"hard",category:"Fix the Code",mode:"options",
+ code:"define(\"MAX_USERS\", 100);\ndefine(\"MAX_USERS\", 200);\necho MAX_USERS;",
+ q:"This code triggers a warning because MAX_USERS is defined twice. Which fix avoids the warning while keeping the first value?",
+ options:["if (!defined(\"MAX_USERS\")) { define(\"MAX_USERS\", 100); }",
+          "define(\"MAX_USERS\", 100); define(\"MAX_USERS\", 100);",
+          "$MAX_USERS = 100; $MAX_USERS = 200;",
+          "Remove echo MAX_USERS;"],
+ correct:"if (!defined(\"MAX_USERS\")) { define(\"MAX_USERS\", 100); }",
+ exp:"Wrapping define() with a defined() check ensures the constant is only created once, avoiding the 'already defined' notice and preserving the original value."},
+
+{topic:"Constants",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which built-in function checks whether a constant already exists? (function name)",
+ accept:["defined()","defined"],
+ exp:"defined(\"NAME\") returns true or false depending on whether the constant has already been created."},
+
+// ---------- echo ----------
+{topic:"echo",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: echo has a return value that can be captured, just like print.",
+ options:["True","False"],correct:"False",
+ exp:"echo is a language construct with no return value. print, on the other hand, always returns 1, which is why $x = print \"hi\"; is valid but $x = echo \"hi\"; is not."},
+
+{topic:"echo",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"echo \"Hello\" . \" \" . \"World\";",
+ q:"What is printed?",
+ accept:["Hello World"],
+ exp:"The dot (.) operator concatenates strings, joining \"Hello\", \" \", and \"World\" into one output: Hello World."},
+
+{topic:"echo",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"echo \"Hello\" \"World\";",
+ q:"What is the error in this line?",
+ options:["Missing concatenation operator (.) between the two strings",
+          "echo cannot print string literals",
+          "You must use print instead of echo",
+          "Strings must be in single quotes"],
+ correct:"Missing concatenation operator (.) between the two strings",
+ exp:"Two adjacent string literals must be joined with the . operator: echo \"Hello\" . \"World\";. Without it, this is a parse error."},
+
+{topic:"echo",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which of these is valid using echo?",
+ options:["echo \"Age: \", 25, \" years\";","echo \"Age: \" 25;","echo(\"Age: \", 25);","print \"Age: \", 25;"],
+ correct:"echo \"Age: \", 25, \" years\";",
+ exp:"Unlike print, echo can output multiple comma-separated values in a single statement."},
+
+// ---------- print ----------
+{topic:"print",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What value does the print statement always return?",
+ options:["1","0","true only if successful","It never returns a value"],correct:"1",
+ exp:"print always returns the integer 1, which is why it can be used inside expressions, e.g. $result = print \"hi\";."},
+
+{topic:"print",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: print can output multiple comma-separated values like echo \"a\", \"b\";",
+ options:["True","False"],correct:"False",
+ exp:"print only accepts a single argument/expression. Passing a comma list to print is a syntax error; echo is the one that supports comma lists."},
+
+{topic:"print",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"$x = print \"Hi\";\necho $x;",
+ q:"What is printed overall (both lines combined)?",
+ accept:["Hi1"],
+ exp:"print \"Hi\"; outputs Hi and returns 1, which gets stored in $x. The following echo $x; then prints that 1, giving the combined output Hi1."},
+
+// ---------- Comments ----------
+{topic:"Comments",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which of these are valid single-line comment styles in PHP? (choose the best answer)",
+ options:["Both // and #","Only //","Only #","<!-- -->"],correct:"Both // and #",
+ exp:"PHP supports two single-line comment styles: // and #. <!-- --> is HTML comment syntax, not PHP."},
+
+{topic:"Comments",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: A /* ... */ comment can span multiple lines.",
+ options:["True","False"],correct:"True",
+ exp:"/* */ is a block comment that continues until the closing */ is found, so it can cover several lines of code."},
+
+{topic:"Comments",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"/* This is the outer comment\n   /* This is nested */\n   still here? */\necho \"done\";",
+ q:"What problem does this code have?",
+ options:["Block comments cannot be nested in PHP, so the comment ends early at the first */, leaving 'still here? */' as invalid code",
+          "PHP does not support block comments at all",
+          "The echo statement is inside the comment and never runs",
+          "There is no problem, this works fine"],
+ correct:"Block comments cannot be nested in PHP, so the comment ends early at the first */, leaving 'still here? */' as invalid code",
+ exp:"PHP block comments end at the FIRST */ encountered. Nesting /* */ inside another /* */ closes the comment too early and causes a parse error from the leftover text."},
+
+{topic:"Comments",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete this line to make it a single-line comment: ____ This is a comment",
+ accept:["//","#"],
+ exp:"Either // or # starts a single-line comment in PHP; everything after it on that line is ignored by the interpreter."},
+
+// ---------- Arithmetic operators ----------
+{topic:"Arithmetic Operators",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What is the result of 10 % 3 in PHP?",
+ options:["1","3","3.33","0"],correct:"1",
+ exp:"% is the modulus operator, returning the remainder of division. 10 divided by 3 is 3 remainder 1."},
+
+{topic:"Arithmetic Operators",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"echo 2 ** 3;",
+ q:"What is printed?",
+ accept:["8"],
+ exp:"** is the exponentiation operator. 2 ** 3 means 2 raised to the power of 3, which is 8."},
+
+{topic:"Arithmetic Operators",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"echo 7 / 2;",
+ q:"What is printed?",
+ accept:["3.5"],
+ exp:"The / operator performs standard division and returns a float when the result isn't a whole number, so 7 / 2 gives 3.5."},
+
+{topic:"Arithmetic Operators",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"You need to find out whether a number has a remainder when divided by another number. Which operator should you use?",
+ options:["%","/","*","**"],correct:"%",
+ exp:"The modulus operator (%) returns the remainder of a division, which is exactly what's needed to check for leftover amounts, e.g. testing even/odd numbers."},
+
+{topic:"Arithmetic Operators",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"$price = 100;\n$discount = 20;\n$final = $price - $discount / 100 * $price;",
+ q:"The developer wanted final = price minus a 20% discount, but the operator precedence causes a different result. What is $final actually?",
+ options:["80 (division and multiplication run before subtraction, computing 100 - (20/100*100) = 100-20 = 80, which actually IS correct here — but only by coincidence of these numbers)",
+          "It is always wrong no matter what numbers are used",
+          "A fatal type error occurs",
+          "Nothing, PHP doesn't support this precedence"],
+ correct:"80 (division and multiplication run before subtraction, computing 100 - (20/100*100) = 100-20 = 80, which actually IS correct here — but only by coincidence of these numbers)",
+ exp:"PHP evaluates / and * before -, following standard operator precedence. Here it happens to give the intended result (80), but relying on this is fragile — parentheses like $price - ($discount/100*$price) make the intent explicit and safe for any numbers."},
+
+// ---------- Assignment operators ----------
+{topic:"Assignment Operators",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"$x += 5; is shorthand for which statement?",
+ options:["$x = $x + 5;","$x = 5;","$x = $x - 5;","$x == $x + 5;"],correct:"$x = $x + 5;",
+ exp:"+= adds the right-hand value to the variable's current value and stores the result back into the variable."},
+
+{topic:"Assignment Operators",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$x = 10;\n$x -= 3;\necho $x;",
+ q:"What is printed?",
+ accept:["7"],
+ exp:"-= subtracts the right operand from the variable. 10 - 3 leaves $x equal to 7."},
+
+{topic:"Assignment Operators",difficulty:"easy",category:"Which Code is Correct?",mode:"options",
+ q:"Which is the correct shorthand for doubling the value of $x (i.e. $x = $x * 2;)?",
+ options:["$x *= 2;","$x =* 2;","$x ** 2;","$x =2*;"],correct:"$x *= 2;",
+ exp:"*= is the compound multiplication-assignment operator: $x *= 2; multiplies $x by 2 and reassigns the result."},
+
+{topic:"Assignment Operators",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$x = 10;\n$x =+ 5;\necho $x;",
+ q:"The programmer intended to add 5 to $x (expecting 15) but got 5 instead. What is the correct fix?",
+ options:["Change $x =+ 5; to $x += 5;","Change $x =+ 5; to $x =+5+;","Add a semicolon after =+","Change echo to print"],
+ correct:"Change $x =+ 5; to $x += 5;",
+ exp:"=+ is not a compound operator — it is just = followed by the unary + (which does nothing), so $x =+ 5; simply reassigns $x to 5. The intended operator is += ."},
+
+// ---------- Comparison operators ----------
+{topic:"Comparison Operators",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"What is the key difference between == and === in PHP?",
+ options:["== compares only value (with type juggling); === compares both value and type",
+          "== compares both value and type; === compares only value",
+          "There is no difference, they behave identically",
+          "=== is used only for strings"],
+ correct:"== compares only value (with type juggling); === compares both value and type",
+ exp:"== allows PHP to convert types before comparing (so 5 == \"5\" is true), while === requires both the value and the type to match exactly (so 5 === \"5\" is false)."},
+
+{topic:"Comparison Operators",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: The == operator checks both the value and the data type of two operands.",
+ options:["True","False"],correct:"False",
+ exp:"That description matches ===, not ==. The == operator only checks value equality after type conversion."},
+
+{topic:"Comparison Operators",difficulty:"medium",category:"Code Reading",mode:"options",
+ code:"if (\"5\" == 5) {\n  echo \"equal\";\n} else {\n  echo \"not equal\";\n}",
+ q:"What does this code print?",
+ options:["equal","not equal","5","A fatal error"],correct:"equal",
+ exp:"With ==, PHP converts the string \"5\" to the number 5 before comparing, so \"5\" == 5 evaluates to true and \"equal\" is printed."},
+
+{topic:"Comparison Operators",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"var_dump(100 == \"1e2\");",
+ q:"What single word does var_dump print (true or false)?",
+ accept:["true"],
+ exp:"\"1e2\" is a numeric string representing scientific notation for 100. With loose comparison (==), PHP converts it to the number 100, so 100 == \"1e2\" is true."},
+
+// ---------- Logical operators ----------
+{topic:"Logical Operators",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"Why might && and and behave differently in the same line of code, even though both mean logical AND?",
+ options:["and has much lower precedence than &&, which can change how an expression is evaluated, especially with assignment",
+          "and only works with integers",
+          "&& only works inside if statements",
+          "They are completely identical in every situation, no exceptions"],
+ correct:"and has much lower precedence than &&, which can change how an expression is evaluated, especially with assignment",
+ exp:"&& binds more tightly than =, while and binds more loosely than =. This means $r = true && false; and $r = true and false; can assign different values to $r."},
+
+{topic:"Logical Operators",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$a = true;\n$b = false;\nvar_dump($a && $b);",
+ q:"What single word does this print (true or false)?",
+ accept:["false"],
+ exp:"&& (AND) only produces true when BOTH operands are true. Since $b is false, the whole expression is false."},
+
+{topic:"Logical Operators",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: The || operator returns true if AT LEAST ONE of the two operands is true.",
+ options:["True","False"],correct:"True",
+ exp:"|| is logical OR — it evaluates to true as long as one side (or both) is true, and only false when both sides are false."},
+
+{topic:"Logical Operators",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$loggedIn = true;\n$isAdmin = false;\nif ($loggedIn & $isAdmin) {\n  echo \"Welcome, admin\";\n} else {\n  echo \"Access denied\";\n}",
+ q:"The developer wanted to check both conditions logically but used the wrong operator. What is the bug?",
+ options:["& is the bitwise AND operator, not the logical AND (&&); it should be $loggedIn && $isAdmin",
+          "if statements cannot contain two variables",
+          "$isAdmin should be a string, not a boolean",
+          "There is no bug, the code behaves exactly as intended"],
+ correct:"& is the bitwise AND operator, not the logical AND (&&); it should be $loggedIn && $isAdmin",
+ exp:"& performs a bitwise AND on the integer representation of the values, which can produce misleading results. For boolean logic, always use && (or 'and')."},
+
+// ---------- if ----------
+{topic:"if",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$age = 20;\nif ($age >= 18) {\n  echo \"Adult\";\n}",
+ q:"What is printed?",
+ accept:["Adult"],
+ exp:"Since $age (20) is greater than or equal to 18, the condition is true, so the code inside the if block runs and prints Adult."},
+
+{topic:"if",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"if $age >= 18 {\n  echo \"Adult\";\n}",
+ q:"What is the syntax error in this code?",
+ options:["The condition must be wrapped in parentheses: if ($age >= 18)","echo cannot be used inside if","Missing a semicolon after if","$age needs quotes"],
+ correct:"The condition must be wrapped in parentheses: if ($age >= 18)",
+ exp:"PHP requires the condition of an if statement to be enclosed in parentheses. Without them, this is a parse error."},
+
+{topic:"if",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"$score = 85;\nif (____) {\n  echo \"Pass\";\n}",
+ q:"Which condition correctly checks that the score is 60 or above?",
+ options:["$score >= 60","$score = 60","$score >> 60","$score => 60"],correct:"$score >= 60",
+ exp:">= is the 'greater than or equal to' comparison operator, which is what's needed to check a passing threshold."},
+
+// ---------- if else ----------
+{topic:"if else",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$num = -5;\nif ($num > 0) {\n  echo \"Positive\";\n} else {\n  echo \"Not positive\";\n}",
+ q:"What is printed?",
+ accept:["Not positive"],
+ exp:"Since -5 is not greater than 0, the if condition is false, so control moves to the else block, printing Not positive."},
+
+{topic:"if else",difficulty:"easy",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly demonstrates if/else syntax?",
+ options:["if ($x > 0) { echo \"pos\"; } else { echo \"neg\"; }",
+          "if ($x > 0) then { echo \"pos\"; } else { echo \"neg\"; }",
+          "if ($x > 0) { echo \"pos\"; } elseif { echo \"neg\"; }",
+          "if $x > 0 { echo \"pos\"; } else echo \"neg\";"],
+ correct:"if ($x > 0) { echo \"pos\"; } else { echo \"neg\"; }",
+ exp:"PHP's if/else requires parentheses around the condition and does not use a then keyword, unlike some other languages."},
+
+{topic:"if else",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"$x = 10;\nif ($x > 5)\n  echo \"Big\";\n  echo \"Always runs\";\nelse\n  echo \"Small\";",
+ q:"Without braces, only the very next statement belongs to the if. What is the actual problem with this code?",
+ options:["\"echo Always runs\" is not part of the if block, and this misalignment even causes a parse error because else has no matching if body left",
+          "The code runs perfectly as intended",
+          "PHP doesn't support if without braces at all",
+          "$x > 5 is always false"],
+ correct:"\"echo Always runs\" is not part of the if block, and this misalignment even causes a parse error because else has no matching if body left",
+ exp:"When braces are omitted, only the single statement immediately after if(...) belongs to it. The second echo falls outside the if, which breaks the if/else pairing and causes a syntax error. Always use { } for multi-statement blocks."},
+
+// ---------- elseif ----------
+{topic:"elseif",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: In PHP, elseif and else if (with a space) behave the same way in a simple if chain.",
+ options:["True","False"],correct:"True",
+ exp:"PHP treats elseif and else if as equivalent when used as a simple chained construct; both start a new conditional branch."},
+
+{topic:"elseif",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$grade = 75;\nif ($grade >= 90) {\n  echo \"A\";\n} elseif ($grade >= 80) {\n  echo \"B\";\n} elseif ($grade >= 70) {\n  echo \"C\";\n} else {\n  echo \"D\";\n}",
+ q:"What letter is printed?",
+ accept:["C"],
+ exp:"75 fails the first two checks (>=90 and >=80) but satisfies >= 70, so the third branch runs and prints C."},
+
+{topic:"elseif",difficulty:"hard",category:"Logical Thinking",mode:"options",
+ code:"$temp = 30;\nif ($temp > 20) {\n  echo \"Warm\";\n} elseif ($temp > 25) {\n  echo \"Hot\";\n} else {\n  echo \"Cold\";\n}",
+ q:"Even though $temp is 30 (which is > 25), why does this print \"Warm\" instead of \"Hot\"?",
+ options:["PHP checks conditions top to bottom and stops at the first true branch; since $temp > 20 is already true, the elseif is never evaluated",
+          "elseif branches are evaluated before if branches",
+          "This is a bug in PHP that always prints the first branch",
+          "$temp > 25 is actually false for 30"],
+ correct:"PHP checks conditions top to bottom and stops at the first true branch; since $temp > 20 is already true, the elseif is never evaluated",
+ exp:"Conditional chains short-circuit: as soon as one branch's condition is true, its code runs and the rest of the chain is skipped — regardless of whether a later condition would also be true. Order matters, from most to least specific."},
+
+// ---------- switch ----------
+{topic:"switch",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$day = 2;\nswitch ($day) {\n  case 1:\n    echo \"Mon\";\n    break;\n  case 2:\n    echo \"Tue\";\n    break;\n  default:\n    echo \"Other\";\n}",
+ q:"What is printed?",
+ accept:["Tue"],
+ exp:"$day matches case 2, so \"Tue\" is printed, and break stops execution from falling into later cases."},
+
+{topic:"switch",difficulty:"hard",category:"Find the Error",mode:"options",
+ code:"$day = 1;\nswitch ($day) {\n  case 1:\n    echo \"Mon\";\n  case 2:\n    echo \"Tue\";\n    break;\n  default:\n    echo \"Other\";\n}",
+ q:"What actually gets printed, and why?",
+ options:["MonTue — because case 1 is missing a break, execution falls through into case 2",
+          "Mon — because switch always stops after one case",
+          "Tue — because $day equals 2 internally",
+          "Other — because default always runs first"],
+ correct:"MonTue — because case 1 is missing a break, execution falls through into case 2",
+ exp:"Without a break statement, PHP's switch keeps executing the following case's code (fall-through), so both \"Mon\" and \"Tue\" are printed."},
+
+{topic:"switch",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"switch ($color) {\n  ____ \"red\":\n    echo \"Stop\";\n    break;\n  default:\n    echo \"Go\";\n}",
+ q:"Which keyword completes the blank?",
+ options:["case","if","when","match"],correct:"case",
+ exp:"Each branch inside a switch is introduced with the case keyword, followed by the value to compare and a colon."},
+
+{topic:"switch",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which switch statement is syntactically correct and includes a default branch?",
+ options:["switch ($x) { case 1: echo \"one\"; break; default: echo \"other\"; }",
+          "switch ($x) { case 1 echo \"one\"; break; default: echo \"other\"; }",
+          "switch $x { case 1: echo \"one\"; break; }",
+          "switch ($x): case 1: echo \"one\"; break; end"],
+ correct:"switch ($x) { case 1: echo \"one\"; break; default: echo \"other\"; }",
+ exp:"A valid switch needs parentheses around the expression, a colon after each case value, and curly braces around the whole block."},
+
+// ---------- while ----------
+{topic:"while",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$i = 1;\nwhile ($i <= 3) {\n  echo $i;\n  $i++;\n}",
+ q:"What is printed?",
+ accept:["123"],
+ exp:"The loop prints 1, then 2, then 3, incrementing $i each time until the condition $i <= 3 becomes false."},
+
+{topic:"while",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ code:"$i = 0;\nwhile ($i < 10) {\n  $i += 2;\n}",
+ q:"How many times does the loop body execute?",
+ options:["5","10","2","Infinite"],correct:"5",
+ exp:"Starting at 0 and adding 2 each time: 0→2→4→6→8→10. The loop runs while $i < 10, which is true for i = 0,2,4,6,8 — five executions — before stopping at 10."},
+
+{topic:"while",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$i = 1;\nwhile ($i <= 5) {\n  echo $i;\n}",
+ q:"What is wrong with this loop?",
+ options:["$i is never incremented inside the loop, so the condition never becomes false — this is an infinite loop",
+          "The loop will run exactly 5 times as intended",
+          "while loops cannot use <=",
+          "echo cannot be used inside while"],
+ correct:"$i is never incremented inside the loop, so the condition never becomes false — this is an infinite loop",
+ exp:"Without $i++ (or similar) inside the loop body, $i stays at 1 forever, so $i <= 5 is always true — the loop never terminates."},
+
+// ---------- do while ----------
+{topic:"do while",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: A do-while loop always executes its body at least once, even if the condition is false from the start.",
+ options:["True","False"],correct:"True",
+ exp:"do-while checks its condition AFTER running the body, so the body is guaranteed to execute at least one time regardless of the condition."},
+
+{topic:"do while",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$i = 10;\ndo {\n  echo $i;\n} while ($i < 5);",
+ q:"What is printed?",
+ accept:["10"],
+ exp:"Even though $i < 5 is false (10 is not less than 5), the loop body still runs once before the condition is even checked, printing 10."},
+
+{topic:"do while",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet is the correct syntax for a do-while loop?",
+ options:["do { echo \"hi\"; } while ($x < 5);","do { echo \"hi\"; } while ($x < 5)","while ($x < 5) do { echo \"hi\"; }","do while ($x < 5) { echo \"hi\"; }"],
+ correct:"do { echo \"hi\"; } while ($x < 5);",
+ exp:"A do-while loop is written do { ... } while (condition); — note the required semicolon after the closing while(...)."},
+
+// ---------- for loop ----------
+{topic:"for loop",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"for ($i = 0; $i < 4; $i++) {\n  echo $i;\n}",
+ q:"What is printed?",
+ accept:["0123"],
+ exp:"The loop starts at 0 and runs while $i < 4, printing 0, 1, 2, 3 before $i becomes 4 and the loop stops."},
+
+{topic:"for loop",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"Which for loop correctly prints the numbers 1 through 5 (inclusive)?",
+ options:["for ($i = 1; $i <= 5; $i++) { echo $i; }",
+          "for ($i = 1; $i < 5; $i++) { echo $i; }",
+          "for ($i = 0; $i <= 5; $i--) { echo $i; }",
+          "for ($i = 1; $i <= 5; $i--) { echo $i; }"],
+ correct:"for ($i = 1; $i <= 5; $i++) { echo $i; }",
+ exp:"Starting at 1, continuing while $i <= 5, and incrementing by 1 each time produces exactly 1,2,3,4,5."},
+
+{topic:"for loop",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ code:"for ($i = 0; $i < 10; $i += 2) {\n  echo $i;\n}",
+ q:"How many times does this loop body execute?",
+ options:["5","10","4","Infinite"],correct:"5",
+ exp:"$i takes the values 0,2,4,6,8 (five values) before reaching 10, at which point $i < 10 becomes false and the loop stops."},
+
+{topic:"for loop",difficulty:"hard",category:"Fix the Code",mode:"options",
+ code:"for ($i = 0; $i < 5;) {\n  echo $i;\n}",
+ q:"This loop never ends. What fix corrects it while keeping the same intended output (01234)?",
+ options:["Add $i++ as the third part of the for statement, or inside the loop body",
+          "Change < to <= only",
+          "Remove the semicolons inside the parentheses",
+          "Change echo to print"],
+ correct:"Add $i++ as the third part of the for statement, or inside the loop body",
+ exp:"The for loop's third section (the increment) was left empty, so $i never changes and the condition $i < 5 stays true forever. Adding $i++ fixes the infinite loop."},
+
+{topic:"for loop",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"for ($i = 1; ____; $i++) {\n  echo $i;\n}",
+ q:"Which condition makes this loop print 1 2 3 (stopping after 3)?",
+ options:["$i <= 3","$i = 3","$i >= 3","$i != 1"],correct:"$i <= 3",
+ exp:"$i <= 3 keeps the loop running while $i is 1, 2, or 3, printing each, and stops once $i becomes 4."},
+
+// ---------- break ----------
+{topic:"break",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"for ($i = 1; $i <= 5; $i++) {\n  if ($i == 3) {\n    break;\n  }\n  echo $i;\n}",
+ q:"What is printed?",
+ accept:["12"],
+ exp:"The loop prints 1 and 2 normally, but when $i reaches 3, break immediately exits the loop entirely, so 3, 4, and 5 never print."},
+
+{topic:"break",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: By default, break exits only the innermost loop or switch it is placed in.",
+ options:["True","False"],correct:"True",
+ exp:"A plain break statement stops the loop/switch it directly belongs to. (PHP does support break 2; etc. to exit multiple levels, but plain break affects only the innermost one.)"},
+
+{topic:"break",difficulty:"hard",category:"Code Reading",mode:"options",
+ code:"for ($i = 1; $i <= 3; $i++) {\n  for ($j = 1; $j <= 3; $j++) {\n    if ($j == 2) {\n      break;\n    }\n    echo \"$i-$j \";\n  }\n}",
+ q:"What is printed?",
+ options:["1-1 2-1 3-1 ","1-1 1-2 1-3 ","1-1 2-1 2-2 3-1 ","Nothing"],
+ correct:"1-1 2-1 3-1 ",
+ exp:"break only exits the inner loop (over $j), not the outer one. So for each value of $i, the inner loop prints $i-1 and then breaks as soon as $j reaches 2, giving 1-1, 2-1, 3-1."},
+
+// ---------- continue ----------
+{topic:"continue",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"for ($i = 1; $i <= 5; $i++) {\n  if ($i % 2 == 0) {\n    continue;\n  }\n  echo $i;\n}",
+ q:"What is printed?",
+ accept:["135"],
+ exp:"continue skips the rest of the current iteration whenever $i is even (2 and 4), so only the odd numbers 1, 3, and 5 get echoed."},
+
+{topic:"continue",difficulty:"easy",category:"Find the Error",mode:"options",
+ code:"continue;\nfor ($i = 0; $i < 5; $i++) {\n  echo $i;\n}",
+ q:"What is wrong with placing continue on the first line here?",
+ options:["continue can only be used inside a loop (or switch); using it outside a loop is a fatal error",
+          "continue must always be the last line of a script",
+          "continue needs an argument to work",
+          "Nothing is wrong, this is valid"],
+ correct:"continue can only be used inside a loop (or switch); using it outside a loop is a fatal error",
+ exp:"continue is only meaningful inside a looping structure. Placing it outside of any loop causes a fatal error in modern PHP."},
+
+{topic:"continue",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"for ($i = 1; $i <= 5; $i++) {\n  if ($i == 3) {\n    break;\n  }\n  echo $i;\n}",
+ q:"The developer actually wanted to SKIP printing 3 but still print 4 and 5. What change fixes this?",
+ options:["Replace break; with continue; so only the current iteration is skipped rather than ending the whole loop",
+          "Replace break; with return; instead",
+          "Move the if statement outside the for loop",
+          "Change $i == 3 to $i = 3"],
+ correct:"Replace break; with continue; so only the current iteration is skipped rather than ending the whole loop",
+ exp:"break terminates the entire loop, which is why 4 and 5 never print. continue only skips the current iteration and lets the loop keep going, which matches the intended behavior of skipping just the number 3."},
+
+// ---------- HTML with PHP ----------
+{topic:"HTML with PHP",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"For a web server to process embedded PHP code inside an HTML page, what must the file's extension typically be?",
+ options:[".php",".html",".txt",".css"],correct:".php",
+ exp:"Servers route requests to the PHP interpreter based on file extension (commonly .php). A plain .html file is served as-is without running any PHP code inside it."},
+
+{topic:"HTML with PHP",difficulty:"easy",category:"Code Reading",mode:"options",
+ code:"<p>Hello, <?php echo $name; ?>!</p>",
+ q:"If $name holds \"Sara\", what does the browser display?",
+ options:["Hello, Sara!","Hello, <?php echo $name; ?>!","Hello, $name!","An error, PHP cannot be inside <p> tags"],
+ correct:"Hello, Sara!",
+ exp:"The PHP block only replaces the code between <?php and ?> with its output. Everything else in the HTML stays exactly as written, so the result is Hello, Sara!."},
+
+{topic:"HTML with PHP",difficulty:"medium",category:"Fill in the Blank",mode:"text",
+ q:"Complete the alternative syntax for mixing PHP with HTML: <?php if ($loggedIn): ?> Welcome! <?php ____ ?>",
+ accept:["endif;","endif"],
+ exp:"The alternative syntax replaces braces with colons and closes the block with endif; (or endwhile;, endfor;, endforeach; for other structures), which is convenient when PHP is mixed with a lot of HTML."},
+
+{topic:"HTML with PHP",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which is a correct way to conditionally show HTML using PHP's alternative syntax?",
+ options:["<?php if ($show): ?> <p>Visible</p> <?php endif; ?>",
+          "<?php if ($show) ?> <p>Visible</p> <?php endif ?>",
+          "<?php if ($show): ?> <p>Visible</p> <?php end; ?>",
+          "<?php if $show: ?> <p>Visible</p> <?php endif; ?>"],
+ correct:"<?php if ($show): ?> <p>Visible</p> <?php endif; ?>",
+ exp:"The alternative syntax needs parentheses around the condition, a colon instead of a brace, and must close with endif;."},
+
+// ---------- GET ----------
+{topic:"GET",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which superglobal array is used to read data sent through the URL's query string?",
+ options:["$_GET","$_POST","$_URL","$_QUERY"],correct:"$_GET",
+ exp:"$_GET holds key/value pairs that were passed in the URL, e.g. page.php?id=5 makes $_GET['id'] equal to 5."},
+
+{topic:"GET",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: Data sent via the GET method is visible in the browser's address bar.",
+ options:["True","False"],correct:"True",
+ exp:"GET parameters are appended directly to the URL (after a ?), so they are visible in the address bar, browser history, and server logs."},
+
+{topic:"GET",difficulty:"medium",category:"Short Answer",mode:"text",
+ q:"Which superglobal array holds URL query parameters? (exact PHP name)",
+ accept:["$_GET"],
+ exp:"$_GET is the superglobal array PHP automatically populates with query-string parameters from the current request's URL."},
+
+// ---------- POST ----------
+{topic:"POST",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which superglobal array holds form data submitted using method=\"post\"?",
+ options:["$_POST","$_GET","$_FORM","$_DATA"],correct:"$_POST",
+ exp:"$_POST is populated with the name/value pairs of form fields when the form's method attribute is set to post."},
+
+{topic:"POST",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: Like GET, data sent through POST is also visible directly in the URL.",
+ options:["True","False"],correct:"False",
+ exp:"POST sends data in the body of the HTTP request rather than in the URL, so it does not appear in the address bar the way GET parameters do."},
+
+{topic:"POST",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"You are building a login form that submits a password. Which form method attribute is the more appropriate choice, and why?",
+ options:["POST, because the data is sent in the request body rather than exposed in the URL",
+          "GET, because it is faster for all requests",
+          "POST, because it makes data show up in the browser history for review",
+          "It does not matter which method is used for sensitive data"],
+ correct:"POST, because the data is sent in the request body rather than exposed in the URL",
+ exp:"While neither method encrypts data on its own, POST at least avoids putting sensitive values into the URL, browser history, and server logs, making it the more suitable base choice for something like a password field."},
+
+// ---------- isset() ----------
+{topic:"isset()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What does isset($var) check?",
+ options:["Whether the variable exists and is not null","Whether the variable equals zero","Whether the variable is a string","Whether the variable was declared as a constant"],
+ correct:"Whether the variable exists and is not null",
+ exp:"isset() returns true only if the variable has been defined AND its value is not null."},
+
+{topic:"isset()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$x = null;\nvar_dump(isset($x));",
+ q:"What single word is printed (true or false)?",
+ accept:["false"],
+ exp:"Even though $x technically exists, its value is null, and isset() specifically treats null values as 'not set', so it returns false."},
+
+{topic:"isset()",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: isset() returns false if you check a variable that was never created.",
+ options:["True","False"],correct:"True",
+ exp:"If a variable has never been assigned, isset() safely returns false instead of causing an error, which makes it ideal for checking optional form fields."},
+
+// ---------- empty() ----------
+{topic:"empty()",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"Which of the following values does empty() consider 'empty'?",
+ options:["\"\", 0, \"0\", null, false, and an unset variable",
+          "Only null and unset variables",
+          "Only the number 0",
+          "Only empty strings \"\""],
+ correct:"\"\", 0, \"0\", null, false, and an unset variable",
+ exp:"empty() treats a wide range of 'falsy' values as empty: an empty string, 0, the string \"0\", null, false, and variables that were never set."},
+
+{topic:"empty()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$x = \"0\";\nvar_dump(empty($x));",
+ q:"What single word is printed (true or false)?",
+ accept:["true"],
+ exp:"Even though $x is a non-null string, the specific value \"0\" is one of the special cases empty() treats as empty, so it returns true."},
+
+{topic:"empty()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$quantity = 0;\nif (empty($quantity)) {\n  echo \"Please enter a quantity\";\n} else {\n  echo \"Quantity: $quantity\";\n}",
+ q:"A user legitimately enters 0 as a valid quantity, but the form always tells them to 'Please enter a quantity'. What is the underlying issue?",
+ options:["empty(0) is true, so a legitimately entered 0 is incorrectly treated the same as a missing value; isset() combined with a stricter check would be more appropriate here",
+          "empty() only works with strings, not numbers",
+          "The variable name $quantity is invalid",
+          "There is no issue; 0 should never be considered valid input"],
+ correct:"empty(0) is true, so a legitimately entered 0 is incorrectly treated the same as a missing value; isset() combined with a stricter check would be more appropriate here",
+ exp:"Because empty() treats 0 as empty, this logic can't distinguish 'the user typed 0' from 'nothing was submitted'. A check like (!isset($quantity) || $quantity === '') avoids that ambiguity."},
+
+// ---------- strlen() ----------
+{topic:"strlen()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What does strlen(\"Hello\") return?",
+ options:["5","4","6","\"Hello\""],correct:"5",
+ exp:"strlen() counts the number of characters (bytes) in a string. \"Hello\" has 5 characters: H-e-l-l-o."},
+
+{topic:"strlen()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"echo strlen(\"PHP Exam\");",
+ q:"What number is printed?",
+ accept:["8"],
+ exp:"Counting every character including the space: P-H-P-(space)-E-x-a-m = 8 characters total."},
+
+{topic:"strlen()",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which built-in function returns the number of characters in a string? (function name)",
+ accept:["strlen()","strlen"],
+ exp:"strlen($string) is the standard PHP function for measuring how many characters a string contains."},
+
+// ---------- define() ----------
+{topic:"define()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What is the correct syntax to define a constant called SITE_NAME with the value \"MyBlog\"?",
+ options:["define(\"SITE_NAME\", \"MyBlog\");","define($SITE_NAME, \"MyBlog\");","SITE_NAME = \"MyBlog\";","const(\"SITE_NAME\", \"MyBlog\");"],
+ correct:"define(\"SITE_NAME\", \"MyBlog\");",
+ exp:"define() takes the constant's name as a string first, followed by the value: define(\"SITE_NAME\", \"MyBlog\");."},
+
+{topic:"define()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"define(\"PI\", 3.14);\necho PI;",
+ q:"What is printed?",
+ accept:["3.14"],
+ exp:"Once PI is defined as a constant, referencing it directly by name (no $) outputs the stored value, 3.14."},
+
+{topic:"define()",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: Once a constant is created with define(), its value can later be changed with a normal assignment.",
+ options:["True","False"],correct:"False",
+ exp:"Constants are meant to stay constant — PHP does not allow reassigning a value created with define() (or const). Attempting to do so results in an error/warning."},
+
+// ---------- Logical Thinking (extra, mixed topics) ----------
+{topic:"Logical Operators",difficulty:"easy",category:"Logical Thinking",mode:"options",
+ q:"If $a = 5 and $b = 10, what is the result of ($a < $b) && ($a > 0)?",
+ options:["true","false","5","10"],correct:"true",
+ exp:"Both sub-conditions are true: 5 < 10 is true, and 5 > 0 is true. Since && requires both sides to be true, the overall expression evaluates to true."},
+
+{topic:"Comparison Operators",difficulty:"medium",category:"Logical Thinking",mode:"options",
+ q:"Given $score = 72, which single condition correctly captures 'a passing grade between 60 and 79 inclusive'?",
+ options:["$score >= 60 && $score <= 79","$score >= 60 || $score <= 79","$score > 60 && $score < 79","$score == 60 && $score == 79"],
+ correct:"$score >= 60 && $score <= 79",
+ exp:"To require a value fall within a range, both boundary checks must hold at the same time, so they are joined with && (AND), not || (OR)."},
+
+{topic:"Arithmetic Operators",difficulty:"hard",category:"Logical Thinking",mode:"text",
+ code:"$result = 10 + 2 * 5 - 3;",
+ q:"Following standard operator precedence (multiplication before addition/subtraction), what is the value of $result?",
+ accept:["17"],
+ exp:"Multiplication runs first: 2 * 5 = 10. Then left-to-right: 10 + 10 - 3 = 17."},
+
+{topic:"Logical Operators",difficulty:"medium",category:"Logical Thinking",mode:"options",
+ q:"For the expression ($x > 0 || $x < -100) to be false, what must be true about $x?",
+ options:["$x must be between -100 and 0 (inclusive of neither exact boundary condition holding)",
+          "$x must be exactly 0",
+          "$x must be greater than 0",
+          "It can never be false"],
+ correct:"$x must be between -100 and 0 (inclusive of neither exact boundary condition holding)",
+ exp:"|| is only false when BOTH sides are false. That means $x > 0 must be false (so $x <= 0) AND $x < -100 must be false (so $x >= -100) — placing $x in the range -100 to 0."},
+
+{topic:"if else",difficulty:"medium",category:"Logical Thinking",mode:"options",
+ code:"$hasTicket = false;\n$isStaff = true;\nif ($hasTicket || $isStaff) {\n  echo \"Entry allowed\";\n} else {\n  echo \"Entry denied\";\n}",
+ q:"What is printed, and why?",
+ options:["Entry allowed — because || only needs one side to be true, and $isStaff is true",
+          "Entry denied — because $hasTicket is false",
+          "Entry allowed — because both sides must be true",
+          "A fatal error occurs mixing booleans"],
+ correct:"Entry allowed — because || only needs one side to be true, and $isStaff is true",
+ exp:"Even though $hasTicket is false, $isStaff being true is enough to satisfy the || (OR) condition, so the if branch runs."},
+
+// ---------- Code Reading (extra, mixed topics) ----------
+{topic:"Variables",difficulty:"medium",category:"Code Reading",mode:"text",
+ code:"$total = 0;\nfor ($i = 1; $i <= 4; $i++) {\n  $total = $total + $i;\n}\necho $total;",
+ q:"What value does $total hold when printed?",
+ accept:["10"],
+ exp:"$total accumulates 1, then 1+2=3, then 3+3=6, then 6+4=10 — the sum of 1 through 4."},
+
+{topic:"if",difficulty:"medium",category:"Code Reading",mode:"text",
+ code:"for ($i = 1; $i <= 3; $i++) {\n  if ($i == 2) {\n    echo \"two\";\n  } else {\n    echo $i;\n  }\n}",
+ q:"What is printed (as one combined string)?",
+ accept:["1two3"],
+ exp:"For $i=1 the else branch runs (prints 1). For $i=2 the if branch runs (prints \"two\"). For $i=3 the else branch runs again (prints 3). Combined: 1two3."},
+
+{topic:"switch",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"$i = 0;\nwhile ($i < 3) {\n  switch ($i) {\n    case 0:\n      echo \"a\";\n      break;\n    case 1:\n      echo \"b\";\n      break;\n    default:\n      echo \"c\";\n  }\n  $i++;\n}",
+ q:"What is printed (as one combined string)?",
+ accept:["abc"],
+ exp:"The loop runs for $i = 0, 1, 2. Each switch prints \"a\" for 0, \"b\" for 1, and falls to default (\"c\") for 2, giving abc overall."},
+
+{topic:"do while",difficulty:"medium",category:"Code Reading",mode:"text",
+ code:"$i = 5;\ndo {\n  echo $i;\n  $i--;\n} while ($i > 2);",
+ q:"What is printed (as one combined string of digits)?",
+ accept:["543"],
+ exp:"The loop prints 5, decrements to 4 (4>2 true, continue), prints 4, decrements to 3 (3>2 true, continue), prints 3, decrements to 2 (2>2 false, stop). Result: 543."},
+
+{topic:"Arithmetic Operators",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"$a = 4;\n$b = 2;\n$c = $a ** $b - $a / $b;\necho $c;",
+ q:"What value is printed?",
+ accept:["14"],
+ exp:"** runs before / and -: 4 ** 2 = 16, and 4 / 2 = 2. Then subtraction: 16 - 2 = 14."},
+
+{topic:"break",difficulty:"medium",category:"Code Reading",mode:"text",
+ code:"for ($i = 1; $i <= 10; $i++) {\n  if ($i == 4) {\n    break;\n  }\n  if ($i % 2 == 0) {\n    continue;\n  }\n  echo $i;\n}",
+ q:"What is printed (as one combined string of digits)?",
+ accept:["13"],
+ exp:"$i=1 is odd, prints 1. $i=2 is even, continue skips it. $i=3 is odd, prints 3. $i=4 triggers break, ending the loop entirely. Result: 13."},
+
+// ---------- Mini Problem Solving (extra) ----------
+{topic:"Arithmetic Operators",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"Which snippet correctly checks whether a number stored in $n is even?",
+ options:["if ($n % 2 == 0) { echo \"Even\"; }","if ($n / 2 == 0) { echo \"Even\"; }","if ($n * 2 == 0) { echo \"Even\"; }","if ($n == 2) { echo \"Even\"; }"],
+ correct:"if ($n % 2 == 0) { echo \"Even\"; }",
+ exp:"A number is even when it has no remainder after dividing by 2, so checking $n % 2 == 0 is the correct approach."},
+
+{topic:"for loop",difficulty:"hard",category:"Mini Problem Solving",mode:"options",
+ q:"Which loop correctly computes the sum of the numbers from 1 to 10?",
+ options:["$sum = 0; for ($i = 1; $i <= 10; $i++) { $sum += $i; }",
+          "$sum = 0; for ($i = 1; $i <= 10; $i++) { $sum = $i; }",
+          "$sum = 0; for ($i = 1; $i < 10; $i++) { $sum += $i; }",
+          "$sum = 0; for ($i = 0; $i <= 10; $i--) { $sum += $i; }"],
+ correct:"$sum = 0; for ($i = 1; $i <= 10; $i++) { $sum += $i; }",
+ exp:"To accumulate a running total, each iteration must ADD $i to $sum using +=, and the loop must run through all values 1 to 10 inclusive (<=10, incrementing with ++)."},
+
+{topic:"POST",difficulty:"hard",category:"Mini Problem Solving",mode:"options",
+ q:"Which snippet safely checks that a POST field named \"username\" was submitted and is not blank?",
+ options:["if (isset($_POST['username']) && !empty($_POST['username'])) { /* valid */ }",
+          "if ($_POST['username']) { /* valid */ }",
+          "if ($_GET['username'] != null) { /* valid */ }",
+          "if (defined($_POST['username'])) { /* valid */ }"],
+ correct:"if (isset($_POST['username']) && !empty($_POST['username'])) { /* valid */ }",
+ exp:"isset() first confirms the key exists (avoiding an undefined-index warning), and !empty() further confirms the submitted value isn't blank, 0, or otherwise 'empty'."},
+
+{topic:"Constants",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"Which snippet safely defines a constant only if it hasn't already been defined elsewhere?",
+ options:["if (!defined(\"APP_VERSION\")) { define(\"APP_VERSION\", \"2.0\"); }",
+          "define(\"APP_VERSION\", \"2.0\"); define(\"APP_VERSION\", \"2.0\");",
+          "if (isset(\"APP_VERSION\")) { define(\"APP_VERSION\", \"2.0\"); }",
+          "$APP_VERSION ??= \"2.0\";"],
+ correct:"if (!defined(\"APP_VERSION\")) { define(\"APP_VERSION\", \"2.0\"); }",
+ exp:"defined() checks constants specifically (isset() is for variables), so guarding define() with !defined() prevents the 'constant already defined' warning."},
+
+// ---------- Which Code is Correct (extra) ----------
+{topic:"Comparison Operators",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly checks that $x is exactly the integer 5 (same value AND same type)?",
+ options:["if ($x === 5) { echo \"yes\"; }","if ($x = 5) { echo \"yes\"; }","if ($x == \"5\") { echo \"yes\"; }","if ($x <> 5) { echo \"yes\"; }"],
+ correct:"if ($x === 5) { echo \"yes\"; }",
+ exp:"=== checks both value and type together, so it correctly requires $x to be the integer 5, not merely something that loosely equals 5."},
+
+{topic:"echo",difficulty:"easy",category:"Which Code is Correct?",mode:"options",
+ q:"Which line correctly concatenates and prints two strings together?",
+ options:["echo \"Hello\" . \"World\";","echo \"Hello\" + \"World\";","echo \"Hello\", , \"World\";","echo \"Hello\" & \"World\";"],
+ correct:"echo \"Hello\" . \"World\";",
+ exp:"The dot (.) is PHP's string concatenation operator. + performs numeric addition and is not used for joining strings."},
+
+{topic:"Naming Variables",difficulty:"easy",category:"Which Code is Correct?",mode:"options",
+ q:"Which of these variable declarations is valid PHP?",
+ options:["$user_name = \"Sam\";","$user-name = \"Sam\";","$3user = \"Sam\";","$user name = \"Sam\";"],
+ correct:"$user_name = \"Sam\";",
+ exp:"Underscores are allowed in variable names, but hyphens, spaces, and leading digits are not."},
+
+{topic:"empty()",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly distinguishes between a variable that was never set and one that was set to an empty string?",
+ options:["if (!isset($x)) { echo \"never set\"; } elseif ($x === \"\") { echo \"empty string\"; }",
+          "if (empty($x)) { echo \"never set\"; }",
+          "if ($x == null) { echo \"never set\"; }",
+          "There is no way to tell these apart in PHP"],
+ correct:"if (!isset($x)) { echo \"never set\"; } elseif ($x === \"\") { echo \"empty string\"; }",
+ exp:"isset() alone can't tell these cases apart the way this combination can: !isset() catches 'never defined', while a strict === \"\" check (only reached if it IS set) catches 'defined as blank'."},
+
+// ---------- Complete the Missing Code (extra) ----------
+{topic:"while",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"$i = 0;\nwhile (____) {\n  echo $i;\n  $i++;\n}",
+ q:"Which condition makes this loop print 0 1 2 3 4 (stopping before 5)?",
+ options:["$i < 5","$i > 5","$i = 5","$i <= 0"],correct:"$i < 5",
+ exp:"$i < 5 keeps the loop going for $i = 0,1,2,3,4, stopping as soon as $i becomes 5."},
+
+{topic:"if else",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"$num = 7;\nif ($num % 2 == 0) {\n  echo \"Even\";\n} ____ {\n  echo \"Odd\";\n}",
+ q:"Which keyword completes the blank to handle the opposite case?",
+ options:["else","elseif","then","otherwise"],correct:"else",
+ exp:"else provides the fallback branch that runs whenever the preceding if condition is false — exactly what's needed here for odd numbers."},
+
+{topic:"switch",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"switch ($grade) {\n  case \"A\":\n    echo \"Excellent\";\n    break;\n  ____:\n    echo \"Unknown grade\";\n}",
+ q:"Which keyword completes the blank to handle any value not matched above?",
+ options:["default","else","case any","otherwise"],correct:"default",
+ exp:"default is switch's catch-all branch, running when none of the case values match the expression."},
+
+{topic:"Assignment Operators",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"$total = 100;\n$total ____ 25;\necho $total;",
+ q:"Which operator, placed in the blank, makes this print 75?",
+ options:["-=","+=","*=","/="],correct:"-=",
+ exp:"-= subtracts the right-hand value from the variable. 100 -= 25 leaves $total at 75."},
+
+// ---------- Find the Error (extra) ----------
+{topic:"Data Types",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$price = 19.99\necho $price;",
+ q:"What is the syntax error in this code?",
+ options:["Missing semicolon after the first line","echo cannot print floats","$price needs to be an integer","19.99 must be in quotes"],
+ correct:"Missing semicolon after the first line",
+ exp:"Every PHP statement must end with a semicolon. Without one after $price = 19.99, PHP cannot tell where that statement ends, causing a parse error."},
+
+{topic:"strlen()",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$word = 'PHP';\necho strlen($word;",
+ q:"What is the error in this code?",
+ options:["A closing parenthesis is missing after $word","strlen() cannot accept variables","echo cannot be combined with strlen()","Single quotes are not allowed here"],
+ correct:"A closing parenthesis is missing after $word",
+ exp:"The call strlen($word has an opening parenthesis with no matching closing one, which is an unbalanced-parentheses parse error."},
+
+{topic:"isset()",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"if (isset($_GET[\"id\") {\n  echo \"found\";\n}",
+ q:"What is the syntax error here?",
+ options:["A closing quote is missing after id, and the parentheses are unbalanced",
+          "isset() cannot be used with $_GET",
+          "if statements cannot contain function calls",
+          "There is no error"],
+ correct:"A closing quote is missing after id, and the parentheses are unbalanced",
+ exp:"The string \"id should be \"id\" (missing its closing quote), which also throws off the parenthesis matching for isset(...) and if(...)."},
+
+{topic:"Comments",difficulty:"easy",category:"Find the Error",mode:"options",
+ code:"// This calculates tax\n$tax = $price * 0.1\n echo $tax;",
+ q:"Ignoring the comment, what is the actual problem in this snippet?",
+ options:["The line $tax = $price * 0.1 is missing its terminating semicolon",
+          "Comments cannot appear before a variable assignment",
+          "$price cannot be multiplied by a decimal",
+          "echo must come before the calculation"],
+ correct:"The line $tax = $price * 0.1 is missing its terminating semicolon",
+ exp:"Every statement needs a semicolon at the end. The comment itself is fine and correctly ignored by PHP; the real bug is the missing ; after 0.1."},
+
+// ---------- Fix the Code (extra) ----------
+{topic:"if",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$age = 20;\nif ($age = 18) {\n  echo \"Just became an adult\";\n}",
+ q:"This always prints the message regardless of $age's original value. What is the fix?",
+ options:["Change $age = 18 to $age == 18 (or === 18), since = is assignment, not comparison",
+          "Change echo to print",
+          "Remove the semicolon after the echo statement",
+          "Change 18 to \"18\""],
+ correct:"Change $age = 18 to $age == 18 (or === 18), since = is assignment, not comparison",
+ exp:"Using = inside the if condition ASSIGNS 18 to $age (which is truthy), so the block always runs and also overwrites $age. The comparison operator == (or ===) is what was intended."},
+
+{topic:"switch",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"switch ($status) {\n  case \"active\":\n    echo \"User is active\";\n  case \"inactive\":\n    echo \"User is inactive\";\n    break;\n}",
+ q:"When $status is \"active\", the output incorrectly includes both messages. What is the correct fix?",
+ options:["Add a break; statement right after the first echo, so it doesn't fall through into the next case",
+          "Remove the break; from the second case instead",
+          "Combine both cases into a single case line",
+          "Replace switch with if, since switch cannot have two cases"],
+ correct:"Add a break; statement right after the first echo, so it doesn't fall through into the next case",
+ exp:"Without a break after the \"active\" case, execution falls through into \"inactive\" as well. Adding break; after the first echo stops that fall-through."},
+
+{topic:"do while",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$i = 0;\ndo {\n  echo $i;\n  $i++;\n} while ($i < 5)",
+ q:"This code causes a parse error. What is missing?",
+ options:["A semicolon after the closing parenthesis of while ($i < 5)","A break statement inside the loop","An extra closing brace","The initial value of $i"],
+ correct:"A semicolon after the closing parenthesis of while ($i < 5)",
+ exp:"Unlike a plain while loop, do-while requires a semicolon immediately after while (condition) to properly terminate the statement."},
+
+{topic:"continue",difficulty:"hard",category:"Fix the Code",mode:"options",
+ code:"for ($i = 1; $i <= 5; $i++) {\n  if ($i == 3) {\n    continue;\n  }\n  echo $i;\n  break;\n}",
+ q:"The developer wanted to print 1, 2, 4, 5 (skipping only 3), but the loop stops after printing 1. What line is misplaced?",
+ options:["The break; at the end of the loop body should be removed — it wasn't part of the intended logic at all",
+          "The continue; should be moved above the if statement",
+          "The for loop's condition should be $i < 5",
+          "echo $i; should come before the if statement"],
+ correct:"The break; at the end of the loop body should be removed — it wasn't part of the intended logic at all",
+ exp:"The stray break; terminates the whole loop right after the first successful echo, which is why only 1 gets printed. Removing it lets the loop continue through all five iterations, correctly skipping only $i == 3."},
+
+// ---------- Debugging (extra) ----------
+{topic:"GET",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"echo \"Welcome, \" . $_GET['user'];",
+ q:"When the URL does not include a 'user' parameter, this code produces a warning about an undefined array key. What is the safest fix?",
+ options:["Check isset($_GET['user']) before using it, e.g. with a fallback value if it's missing",
+          "Switch $_GET to $_POST, which never causes warnings",
+          "Wrap the line in a comment",
+          "Use define() to create the user parameter"],
+ correct:"Check isset($_GET['user']) before using it, e.g. with a fallback value if it's missing",
+ exp:"Directly accessing an array key that might not exist causes a warning. Guarding the access with isset() (or the null coalescing operator ??) avoids that and lets you supply a default."},
+
+{topic:"Data Types",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$input = \"abc\";\n$result = $input + 5;\necho $result;",
+ q:"What actually happens when this code runs in modern PHP?",
+ options:["A TypeError/warning occurs because \"abc\" is a non-numeric string that cannot be meaningfully converted to a number for arithmetic",
+          "It prints \"abc5\" as a concatenated string",
+          "It silently prints 5, treating \"abc\" as 0",
+          "It prints exactly \"abc\" unchanged"],
+ correct:"A TypeError/warning occurs because \"abc\" is a non-numeric string that cannot be meaningfully converted to a number for arithmetic",
+ exp:"Numeric strings like \"5\" convert cleanly for arithmetic, but a non-numeric string like \"abc\" cannot, so modern PHP raises a warning/error instead of guessing a value."},
+
+{topic:"Variables",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"echo \"Total: \" . $total;\n$total = 50;",
+ q:"Why does this code produce a warning instead of printing 'Total: 50'?",
+ options:["$total is used on the echo line BEFORE it has been assigned a value on the next line",
+          "Concatenation cannot be used with numbers",
+          "Variables must be declared with the var keyword first",
+          "echo must always come after all variables in the file"],
+ correct:"$total is used on the echo line BEFORE it has been assigned a value on the next line",
+ exp:"PHP executes code top to bottom. Since $total isn't assigned 50 until AFTER the echo statement runs, it is undefined at the time it's used, triggering a warning."},
+
+{topic:"for loop",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"for ($i = 1; $i <= 5; $i--) {\n  echo $i;\n}",
+ q:"What is the bug in this loop?",
+ options:["The loop decrements $i instead of incrementing it, so $i moves away from ever failing the $i <= 5 condition, causing an infinite loop",
+          "The starting value of $i should be 0",
+          "The condition should use == instead of <=",
+          "There is no bug"],
+ correct:"The loop decrements $i instead of incrementing it, so $i moves away from ever failing the $i <= 5 condition, causing an infinite loop",
+ exp:"Starting at 1 and decrementing means $i gets smaller (1, 0, -1, -2, ...), which will always remain <= 5 — the condition never becomes false, so the loop never stops."},
+
+// ---------- Short Answer (extra) ----------
+{topic:"switch",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which keyword is used inside a switch statement to prevent execution from falling into the next case? (one word)",
+ accept:["break","break;"],
+ exp:"break exits the switch block immediately once a matching case has finished running its code."},
+
+{topic:"break",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which keyword immediately exits a loop entirely, skipping any remaining iterations? (one word)",
+ accept:["break","break;"],
+ exp:"break stops the loop right away, and execution continues with the code right after the loop."},
+
+{topic:"continue",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which keyword skips the rest of the current loop iteration but lets the loop keep running? (one word)",
+ accept:["continue","continue;"],
+ exp:"continue jumps straight to the loop's next check/increment step, skipping only the remainder of the current pass through the body."},
+
+{topic:"Data Types",difficulty:"medium",category:"Short Answer",mode:"text",
+ q:"Which built-in function returns the type of a variable as a string, e.g. \"integer\" or \"string\"? (function name)",
+ accept:["gettype()","gettype"],
+ exp:"gettype($var) inspects a value and returns a string describing its data type."},
+
+{topic:"empty()",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which function would you use to check if a variable is 'empty' (covers \"\", 0, null, false, unset, etc.) in one call? (function name)",
+ accept:["empty()","empty"],
+ exp:"empty($var) is a single convenient check that covers several falsy/blank cases at once, without raising a warning if the variable is undefined."}
+];
+
+/* ================= Utility ================= */
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function highlightPHP(raw){
+  let s = escapeHtml(raw);
+  const kw = "if|else|elseif|endif|while|endwhile|do|for|endfor|foreach|endforeach|switch|case|default|break|continue|return|echo|print|true|false|TRUE|FALSE|null|NULL|and|or|xor|define|isset|empty|const|var_dump|gettype";
+  const re = new RegExp("(//.*$|#.*$)|('(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\")|(\\$[a-zA-Z_][a-zA-Z0-9_]*)|\\b(" + kw + ")\\b","gm");
+  s = s.replace(re, function(match, comment, string, variable, keyword){
+    if(comment) return '<span class="cm">'+comment+'</span>';
+    if(string) return '<span class="str">'+string+'</span>';
+    if(variable) return '<span class="vr">'+variable+'</span>';
+    if(keyword) return '<span class="kw">'+keyword+'</span>';
+    return match;
+  });
+  s = s.replace(/(&lt;\?php|\?&gt;)/g, '<span class="tg">$1</span>');
+  return s;
+}
+
+function normalize(s){
+  return String(s).toLowerCase().trim().replace(/[;'"\s]+/g,'');
+}
+
+/* ================= Exam state ================= */
+const EXAM_SIZE = 30;
+const EXAM_MINUTES = 40;
+let examQuestions = [];   // built questions with shuffled options
+let userAnswers = [];     // parallel array
+let currentIndex = 0;
+let timerInterval = null;
+let secondsLeft = EXAM_MINUTES*60;
+let startTimestamp = null;
+let elapsedSeconds = 0;
+
+function buildExam(){
+  const picked = shuffleArray(BANK).slice(0, EXAM_SIZE);
+  examQuestions = picked.map(function(bq){
+    const built = Object.assign({}, bq);
+    if(bq.mode === "options"){
+      built.shuffledOptions = shuffleArray(bq.options);
+    }
+    return built;
+  });
+  userAnswers = examQuestions.map(function(){ return null; });
+  currentIndex = 0;
+}
+
+function startExam(){
+  buildExam();
+  secondsLeft = EXAM_MINUTES*60;
+  startTimestamp = Date.now();
+  showScreen('screen-exam');
+  renderQuestion();
+  renderNav();
+  updateProgress();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+}
+
+function retryExam(){
+  // Same question set, options reshuffled, answers cleared
+  examQuestions = examQuestions.map(function(bq){
+    const built = Object.assign({}, bq);
+    if(bq.mode === "options"){
+      built.shuffledOptions = shuffleArray(bq.options);
+    }
+    return built;
+  });
+  userAnswers = examQuestions.map(function(){ return null; });
+  currentIndex = 0;
+  secondsLeft = EXAM_MINUTES*60;
+  startTimestamp = Date.now();
+  showScreen('screen-exam');
+  renderQuestion();
+  renderNav();
+  updateProgress();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+}
+
+function tickTimer(){
+  secondsLeft--;
+  updateTimerDisplay();
+  if(secondsLeft <= 0){
+    clearInterval(timerInterval);
+    finishExam();
+  }
+}
+
+function updateTimerDisplay(){
+  const m = Math.max(0,Math.floor(secondsLeft/60));
+  const s = Math.max(0,secondsLeft%60);
+  const txt = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('timerText').textContent = txt;
+  const box = document.getElementById('timerBox');
+  if(secondsLeft <= 60){ box.classList.add('low'); } else { box.classList.remove('low'); }
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderQuestion(){
+  const q = examQuestions[currentIndex];
+  document.getElementById('qTab').textContent = 'question_' + String(currentIndex+1).padStart(2,'0') + '.php';
+  document.getElementById('qCategory').textContent = q.category;
+  document.getElementById('qTopic').textContent = q.topic;
+  const diffEl = document.getElementById('qDifficulty');
+  diffEl.textContent = q.difficulty;
+  diffEl.className = 'badge diff-' + q.difficulty;
+  document.getElementById('qText').textContent = q.q;
+
+  const codeEl = document.getElementById('qCode');
+  if(q.code){
+    codeEl.style.display = 'block';
+    codeEl.innerHTML = highlightPHP(q.code);
+  } else {
+    codeEl.style.display = 'none';
+    codeEl.innerHTML = '';
+  }
+
+  const optWrap = document.getElementById('qOptions');
+  const textWrap = document.getElementById('qTextInputWrap');
+  optWrap.innerHTML = '';
+  if(q.mode === 'options'){
+    textWrap.style.display = 'none';
+    optWrap.style.display = 'flex';
+    const letters = ['A','B','C','D'];
+    q.shuffledOptions.forEach(function(opt, idx){
+      const label = document.createElement('label');
+      label.className = 'option' + (userAnswers[currentIndex] === opt ? ' selected' : '');
+      label.innerHTML = '<span class="letter">'+letters[idx]+'</span>'+
+        '<input type="radio" name="opt" '+(userAnswers[currentIndex]===opt?'checked':'')+'>'+
+        '<span>'+escapeHtml(opt)+'</span>';
+      label.addEventListener('click', function(){
+        userAnswers[currentIndex] = opt;
+        renderQuestion();
+        renderNav();
+        updateProgress();
+      });
+      optWrap.appendChild(label);
+    });
+  } else {
+    optWrap.style.display = 'none';
+    textWrap.style.display = 'block';
+    const input = document.getElementById('qTextInput');
+    input.value = userAnswers[currentIndex] || '';
+    input.oninput = function(){
+      userAnswers[currentIndex] = input.value;
+      renderNav();
+      updateProgress();
+    };
+  }
+  document.getElementById('qIndicator').textContent = 'Question ' + (currentIndex+1) + ' of ' + examQuestions.length;
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  document.getElementById('nextBtn').textContent = currentIndex === examQuestions.length-1 ? 'Finish →' : 'Next →';
+}
+
+function renderNav(){
+  const nav = document.getElementById('qNav');
+  nav.innerHTML = '';
+  examQuestions.forEach(function(q, idx){
+    const btn = document.createElement('div');
+    let cls = 'qn';
+    if(idx === currentIndex) cls += ' current';
+    else if(userAnswers[idx] !== null && userAnswers[idx] !== '' ) cls += ' answered';
+    btn.className = cls;
+    btn.textContent = idx+1;
+    btn.addEventListener('click', function(){ currentIndex = idx; renderQuestion(); renderNav(); });
+    nav.appendChild(btn);
+  });
+}
+
+function updateProgress(){
+  const answered = userAnswers.filter(function(a){ return a !== null && a !== ''; }).length;
+  const pct = Math.round((answered/examQuestions.length)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = answered + ' / ' + examQuestions.length + ' answered';
+}
+
+function gradeQuestion(q, userAns){
+  if(userAns === null || userAns === '') return false;
+  if(q.mode === 'options'){
+    return userAns === q.correct;
+  } else {
+    const na = normalize(userAns);
+    return q.accept.some(function(acc){ return normalize(acc) === na; });
+  }
+}
+
+function finishExam(){
+  clearInterval(timerInterval);
+  elapsedSeconds = Math.floor((Date.now()-startTimestamp)/1000);
+  let correct = 0;
+  examQuestions.forEach(function(q, idx){
+    if(gradeQuestion(q, userAnswers[idx])) correct++;
+  });
+  const total = examQuestions.length;
+  const wrong = total - correct;
+  const pct = Math.round((correct/total)*100);
+
+  document.getElementById('scoreRing').style.setProperty('--pct', pct);
+  document.getElementById('scorePct').innerHTML = pct + '%<small>score</small>';
+  document.getElementById('rCorrect').textContent = correct;
+  document.getElementById('rWrong').textContent = wrong;
+  document.getElementById('rTotal').textContent = total;
+  const mm = String(Math.floor(elapsedSeconds/60)).padStart(2,'0');
+  const ss = String(elapsedSeconds%60).padStart(2,'0');
+  document.getElementById('rTime').textContent = mm+':'+ss;
+
+  let headline = 'Solid effort — keep practicing!';
+  if(pct >= 90) headline = 'Outstanding! You know your PHP basics cold.';
+  else if(pct >= 75) headline = 'Great job — a strong grasp of the fundamentals.';
+  else if(pct >= 50) headline = 'Good start — a bit more review will help.';
+  document.getElementById('scoreHeadline').textContent = headline;
+
+  buildReview();
+  showScreen('screen-results');
+}
+
+function submitExam(){
+  const unanswered = userAnswers.filter(function(a){ return a === null || a === ''; }).length;
+  if(unanswered > 0){
+    const ok = confirm('You have '+unanswered+' unanswered question(s). Submit anyway?');
+    if(!ok) return;
+  }
+  finishExam();
+}
+
+function buildReview(){
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  examQuestions.forEach(function(q, idx){
+    const userAns = userAnswers[idx];
+    const isCorrect = gradeQuestion(q, userAns);
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (isCorrect ? 'is-correct' : 'is-wrong');
+
+    let html = '';
+    html += '<div class="q-meta">'+
+      '<span class="badge cat">'+q.category+'</span>'+
+      '<span class="badge">'+q.topic+'</span>'+
+      '<span class="badge diff-'+q.difficulty+'">'+q.difficulty+'</span>'+
+      '<span class="badge" style="color:'+(isCorrect?'var(--success)':'var(--danger)')+';border-color:'+(isCorrect?'var(--success)':'var(--danger)')+';">'+
+      (isCorrect ? '✔ Correct' : '✘ Wrong') + '</span></div>';
+    html += '<p class="q-text">'+(idx+1)+'. '+escapeHtml(q.q)+'</p>';
+    if(q.code){
+      html += '<pre class="snippet">'+highlightPHP(q.code)+'</pre>';
+    }
+    const userDisplay = (userAns===null||userAns==='') ? '(no answer given)' : escapeHtml(String(userAns));
+    const correctDisplay = q.mode==='options' ? escapeHtml(q.correct) : escapeHtml(q.accept[0]);
+
+    if(!isCorrect){
+      html += '<div class="ans-line your-wrong">✘ Your answer: '+userDisplay+'</div>';
+      html += '<div class="ans-line correct-line">✔ Correct answer: '+correctDisplay+'</div>';
+    } else {
+      html += '<div class="ans-line your-right">✔ Your answer: '+userDisplay+'</div>';
+    }
+    html += '<div class="explain"><b>Explanation:</b> '+escapeHtml(q.exp)+'</div>';
+    item.innerHTML = html;
+    list.appendChild(item);
+  });
+}
+
+/* ================= Theme ================= */
+function initTheme(){
+  const saved = localStorageSafeGet('phpExamTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+  localStorageSafeSet('phpExamTheme', next);
+}
+// In-memory fallback since artifact/sandbox contexts may restrict storage; safe no-op wrapper.
+let _memTheme = null;
+function localStorageSafeGet(key){
+  try { return window.localStorage.getItem(key) || _memTheme; } catch(e){ return _memTheme; }
+}
+function localStorageSafeSet(key,val){
+  _memTheme = val;
+  try { window.localStorage.setItem(key, val); } catch(e){ /* ignore */ }
+}
+
+/* ================= Init / events ================= */
+function populateTopicChips(){
+  const topics = Array.from(new Set(BANK.map(function(b){return b.topic;})));
+  const wrap = document.getElementById('topicChips');
+  topics.forEach(function(t){
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = t;
+    wrap.appendChild(c);
+  });
+  document.getElementById('statCount').textContent = Math.min(EXAM_SIZE, BANK.length);
+}
+
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('startBtn').addEventListener('click', startExam);
+document.getElementById('prevBtn').addEventListener('click', function(){
+  if(currentIndex>0){ currentIndex--; renderQuestion(); renderNav(); }
+});
+document.getElementById('nextBtn').addEventListener('click', function(){
+  if(currentIndex < examQuestions.length-1){ currentIndex++; renderQuestion(); renderNav(); }
+  else { submitExam(); }
+});
+document.getElementById('submitBtn').addEventListener('click', submitExam);
+document.getElementById('reviewBtn').addEventListener('click', function(){ showScreen('screen-review'); });
+document.getElementById('backToResultsBtn').addEventListener('click', function(){ showScreen('screen-results'); });
+document.getElementById('retryBtn').addEventListener('click', retryExam);
+document.getElementById('retryBtn2').addEventListener('click', retryExam);
+document.getElementById('newExamBtn').addEventListener('click', startExam);
+document.getElementById('newExamBtn2').addEventListener('click', startExam);
+
+initTheme();
+populateTopicChips();
+</script>
+</body>
+</html>

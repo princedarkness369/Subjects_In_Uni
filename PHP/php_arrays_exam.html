@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP Arrays Exam — arrays.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;
+  --bg-alt:#12151d;
+  --surface:#171b26;
+  --surface-2:#1e2330;
+  --border:#2a3040;
+  --text:#e8e9f1;
+  --text-dim:#9aa1b5;
+  --accent:#8892bf;
+  --accent-2:#6c5ce7;
+  --accent-soft:rgba(136,146,191,.16);
+  --success:#3ddc97;
+  --success-soft:rgba(61,220,151,.14);
+  --danger:#ff6b81;
+  --danger-soft:rgba(255,107,129,.14);
+  --warning:#ffc857;
+  --code-bg:#0a0c11;
+  --code-keyword:#c792ea;
+  --code-string:#9fca6b;
+  --code-comment:#5c6370;
+  --code-variable:#82aaff;
+  --code-tag:#ff9e64;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --dot-red:#ff5f56;--dot-yellow:#ffbd2e;--dot-green:#27c93f;
+}
+[data-theme="light"]{
+  --bg:#f3f4f9;
+  --bg-alt:#eceef5;
+  --surface:#ffffff;
+  --surface-2:#f5f6fb;
+  --border:#e0e3ee;
+  --text:#1b1e27;
+  --text-dim:#5b6272;
+  --accent-soft:rgba(108,92,231,.10);
+  --shadow:0 10px 26px rgba(30,34,60,.10);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 620px at 85% -10%, var(--accent-soft), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(108,92,231,.10), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Manrope',sans-serif;
+  min-height:100vh;
+  transition:background .3s ease,color .3s ease;
+}
+h1,h2,h3,.display{font-family:'Sora',sans-serif;}
+code,.mono,.code-window,input[type=text]{font-family:'JetBrains Mono',monospace;}
+.app{max-width:1000px;margin:0 auto;padding:28px 20px 70px;}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.2px;}
+.brand .tag{color:var(--accent);}
+.brand .blink{display:inline-block;width:9px;background:var(--accent-2);margin-left:1px;animation:blink 1s steps(1) infinite;}
+@keyframes blink{50%{opacity:0;}}
+.icon-btn{
+  background:var(--surface);border:1px solid var(--border);color:var(--text);
+  width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.2s;font-size:1.05rem;
+}
+.icon-btn:hover{border-color:var(--accent);transform:translateY(-1px);}
+
+/* ---------- editor window chrome (signature element) ---------- */
+.code-window{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  margin-bottom:22px;
+}
+.window-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);
+}
+.dot{width:11px;height:11px;border-radius:50%;}
+.dot.r{background:var(--dot-red);}.dot.y{background:var(--dot-yellow);}.dot.g{background:var(--dot-green);}
+.window-tab{
+  margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-dim);
+  background:var(--bg-alt);padding:4px 12px;border-radius:7px 7px 0 0;border:1px solid var(--border);border-bottom:none;
+}
+.window-body{padding:26px;}
+@media(max-width:600px){.window-body{padding:18px;}}
+
+/* ---------- hero / start screen ---------- */
+.hero-title{font-size:2.1rem;font-weight:800;margin:0 0 8px;line-height:1.2;}
+.hero-title .php-accent{color:var(--accent);}
+.hero-sub{color:var(--text-dim);font-size:1rem;margin:0 0 22px;max-width:60ch;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:14px 16px;}
+.stat-card .num{font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent);}
+.stat-card .lbl{font-size:.78rem;color:var(--text-dim);margin-top:2px;}
+.topic-chips{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 26px;}
+.chip{background:var(--bg-alt);border:1px solid var(--border);color:var(--text-dim);font-size:.76rem;padding:5px 11px;border-radius:999px;}
+.btn{
+  border:none;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;font-size:.92rem;
+  padding:13px 26px;border-radius:10px;transition:.2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 8px 20px rgba(108,92,231,.30);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(108,92,231,.40);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;}
+
+/* ---------- exam screen ---------- */
+.exam-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap;}
+.timer{
+  font-family:'JetBrains Mono',monospace;font-weight:600;background:var(--surface-2);
+  border:1px solid var(--border);padding:8px 14px;border-radius:9px;font-size:.92rem;display:flex;gap:8px;align-items:center;
+}
+.timer.low{color:var(--danger);border-color:var(--danger);}
+.progress-wrap{flex:1;min-width:160px;}
+.progress-bar-bg{height:9px;background:var(--bg-alt);border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .3s;}
+.progress-text{font-size:.75rem;color:var(--text-dim);margin-top:5px;}
+
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.badge{font-size:.72rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--text-dim);background:var(--bg-alt);}
+.badge.cat{color:var(--accent);border-color:var(--accent);}
+.badge.diff-easy{color:var(--success);border-color:var(--success);}
+.badge.diff-medium{color:var(--warning);border-color:var(--warning);}
+.badge.diff-hard{color:var(--danger);border-color:var(--danger);}
+
+.q-text{font-size:1.08rem;font-weight:600;margin:0 0 16px;line-height:1.55;}
+pre.snippet{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:.86rem;line-height:1.6;margin:0 0 18px;color:var(--text);
+}
+.kw{color:var(--code-keyword);}.str{color:var(--code-string);}.cm{color:var(--code-comment);font-style:italic;}
+.vr{color:var(--code-variable);}.tg{color:var(--code-tag);font-weight:600;}
+
+.options{display:flex;flex-direction:column;gap:10px;}
+.option{
+  display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:10px;padding:13px 15px;cursor:pointer;transition:.15s;font-size:.94rem;
+}
+.option:hover{border-color:var(--accent);}
+.option input{accent-color:var(--accent-2);width:16px;height:16px;flex-shrink:0;}
+.option.selected{border-color:var(--accent-2);background:var(--accent-soft);}
+.option .letter{
+  width:26px;height:26px;border-radius:7px;background:var(--bg-alt);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-dim);flex-shrink:0;
+}
+.text-answer{
+  width:100%;padding:13px 15px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.95rem;outline:none;
+}
+.text-answer:focus{border-color:var(--accent-2);}
+.hint{color:var(--text-dim);font-size:.78rem;margin-top:8px;}
+
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:10px;flex-wrap:wrap;}
+.qnav{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:7px;margin:18px 0 4px;}
+.qnav .qn{
+  aspect-ratio:1;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;font-size:.74rem;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:.15s;
+}
+.qnav .qn:hover{border-color:var(--accent);}
+.qnav .qn.answered{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+.qnav .qn.current{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border-color:transparent;}
+
+/* ---------- results ---------- */
+.score-hero{text-align:center;padding:10px 0 4px;}
+.score-ring{
+  width:150px;height:150px;border-radius:50%;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  background:conic-gradient(var(--accent) calc(var(--pct)*1%), var(--bg-alt) 0);
+}
+.score-ring::before{content:"";position:absolute;inset:10px;background:var(--surface);border-radius:50%;}
+.score-ring .val{position:relative;z-index:1;font-family:'Sora',sans-serif;font-weight:800;font-size:1.6rem;}
+.score-ring .val small{display:block;font-size:.7rem;color:var(--text-dim);font-weight:500;}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;}
+@media(max-width:640px){.result-grid{grid-template-columns:repeat(2,1fr);}}
+.result-card{background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:16px;text-align:center;}
+.result-card .n{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;}
+.result-card.correct .n{color:var(--success);}
+.result-card.wrong .n{color:var(--danger);}
+.result-card .l{font-size:.76rem;color:var(--text-dim);margin-top:3px;}
+
+/* ---------- review ---------- */
+.review-item{border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;background:var(--surface-2);}
+.review-item.is-correct{border-left:4px solid var(--success);}
+.review-item.is-wrong{border-left:4px solid var(--danger);}
+.ans-line{padding:9px 12px;border-radius:8px;font-size:.88rem;margin-top:8px;display:flex;gap:8px;}
+.ans-line.your-wrong{background:var(--danger-soft);color:var(--danger);}
+.ans-line.your-right{background:var(--success-soft);color:var(--success);}
+.ans-line.correct-line{background:var(--success-soft);color:var(--success);}
+.explain{margin-top:10px;padding:12px 14px;background:var(--bg-alt);border-radius:8px;font-size:.86rem;color:var(--text-dim);border:1px dashed var(--border);}
+.explain b{color:var(--text);}
+
+.screen{display:none;}
+.screen.active{display:block;}
+.small-note{font-size:.78rem;color:var(--text-dim);text-align:center;margin-top:16px;}
+::selection{background:var(--accent-2);color:#fff;}
+@media(max-width:640px){.hero-title{font-size:1.5rem;} .btn{width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand"><span class="tag">&lt;?php</span>&nbsp;Exam<span class="blink">&nbsp;</span></div>
+    <button class="icon-btn" id="themeToggle" title="Toggle dark / light mode">🌙</button>
+  </div>
+
+  <!-- START SCREEN -->
+  <section id="screen-start" class="screen active">
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab">arrays.php</span></div>
+      <div class="window-body">
+        <h1 class="hero-title"><span class="php-accent">&lt;?php</span> PHP Arrays Exam</h1>
+        <p class="hero-sub">A complete interactive assessment focused entirely on PHP Arrays — indexed &amp; associative arrays, foreach, multidimensional arrays, and the built-in array functions. No OOP, no database, no sessions — just arrays. Every attempt pulls a fresh, shuffled set of questions from a bank of 130+.</p>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="num" id="statCount">30</div><div class="lbl">Questions</div></div>
+          <div class="stat-card"><div class="num">13</div><div class="lbl">Question Types</div></div>
+          <div class="stat-card"><div class="num">40</div><div class="lbl">Minutes</div></div>
+          <div class="stat-card"><div class="num" id="statTopics">34</div><div class="lbl">Array Topics</div></div>
+        </div>
+        <div class="topic-chips" id="topicChips"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="startBtn">▶ Start Exam</button>
+        </div>
+        <p class="small-note">Timer starts as soon as you begin. You can navigate freely between questions before submitting.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAM SCREEN -->
+  <section id="screen-exam" class="screen">
+    <div class="exam-head">
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">0 / 30 answered</div>
+      </div>
+      <div class="timer" id="timerBox">⏱ <span id="timerText">40:00</span></div>
+    </div>
+
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab" id="qTab">question_01.php</span></div>
+      <div class="window-body">
+        <div class="q-meta">
+          <span class="badge cat" id="qCategory">Multiple Choice</span>
+          <span class="badge" id="qTopic">Variables</span>
+          <span class="badge diff-easy" id="qDifficulty">easy</span>
+        </div>
+        <p class="q-text" id="qText">Question text</p>
+        <pre class="snippet" id="qCode" style="display:none;"></pre>
+        <div id="qOptions" class="options"></div>
+        <div id="qTextInputWrap" style="display:none;">
+          <input type="text" class="text-answer" id="qTextInput" placeholder="Type your answer here…" autocomplete="off">
+          <div class="hint">Short, exact answers are graded automatically (e.g. a keyword, a value, a function name).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="prevBtn">← Previous</button>
+      <span class="small-note" id="qIndicator" style="margin:0;"></span>
+      <button class="btn btn-primary" id="nextBtn">Next →</button>
+    </div>
+
+    <div class="qnav" id="qNav"></div>
+
+    <div class="btn-row" style="margin-top:18px;justify-content:center;">
+      <button class="btn btn-primary" id="submitBtn">✔ Submit Exam</button>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section id="screen-results" class="screen">
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab">results.php</span></div>
+      <div class="window-body">
+        <div class="score-hero">
+          <div class="score-ring" id="scoreRing" style="--pct:0;">
+            <div class="val" id="scorePct">0%<small>score</small></div>
+          </div>
+          <h2 id="scoreHeadline">Let's see how you did</h2>
+        </div>
+        <div class="result-grid">
+          <div class="result-card correct"><div class="n" id="rCorrect">0</div><div class="l">Correct</div></div>
+          <div class="result-card wrong"><div class="n" id="rWrong">0</div><div class="l">Wrong</div></div>
+          <div class="result-card"><div class="n" id="rTotal">0</div><div class="l">Total Questions</div></div>
+          <div class="result-card"><div class="n" id="rTime">00:00</div><div class="l">Time Taken</div></div>
+        </div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-primary" id="reviewBtn">📖 Review Answers</button>
+          <button class="btn btn-ghost" id="retryBtn">🔁 Retry Exam</button>
+          <button class="btn btn-ghost" id="newExamBtn">🆕 Generate New Exam</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW SCREEN -->
+  <section id="screen-review" class="screen">
+    <div class="code-window">
+      <div class="window-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="window-tab">review.php</span></div>
+      <div class="window-body">
+        <h2 style="margin-top:0;">Detailed Review</h2>
+        <p class="hero-sub" style="margin-bottom:0;">Every question, your answer, the correct answer, and why — mistakes highlighted in red, correct answers in green.</p>
+      </div>
+    </div>
+    <div id="reviewList"></div>
+    <div class="btn-row" style="justify-content:center;margin-top:6px;">
+      <button class="btn btn-primary" id="backToResultsBtn">← Back to Results</button>
+      <button class="btn btn-ghost" id="retryBtn2">🔁 Retry Exam</button>
+      <button class="btn btn-ghost" id="newExamBtn2">🆕 Generate New Exam</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK (130+ questions) — chapter 1 of PHP only
+   Categories match the 13 required question types.
+   mode: "options" -> multiple choice / true-false / fix-code /
+         find-error / complete / which-correct / debug / logic /
+         coderead / miniproblem (all auto-graded by matching text)
+         "text" -> fill-in-blank / predict-output / short-answer
+   ========================================================= */
+const BANK = [
+// ---------- Creating Arrays ----------
+{topic:"Creating Arrays",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function/syntax creates an array in PHP?",
+ options:["array() or []","list()","new Array()","{ }"],correct:"array() or []",
+ exp:"PHP arrays are created either with the array() language construct or the shorter [] syntax, e.g. $a = array(1,2,3); or $a = [1,2,3];."},
+
+{topic:"Creating Arrays",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: $fruits = []; creates an empty array.",
+ options:["True","False"],correct:"True",
+ exp:"The short array syntax [] with nothing inside creates a valid, empty array — the same as array()."},
+
+{topic:"Creating Arrays",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to create an array of three numbers: $nums = ____(1, 2, 3);",
+ accept:["array"],
+ exp:"array(1, 2, 3) is the classic function-style syntax for building an array with the given elements."},
+
+{topic:"Creating Arrays",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$a = [10, 20, 30];\necho count($a);",
+ q:"What is printed?",
+ accept:["3"],
+ exp:"count() returns the number of elements in the array. [10, 20, 30] has 3 elements."},
+
+// ---------- Indexed vs Associative Arrays ----------
+{topic:"Indexed vs Associative Arrays",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What is the default index of the first element in an indexed array?",
+ options:["0","1","-1","It depends on the array"],correct:"0",
+ exp:"PHP indexed arrays are zero-based by default, so the first element sits at index 0 unless you explicitly assign different keys."},
+
+{topic:"Indexed vs Associative Arrays",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: An associative array uses named keys (strings) instead of, or in addition to, numeric indexes.",
+ options:["True","False"],correct:"True",
+ exp:"Associative arrays map custom keys (usually strings) to values, e.g. [\"name\" => \"Ali\", \"age\" => 25]."},
+
+{topic:"Indexed vs Associative Arrays",difficulty:"medium",category:"Code Reading",mode:"text",
+ code:"$person = [\"name\" => \"Sara\", \"age\" => 30];\necho $person[\"name\"];",
+ q:"What is printed?",
+ accept:["Sara"],
+ exp:"Accessing an associative array by its string key \"name\" returns the corresponding value, Sara."},
+
+{topic:"Indexed vs Associative Arrays",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly creates an associative array mapping fruit names to prices?",
+ options:["$prices = [\"apple\" => 1.5, \"banana\" => 0.5];",
+          "$prices = [\"apple\" : 1.5, \"banana\" : 0.5];",
+          "$prices = (\"apple\" => 1.5, \"banana\" => 0.5);",
+          "$prices = [\"apple\", 1.5, \"banana\", 0.5];"],
+ correct:"$prices = [\"apple\" => 1.5, \"banana\" => 0.5];",
+ exp:"Associative array entries use the => operator to pair each key with its value, all inside square brackets: [\"apple\" => 1.5, \"banana\" => 0.5]."},
+
+// ---------- Short Array Syntax [] ----------
+{topic:"Short Array Syntax []",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: [1, 2, 3] and array(1, 2, 3) produce exactly the same array.",
+ options:["True","False"],correct:"True",
+ exp:"The short [] syntax (available since PHP 5.4) is fully equivalent to the array() construct — just less typing."},
+
+{topic:"Short Array Syntax []",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which of these is the modern, short way to create an array with elements 1, 2, and 3?",
+ options:["[1, 2, 3]","{1, 2, 3}","(1, 2, 3)","<1, 2, 3>"],correct:"[1, 2, 3]",
+ exp:"Square brackets [] are PHP's short array syntax, equivalent to array(1, 2, 3)."},
+
+{topic:"Short Array Syntax []",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$colors = {\"red\", \"green\", \"blue\"};",
+ q:"What is wrong with this line?",
+ options:["Curly braces {} are not valid array syntax in PHP; it should use [] or array()",
+          "Array elements must be numbers, not strings",
+          "You must use the keyword new before an array",
+          "There is nothing wrong with this code"],
+ correct:"Curly braces {} are not valid array syntax in PHP; it should use [] or array()",
+ exp:"PHP arrays are written with [] or array(...), never {}. Curly braces cause a parse error here."},
+
+// ---------- Accessing Array Elements ----------
+{topic:"Accessing Array Elements",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$colors = [\"red\", \"green\", \"blue\"];\necho $colors[1];",
+ q:"What is printed?",
+ accept:["green"],
+ exp:"Indexed arrays start counting at 0, so index 1 refers to the second element, \"green\"."},
+
+{topic:"Accessing Array Elements",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"$colors = [\"red\", \"green\", \"blue\"];\necho $colors[3];",
+ q:"What happens when this code runs?",
+ options:["A warning is triggered because index 3 does not exist (valid indexes are 0, 1, 2)",
+          "It prints an empty string with no warning",
+          "It automatically prints \"blue\" again",
+          "It throws a fatal error and stops the whole script"],
+ correct:"A warning is triggered because index 3 does not exist (valid indexes are 0, 1, 2)",
+ exp:"The array only has indexes 0 through 2. Accessing $colors[3] triggers an 'undefined array key' warning and evaluates to null."},
+
+{topic:"Accessing Array Elements",difficulty:"hard",category:"Logical Thinking",mode:"options",
+ q:"True or False style reasoning: does $arr[-1] retrieve the LAST element of an indexed array in PHP, the way it does in some other languages?",
+ options:["No — PHP does not support negative array indexing this way; $arr[-1] just looks for a key literally named -1",
+          "Yes — PHP fully supports negative indexing like Python",
+          "Yes, but only for associative arrays",
+          "Yes, but only inside a foreach loop"],
+ correct:"No — PHP does not support negative array indexing this way; $arr[-1] just looks for a key literally named -1",
+ exp:"Unlike Python, PHP arrays don't support negative indexing to mean 'from the end'. $arr[-1] simply looks up the key -1, which likely doesn't exist unless you created it explicitly."},
+
+// ---------- Modifying Array Elements ----------
+{topic:"Modifying Array Elements",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3];\n$nums[1] = 99;\necho $nums[1];",
+ q:"What is printed?",
+ accept:["99"],
+ exp:"Assigning directly to an existing index, $nums[1] = 99;, overwrites that element's value."},
+
+{topic:"Modifying Array Elements",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly changes the value at key \"age\" in an associative array to 31?",
+ options:["$person[\"age\"] = 31;","$person->age = 31;","$person(\"age\") = 31;","update($person, \"age\", 31);"],
+ correct:"$person[\"age\"] = 31;",
+ exp:"Array elements — indexed or associative — are updated by assigning a new value to the bracket-notation key, $person[\"age\"] = 31;."},
+
+// ---------- Adding Elements (append / array_push) ----------
+{topic:"Adding Elements",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which syntax appends a new value to the end of an indexed array $arr?",
+ options:["$arr[] = $value;","$arr[-1] = $value;","$arr.push($value);","$arr + $value;"],correct:"$arr[] = $value;",
+ exp:"Using empty brackets, $arr[] = $value;, is the standard shorthand for appending a value with the next available integer index."},
+
+{topic:"Adding Elements",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3];\narray_push($nums, 4, 5);\necho count($nums);",
+ q:"What is printed?",
+ accept:["5"],
+ exp:"array_push() can append multiple values at once. Adding 4 and 5 to the existing three elements results in 5 total elements."},
+
+{topic:"Adding Elements",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"$cart = [\"pen\", \"book\"];\n____($cart, \"eraser\");\nprint_r($cart);",
+ q:"Which function call correctly completes the blank to add \"eraser\" to the end of $cart?",
+ options:["array_push","array_pop","array_shift","array_slice"],correct:"array_push",
+ exp:"array_push($cart, \"eraser\") appends \"eraser\" as the new last element of the array."},
+
+// ---------- array_pop() & array_shift() ----------
+{topic:"array_pop() & array_shift()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function removes and returns the LAST element of an array?",
+ options:["array_pop()","array_shift()","array_push()","array_slice()"],correct:"array_pop()",
+ exp:"array_pop() removes the last element from the array and returns it, shortening the array by one."},
+
+{topic:"array_pop() & array_shift()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3];\n$first = array_shift($nums);\necho $first . \"-\" . count($nums);",
+ q:"What is printed?",
+ accept:["1-2"],
+ exp:"array_shift() removes and returns the FIRST element (1), leaving the array with 2 elements remaining."},
+
+{topic:"array_pop() & array_shift()",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"$nums = [10, 20, 30];\narray_shift($nums);\nprint_r(array_keys($nums));",
+ q:"After array_shift() removes the first element, what is the FIRST key shown by array_keys() (just the number)?",
+ accept:["0"],
+ exp:"array_shift() also re-indexes the remaining elements starting from 0, so even though 20 used to be at index 1, it becomes index 0 afterward."},
+
+// ---------- array_unshift() ----------
+{topic:"array_unshift()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [2, 3];\narray_unshift($nums, 1);\necho implode(\",\", $nums);",
+ q:"What is printed?",
+ accept:["1,2,3"],
+ exp:"array_unshift() inserts new elements at the BEGINNING of the array and shifts everything else up, giving 1,2,3."},
+
+{topic:"array_unshift()",difficulty:"easy",category:"Which Code is Correct?",mode:"options",
+ q:"Which function adds a new element to the FRONT of an array (not the end)?",
+ options:["array_unshift()","array_push()","array_pop()","array_merge()"],correct:"array_unshift()",
+ exp:"array_unshift($arr, $value) inserts $value at the start of the array, pushing existing elements to higher indexes."},
+
+// ---------- Removing Elements (unset) ----------
+{topic:"Removing Elements",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [10, 20, 30];\nunset($nums[1]);\nprint_r(array_values($nums));",
+ q:"How many elements remain in the array after unset() and array_values()? (just the number)",
+ accept:["2"],
+ exp:"unset($nums[1]) removes the element at index 1 (20), leaving two elements (10 and 30). array_values() then just re-indexes them, but the count stays 2."},
+
+{topic:"Removing Elements",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$nums = [10, 20, 30];\nunset($nums[1]);\necho $nums[1];\necho $nums[2];",
+ q:"After unset($nums[1]), what happens when the code tries to echo $nums[1] and $nums[2]?",
+ options:["echo $nums[1] triggers an undefined-key warning (the gap isn't auto-filled), while echo $nums[2] still prints 30 normally",
+          "Both lines print normally because unset() automatically re-indexes the array",
+          "Both lines cause fatal errors",
+          "$nums[1] now equals $nums[2] automatically"],
+ correct:"echo $nums[1] triggers an undefined-key warning (the gap isn't auto-filled), while echo $nums[2] still prints 30 normally",
+ exp:"unset() only removes that specific key — it does NOT reindex the rest of the array. Index 1 is now simply missing, while index 2 (value 30) is untouched and still accessible."},
+
+{topic:"Removing Elements",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: unset() automatically renumbers the remaining indexed keys after removing an element.",
+ options:["True","False"],correct:"False",
+ exp:"unset() leaves a gap in the numeric keys. Use array_values() afterward if you need a cleanly re-indexed array."},
+
+// ---------- count() / sizeof() ----------
+{topic:"count() / sizeof()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function returns the number of elements in an array?",
+ options:["count()","length()","size()","total()"],correct:"count()",
+ exp:"count($array) (with sizeof() as an alias) returns how many elements the array contains."},
+
+{topic:"count() / sizeof()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$items = [\"a\", \"b\", \"c\", \"d\"];\necho count($items);",
+ q:"What is printed?",
+ accept:["4"],
+ exp:"The array has four elements, so count() returns 4."},
+
+{topic:"count() / sizeof()",difficulty:"medium",category:"Short Answer",mode:"text",
+ q:"What is the built-in alias function name for count() that also returns the number of elements? (function name)",
+ accept:["sizeof()","sizeof"],
+ exp:"sizeof() is functionally identical to count() — an alias provided for familiarity with other languages."},
+
+// ---------- foreach Loop ----------
+{topic:"foreach Loop",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3];\nforeach ($nums as $n) {\n  echo $n;\n}",
+ q:"What is printed (as one combined string)?",
+ accept:["123"],
+ exp:"foreach iterates over every element of the array in order, echoing 1, then 2, then 3."},
+
+{topic:"foreach Loop",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly loops through every value in $items using foreach?",
+ options:["foreach ($items as $item) { echo $item; }",
+          "foreach ($item in $items) { echo $item; }",
+          "foreach $items as $item { echo $item; }",
+          "for ($items as $item) { echo $item; }"],
+ correct:"foreach ($items as $item) { echo $item; }",
+ exp:"PHP's foreach syntax is foreach ($array as $variable) { ... } — no in keyword, and parentheses plus braces are required."},
+
+{topic:"foreach Loop",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$nums = [1, 2, 3];\nforeach ($nums as $n)\n  echo $n;\n  echo \"-\";",
+ q:"The intended output was 1-2-3-, but the dashes only print once at the very end. What is the fix?",
+ options:["Wrap both statements in braces: foreach ($nums as $n) { echo $n; echo \"-\"; }",
+          "Change foreach to for",
+          "Remove the semicolon after echo $n;",
+          "Move $nums outside the loop"],
+ correct:"Wrap both statements in braces: foreach ($nums as $n) { echo $n; echo \"-\"; }",
+ exp:"Without braces, only the single line right after foreach(...) belongs to the loop. The second echo runs just once, after the loop ends. Braces are needed to include both statements in every iteration."},
+
+// ---------- foreach with Key => Value ----------
+{topic:"foreach with Key => Value",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$ages = [\"Sam\" => 20, \"Alex\" => 25];\nforeach ($ages as $name => $age) {\n  echo \"$name:$age \";\n}",
+ q:"What is printed (exact text, including the trailing space)?",
+ accept:["Sam:20 Alex:25"],
+ exp:"foreach with the key => value syntax gives access to both the key ($name) and value ($age) of each pair, printing Sam:20 Alex:25 (with a trailing space)."},
+
+{topic:"foreach with Key => Value",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"$scores = [\"Math\" => 90, \"Art\" => 75];\nforeach ($scores ____ $subject => $score) {\n  echo \"$subject: $score\";\n}",
+ q:"Which keyword completes the blank?",
+ options:["as","in","=>","to"],correct:"as",
+ exp:"The correct syntax is foreach ($array as $key => $value), using the as keyword to introduce the loop variables."},
+
+{topic:"foreach with Key => Value",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$prices = [\"apple\" => 1.5, \"banana\" => 0.5];\nforeach ($prices as $price) {\n  echo $price . \" \";\n}",
+ q:"The developer wanted to print both the fruit name and its price, but only prices show up. What is the bug?",
+ options:["Only one loop variable was declared, so it captures the VALUE, not the key; it should be foreach ($prices as $fruit => $price)",
+          "Associative arrays cannot be used in foreach loops",
+          "The array should have used numeric keys instead",
+          "echo cannot print floating point prices"],
+ correct:"Only one loop variable was declared, so it captures the VALUE, not the key; it should be foreach ($prices as $fruit => $price)",
+ exp:"With a single loop variable, foreach only exposes each element's value. To also access the key, you need the two-variable form: foreach ($prices as $fruit => $price)."},
+
+// ---------- Multidimensional Arrays ----------
+{topic:"Multidimensional Arrays",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$matrix = [[1, 2], [3, 4]];\necho $matrix[1][0];",
+ q:"What is printed?",
+ accept:["3"],
+ exp:"$matrix[1] refers to the second inner array, [3, 4], and [0] then accesses its first element, 3."},
+
+{topic:"Multidimensional Arrays",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"$students = [\n  [\"name\" => \"Ann\", \"grade\" => 85],\n  [\"name\" => \"Ben\", \"grade\" => 90]\n];\necho $students[1][\"name\"];",
+ q:"What is printed?",
+ accept:["Ben"],
+ exp:"$students[1] is the second student record, and [\"name\"] pulls out that record's name field, Ben."},
+
+{topic:"Multidimensional Arrays",difficulty:"hard",category:"Mini Problem Solving",mode:"options",
+ code:"$grid = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];",
+ q:"Which expression correctly accesses the value 6 from this grid?",
+ options:["$grid[1][2]","$grid[2][1]","$grid[6]","$grid[1,2]"],correct:"$grid[1][2]",
+ exp:"6 is in the second row (index 1) at the third position (index 2), so $grid[1][2] retrieves it."},
+
+{topic:"Multidimensional Arrays",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly creates a 2D array representing a tic-tac-toe-like 2x2 grid?",
+ options:["$grid = [[1, 2], [3, 4]];","$grid = [1, 2, 3, 4];","$grid = [1 => [2], 3 => [4]];","$grid = array(1, 2)(3, 4);"],
+ correct:"$grid = [[1, 2], [3, 4]];",
+ exp:"A multidimensional array is simply an array whose elements are themselves arrays, e.g. [[1,2],[3,4]] represents two rows."},
+
+// ---------- in_array() ----------
+{topic:"in_array()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function checks whether a value exists anywhere within an array?",
+ options:["in_array()","array_key_exists()","isset()","array_search()"],correct:"in_array()",
+ exp:"in_array($needle, $haystack) returns true or false depending on whether the value is found in the array."},
+
+{topic:"in_array()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$fruits = [\"apple\", \"banana\", \"cherry\"];\nvar_dump(in_array(\"banana\", $fruits));",
+ q:"What single word is printed (true or false)?",
+ accept:["true"],
+ exp:"\"banana\" is present in the array, so in_array() returns true."},
+
+{topic:"in_array()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$ids = [\"10\", \"20\", \"30\"];\nvar_dump(in_array(20, $ids, true));",
+ q:"What does this print, and why?",
+ options:["bool(false) — because the strict third parameter (true) requires type AND value to match, and 20 (int) is not identical to \"20\" (string)",
+          "bool(true) — because 20 loosely equals \"20\"",
+          "bool(true) — strict mode is ignored for numeric strings",
+          "A fatal error, since in_array() doesn't accept a third argument"],
+ correct:"bool(false) — because the strict third parameter (true) requires type AND value to match, and 20 (int) is not identical to \"20\" (string)",
+ exp:"Passing true as the third argument makes in_array() use strict (===) comparison, so type matters. The integer 20 is not identical to the string \"20\", so the result is false."},
+
+// ---------- array_search() ----------
+{topic:"array_search()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$fruits = [\"apple\", \"banana\", \"cherry\"];\necho array_search(\"cherry\", $fruits);",
+ q:"What is printed?",
+ accept:["2"],
+ exp:"array_search() returns the KEY (index) of the first matching value. \"cherry\" sits at index 2."},
+
+{topic:"array_search()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What does array_search() return if the value is NOT found in the array?",
+ options:["false","null","-1","0"],correct:"false",
+ exp:"array_search() returns false when no match is found (which is why using === false to check the result is recommended, since a valid key could also be 0)."},
+
+// ---------- array_keys() ----------
+{topic:"array_keys()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What does array_keys() return?",
+ options:["A new array containing all the keys of the given array","The number of keys","The first key only","A boolean"],
+ correct:"A new array containing all the keys of the given array",
+ exp:"array_keys($array) collects every key from the array into a fresh, indexed array."},
+
+{topic:"array_keys()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$ages = [\"Tom\" => 20, \"Jerry\" => 22];\nprint_r(array_keys($ages));",
+ q:"Ignoring print_r's formatting, what is the FIRST key shown (just the word)?",
+ accept:["Tom"],
+ exp:"array_keys() preserves the original order of the array, so the first key returned is Tom."},
+
+// ---------- array_values() ----------
+{topic:"array_values()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"What does array_values() return?",
+ options:["A new, re-indexed array containing only the values","A new array containing only the keys","The last value in the array","A sorted copy of the array"],
+ correct:"A new, re-indexed array containing only the values",
+ exp:"array_values() strips out the original keys and returns a fresh array with the same values, re-indexed starting from 0."},
+
+{topic:"array_values()",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ code:"$data = [5 => \"a\", 9 => \"b\", 12 => \"c\"];",
+ q:"Which function call would reset this array's keys to the clean sequence 0, 1, 2?",
+ options:["array_values($data)","array_keys($data)","array_flip($data)","array_reverse($data)"],
+ correct:"array_values($data)",
+ exp:"array_values() discards the original (in this case, non-sequential) keys and produces a new array indexed cleanly from 0."},
+
+// ---------- isset() & array_key_exists() ----------
+{topic:"isset() & array_key_exists()",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"Which function correctly checks whether a specific key exists in an array, even if that key's value is null?",
+ options:["array_key_exists()","isset()","empty()","in_array()"],correct:"array_key_exists()",
+ exp:"array_key_exists() only checks for the key's presence, regardless of its value — unlike isset(), which returns false for keys whose value is null."},
+
+{topic:"isset() & array_key_exists()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$data = [\"status\" => null];\nvar_dump(isset($data[\"status\"]));\nvar_dump(array_key_exists(\"status\", $data));",
+ q:"What do these two lines print?",
+ options:["bool(false) then bool(true)","bool(true) then bool(true)","bool(false) then bool(false)","bool(true) then bool(false)"],
+ correct:"bool(false) then bool(true)",
+ exp:"isset() treats null values as 'not set', so it returns false even though the key exists. array_key_exists() only cares about the key's presence, so it correctly returns true."},
+
+{topic:"isset() & array_key_exists()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$user = [\"name\" => \"Lee\"];\nvar_dump(isset($user[\"age\"]));",
+ q:"What single word is printed (true or false)?",
+ accept:["false"],
+ exp:"The key \"age\" was never added to the array, so isset() correctly reports it as not set: false."},
+
+// ---------- sort() & rsort() ----------
+{topic:"sort() & rsort()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$nums = [3, 1, 2];\nsort($nums);\necho implode(\",\", $nums);",
+ q:"What is printed?",
+ accept:["1,2,3"],
+ exp:"sort() rearranges the array's values in ascending order (and also re-indexes the keys), giving 1,2,3."},
+
+{topic:"sort() & rsort()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [3, 1, 2];\nrsort($nums);\necho implode(\",\", $nums);",
+ q:"What is printed?",
+ accept:["3,2,1"],
+ exp:"rsort() sorts the array's values in descending order, giving 3,2,1."},
+
+{topic:"sort() & rsort()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$ages = [\"Sam\" => 20, \"Alex\" => 25];\nsort($ages);\nprint_r($ages);",
+ q:"After sort(), what happens to the original string keys \"Sam\" and \"Alex\"?",
+ options:["They are discarded — sort() re-indexes the array numerically starting from 0, losing the original associative keys",
+          "They are preserved exactly as they were",
+          "They are converted to numbers automatically",
+          "sort() throws a fatal error on associative arrays"],
+ correct:"They are discarded — sort() re-indexes the array numerically starting from 0, losing the original associative keys",
+ exp:"sort() (and rsort()) always reset the keys to sequential integers. To sort an associative array while keeping its keys intact, asort() or arsort() should be used instead."},
+
+// ---------- asort() & arsort() ----------
+{topic:"asort() & arsort()",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"Which function sorts an associative array by VALUE while preserving the original key-value associations?",
+ options:["asort()","sort()","ksort()","array_flip()"],correct:"asort()",
+ exp:"asort() sorts by value (ascending) but, unlike sort(), keeps each value paired with its original key."},
+
+{topic:"asort() & arsort()",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"$scores = [\"Ann\" => 70, \"Ben\" => 95, \"Cy\" => 60];\narsort($scores);\necho array_key_first($scores);",
+ q:"What name is printed?",
+ accept:["Ben"],
+ exp:"arsort() sorts by value in descending order while keeping keys attached. Ben has the highest score (95), so after sorting, Ben's key comes first."},
+
+// ---------- ksort() & krsort() ----------
+{topic:"ksort() & krsort()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$data = [\"c\" => 3, \"a\" => 1, \"b\" => 2];\nksort($data);\necho array_key_first($data);",
+ q:"What is printed?",
+ accept:["a"],
+ exp:"ksort() sorts the array by its KEYS in ascending order, so \"a\" (alphabetically first) becomes the first key."},
+
+{topic:"ksort() & krsort()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function sorts an array by its keys in descending order?",
+ options:["krsort()","ksort()","rsort()","arsort()"],correct:"krsort()",
+ exp:"krsort() sorts by key, from highest/last to lowest/first — the 'reverse' counterpart to ksort()."},
+
+// ---------- array_merge() ----------
+{topic:"array_merge()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$a = [1, 2];\n$b = [3, 4];\n$c = array_merge($a, $b);\necho implode(\",\", $c);",
+ q:"What is printed?",
+ accept:["1,2,3,4"],
+ exp:"array_merge() combines the elements of both arrays into one, in order, giving 1,2,3,4."},
+
+{topic:"array_merge()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$a = [\"name\" => \"Tim\"];\n$b = [\"name\" => \"Jan\"];\n$c = array_merge($a, $b);\necho $c[\"name\"];",
+ q:"What is printed, and why?",
+ options:["Jan — when merging arrays that share a string key, the LATER array's value overwrites the earlier one",
+          "Tim — the first array's value always takes priority",
+          "TimJan — both values get concatenated",
+          "A fatal error, since both arrays have the same key"],
+ correct:"Jan — when merging arrays that share a string key, the LATER array's value overwrites the earlier one",
+ exp:"For string keys, array_merge() lets the value from the later array win when there's a duplicate key, so $b's \"name\" (Jan) overwrites $a's."},
+
+// ---------- array_slice() ----------
+{topic:"array_slice()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [10, 20, 30, 40, 50];\n$part = array_slice($nums, 1, 2);\necho implode(\",\", $part);",
+ q:"What is printed?",
+ accept:["20,30"],
+ exp:"array_slice($nums, 1, 2) starts extracting at index 1 and takes 2 elements: 20 and 30. The original array is left unmodified."},
+
+{topic:"array_slice()",difficulty:"hard",category:"Mini Problem Solving",mode:"options",
+ q:"Which snippet extracts just the LAST two elements of $items without modifying the original array?",
+ options:["array_slice($items, -2)","array_splice($items, -2)","array_slice($items, 2)","array_pop($items, 2)"],
+ correct:"array_slice($items, -2)",
+ exp:"A negative offset in array_slice() counts from the end of the array, so -2 grabs the final two elements while leaving $items untouched."},
+
+// ---------- array_splice() ----------
+{topic:"array_splice()",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3, 4, 5];\narray_splice($nums, 1, 2);\necho implode(\",\", $nums);",
+ q:"What is printed?",
+ accept:["1,4,5"],
+ exp:"array_splice() removes elements from the ORIGINAL array in place. Starting at index 1 and removing 2 elements deletes 2 and 3, leaving 1,4,5."},
+
+{topic:"array_splice()",difficulty:"hard",category:"Logical Thinking",mode:"options",
+ q:"What is the key difference between array_slice() and array_splice()?",
+ options:["array_slice() returns a portion WITHOUT changing the original array; array_splice() removes/replaces elements and modifies the original array directly",
+          "They are exactly the same function with two names",
+          "array_slice() only works on associative arrays; array_splice() only works on indexed arrays",
+          "array_splice() cannot remove elements, only add them"],
+ correct:"array_slice() returns a portion WITHOUT changing the original array; array_splice() removes/replaces elements and modifies the original array directly",
+ exp:"array_slice() is non-destructive (read-only extraction), while array_splice() actively mutates the array it's given, which is an important distinction when debugging unexpected data changes."},
+
+// ---------- array_reverse() ----------
+{topic:"array_reverse()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3];\n$rev = array_reverse($nums);\necho implode(\",\", $rev);",
+ q:"What is printed?",
+ accept:["3,2,1"],
+ exp:"array_reverse() returns a new array with the elements in the opposite order."},
+
+{topic:"array_reverse()",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: array_reverse() modifies the original array directly and returns nothing useful.",
+ options:["True","False"],correct:"False",
+ exp:"array_reverse() does not modify the original array — it returns a brand-new reversed array, which needs to be captured in a variable to be used."},
+
+// ---------- array_unique() ----------
+{topic:"array_unique()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 2, 3, 3, 3];\n$u = array_unique($nums);\necho count($u);",
+ q:"What is printed?",
+ accept:["3"],
+ exp:"array_unique() removes duplicate values, leaving only the distinct values 1, 2, and 3 — a count of 3."},
+
+{topic:"array_unique()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$nums = [1, 2, 2, 3];\n$u = array_unique($nums);\necho $u[2];",
+ q:"array_unique() keeps the ORIGINAL keys of the first occurrence of each value. Given that, what happens when this code tries to echo $u[2]?",
+ options:["A warning occurs, because index 2 (which held the duplicate \"2\") was removed and never re-indexed",
+          "It prints 2, since duplicates are always kept at their first index",
+          "It prints 3, treating the array as freshly re-indexed",
+          "It throws a fatal error"],
+ correct:"A warning occurs, because index 2 (which held the duplicate \"2\") was removed and never re-indexed",
+ exp:"array_unique() removes the later duplicate entries but does NOT reindex the array afterward, so gaps like index 2 can be left behind, similar to unset()."},
+
+// ---------- implode() & explode() ----------
+{topic:"implode() & explode()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function joins array elements into a single string, separated by a given delimiter?",
+ options:["implode()","explode()","join_array()","array_join()"],correct:"implode()",
+ exp:"implode($delimiter, $array) glues array elements together into one string, placing the delimiter between each element."},
+
+{topic:"implode() & explode()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$parts = explode(\"-\", \"2024-06-15\");\necho $parts[1];",
+ q:"What is printed?",
+ accept:["06"],
+ exp:"explode(\"-\", \"2024-06-15\") splits the string at every hyphen into [\"2024\", \"06\", \"15\"], so index 1 is \"06\"."},
+
+{topic:"implode() & explode()",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly turns [\"a\", \"b\", \"c\"] into the string \"a-b-c\"?",
+ options:["implode(\"-\", [\"a\",\"b\",\"c\"])","explode(\"-\", [\"a\",\"b\",\"c\"])","implode([\"a\",\"b\",\"c\"], \"-\")","join(\"-\") [\"a\",\"b\",\"c\"]"],
+ correct:"implode(\"-\", [\"a\",\"b\",\"c\"])",
+ exp:"implode() takes the delimiter first, then the array, joining elements with the delimiter between them: \"a-b-c\"."},
+
+// ---------- array_map() ----------
+{topic:"array_map()",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"function doubleIt($n) { return $n * 2; }\n$nums = [1, 2, 3];\n$doubled = array_map(\"doubleIt\", $nums);\necho implode(\",\", $doubled);",
+ q:"What is printed?",
+ accept:["2,4,6"],
+ exp:"array_map() applies the given function to every element and returns a new array of the results: 1→2, 2→4, 3→6."},
+
+{topic:"array_map()",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"What does array_map() return?",
+ options:["A new array where each element is the result of applying a function to the corresponding original element",
+          "A single combined value",
+          "true or false depending on success",
+          "The original array unmodified"],
+ correct:"A new array where each element is the result of applying a function to the corresponding original element",
+ exp:"array_map() transforms every element through a callback and collects the results into a brand-new array, leaving the original untouched."},
+
+// ---------- array_filter() ----------
+{topic:"array_filter()",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"function isEven($n) { return $n % 2 == 0; }\n$nums = [1, 2, 3, 4, 5, 6];\n$evens = array_filter($nums, \"isEven\");\necho implode(\",\", $evens);",
+ q:"What is printed?",
+ accept:["2,4,6"],
+ exp:"array_filter() keeps only the elements for which the callback returns true. isEven() is true for 2, 4, and 6."},
+
+{topic:"array_filter()",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"function isEven($n) { return $n % 2 == 0; }\n$nums = [1, 2, 3, 4];\n$evens = array_filter($nums, \"isEven\");\necho $evens[0];",
+ q:"array_filter() preserves original keys. Given that, what happens when this code tries to echo $evens[0]?",
+ options:["A warning occurs, because the element that was originally at index 0 (the value 1) was filtered out, leaving no key 0 behind",
+          "It prints 2, the first remaining even number",
+          "It prints 1, since filtering resets indexes",
+          "A fatal error is thrown"],
+ correct:"A warning occurs, because the element that was originally at index 0 (the value 1) was filtered out, leaving no key 0 behind",
+ exp:"Since array_filter() keeps the ORIGINAL keys of surviving elements, and index 0 held the (removed) value 1, there is no key 0 left. array_values() can be used afterward to re-index cleanly."},
+
+// ---------- array_reduce() ----------
+{topic:"array_reduce()",difficulty:"hard",category:"Predict the Output",mode:"text",
+ code:"function addUp($carry, $item) { return $carry + $item; }\n$nums = [1, 2, 3, 4];\necho array_reduce($nums, \"addUp\", 0);",
+ q:"What is printed?",
+ accept:["10"],
+ exp:"array_reduce() repeatedly combines elements using the callback, starting from the initial value 0: 0+1=1, 1+2=3, 3+3=6, 6+4=10."},
+
+{topic:"array_reduce()",difficulty:"medium",category:"Multiple Choice",mode:"options",
+ q:"What is the purpose of array_reduce()'s third argument?",
+ options:["It sets the initial (starting) value for the accumulator/carry",
+          "It sets the maximum number of elements to process",
+          "It defines the delimiter used between elements",
+          "It is required only for associative arrays"],
+ correct:"It sets the initial (starting) value for the accumulator/carry",
+ exp:"The optional third argument seeds the running total (or 'carry') before the callback processes the first element."},
+
+// ---------- range() ----------
+{topic:"range()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$nums = range(1, 5);\necho implode(\",\", $nums);",
+ q:"What is printed?",
+ accept:["1,2,3,4,5"],
+ exp:"range(1, 5) generates an array of consecutive integers from 1 to 5 inclusive."},
+
+{topic:"range()",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$nums = range(0, 10, 2);\necho implode(\",\", $nums);",
+ q:"What is printed?",
+ accept:["0,2,4,6,8,10"],
+ exp:"The third argument to range() sets the step size. Counting from 0 to 10 in steps of 2 gives 0,2,4,6,8,10."},
+
+// ---------- array_sum() / array_count_values() ----------
+{topic:"array_sum() / array_count_values()",difficulty:"easy",category:"Predict the Output",mode:"text",
+ code:"$nums = [1, 2, 3, 4];\necho array_sum($nums);",
+ q:"What is printed?",
+ accept:["10"],
+ exp:"array_sum() adds up all the numeric values in the array: 1+2+3+4 = 10."},
+
+{topic:"array_sum() / array_count_values()",difficulty:"hard",category:"Short Answer",mode:"text",
+ q:"Which function returns an array showing how many times each distinct VALUE appears in an array? (function name)",
+ accept:["array_count_values()","array_count_values"],
+ exp:"array_count_values() builds a new array where the keys are the original values and each value is the count of how often that value occurred."},
+
+// ---------- Comparing Arrays ----------
+{topic:"Comparing Arrays",difficulty:"medium",category:"Predict the Output",mode:"text",
+ code:"$a = [\"x\" => 1, \"y\" => 2];\n$b = [\"y\" => 2, \"x\" => 1];\nvar_dump($a == $b);",
+ q:"What single word is printed (true or false)?",
+ accept:["true"],
+ exp:"== compares arrays by key/value pairs regardless of order, so having the same pairs in different order still makes them equal (==)."},
+
+{topic:"Comparing Arrays",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$a = [\"x\" => 1, \"y\" => 2];\n$b = [\"y\" => 2, \"x\" => 1];\nvar_dump($a === $b);",
+ q:"Why does this print bool(false), even though $a == $b would be true?",
+ options:["=== requires the same key/value pairs in the SAME ORDER and the same types; the two arrays have their pairs in a different order",
+          "=== can never be used to compare arrays",
+          "The arrays actually have different values",
+          "This is a bug in PHP"],
+ correct:"=== requires the same key/value pairs in the SAME ORDER and the same types; the two arrays have their pairs in a different order",
+ exp:"Strict array comparison (===) additionally requires that the pairs appear in the same order, which $a and $b don't share, even though their contents are equivalent."},
+
+// ---------- print_r() & var_dump() ----------
+{topic:"print_r() & var_dump()",difficulty:"easy",category:"Multiple Choice",mode:"options",
+ q:"Which function is typically used to print a human-readable representation of an array's structure (keys and values)?",
+ options:["print_r()","echo()","strlen()","implode()"],correct:"print_r()",
+ exp:"print_r() outputs arrays (and other data) in a readable, indented format showing every key and value, which is very useful for debugging."},
+
+{topic:"print_r() & var_dump()",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: Unlike print_r(), var_dump() also shows the data TYPE of each array element.",
+ options:["True","False"],correct:"True",
+ exp:"var_dump() is more verbose than print_r() — it displays each value's type (e.g. int, string, bool) alongside the value itself, which print_r() does not."},
+
+{topic:"print_r() & var_dump()",difficulty:"medium",category:"Short Answer",mode:"text",
+ q:"Which function name (besides print_r) also dumps full type + value information about a variable, commonly used for deep debugging? (function name)",
+ accept:["var_dump()","var_dump"],
+ exp:"var_dump() prints detailed information — type and value — for one or more expressions, including arrays."},
+
+// ---------- Extra Mixed: Mini Problem Solving / Logical Thinking / Code Reading / Find the Error / Fix the Code / Complete Missing Code / Which Code Correct ----------
+{topic:"Adding Elements",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"You need to build an array of squares (1, 4, 9, 16) from the numbers 1 to 4 using a loop. Which snippet does this correctly?",
+ options:["$squares = []; for ($i = 1; $i <= 4; $i++) { $squares[] = $i * $i; }",
+          "$squares = []; for ($i = 1; $i <= 4; $i++) { $squares = $i * $i; }",
+          "$squares = []; for ($i = 1; $i <= 4; $i++) { $squares[$i * $i]; }",
+          "$squares[] = 1, 4, 9, 16;"],
+ correct:"$squares = []; for ($i = 1; $i <= 4; $i++) { $squares[] = $i * $i; }",
+ exp:"Appending with $squares[] = $i * $i; inside the loop builds up the array one squared value at a time, correctly producing [1, 4, 9, 16]."},
+
+{topic:"foreach Loop",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"Which snippet correctly computes the total of all values in $prices using foreach (without array_sum)?",
+ options:["$total = 0; foreach ($prices as $p) { $total += $p; }",
+          "$total = 0; foreach ($prices as $p) { $total = $p; }",
+          "$total = 0; foreach ($p as $prices) { $total += $p; }",
+          "$total += foreach ($prices as $p);"],
+ correct:"$total = 0; foreach ($prices as $p) { $total += $p; }",
+ exp:"Accumulating a running total requires adding each value to $total with += inside the loop, rather than overwriting it each time."},
+
+{topic:"Multidimensional Arrays",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"$cart = [\n  [\"item\" => \"Pen\", \"qty\" => 3],\n  [\"item\" => \"Bag\", \"qty\" => 1]\n];\n$total = 0;\nforeach ($cart as $entry) {\n  $total += $entry[\"qty\"];\n}\necho $total;",
+ q:"What value is printed?",
+ accept:["4"],
+ exp:"The loop adds up the \"qty\" field from each sub-array: 3 (Pen) + 1 (Bag) = 4."},
+
+{topic:"Removing Elements",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$fruits = [\"apple\", \"banana\", \"cherry\"];\ndelete($fruits[1]);",
+ q:"What is wrong with this code?",
+ options:["delete() is not a PHP function; the correct way to remove an element by key is unset($fruits[1])",
+          "You cannot remove elements from an indexed array at all",
+          "$fruits[1] refers to the first element, not the second",
+          "There is no problem, this works fine"],
+ correct:"delete() is not a PHP function; the correct way to remove an element by key is unset($fruits[1])",
+ exp:"PHP has no built-in delete() function. Removing a single array element by its key is done with unset(), e.g. unset($fruits[1]);."},
+
+{topic:"array_merge()",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$a = [1, 2, 3];\n$b = [4, 5, 6];\n$combined = $a + $b;\necho implode(\",\", $combined);",
+ q:"The developer wanted to combine both arrays into [1,2,3,4,5,6] but the + operator doesn't do that for indexed arrays here. What is the correct fix?",
+ options:["Use array_merge($a, $b) instead of $a + $b",
+          "Use $a * $b instead of $a + $b",
+          "Use $a . $b instead of $a + $b",
+          "Swap the order to $b + $a"],
+ correct:"Use array_merge($a, $b) instead of $a + $b",
+ exp:"The + operator on arrays keeps the LEFT array's values for any matching keys and only adds keys that don't already exist (union), so $a + $b here just gives back $a's values unchanged. array_merge() properly appends and combines both arrays' elements."},
+
+{topic:"sort() & rsort()",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"$nums = [5, 3, 8, 1];\n____($nums);\necho implode(\",\", $nums);\n// Expected output: 1,3,5,8",
+ q:"Which function call correctly completes the blank?",
+ options:["sort","rsort","ksort","array_reverse"],correct:"sort",
+ exp:"sort() rearranges the values into ascending order, which matches the expected output 1,3,5,8."},
+
+{topic:"array_keys()",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly gets an array of all the KEYS from an associative array $inventory?",
+ options:["array_keys($inventory)","array_values($inventory)","keys($inventory)","$inventory.keys()"],
+ correct:"array_keys($inventory)",
+ exp:"array_keys() is the dedicated function for extracting all keys from an array into a new indexed array."},
+
+{topic:"count() / sizeof()",difficulty:"medium",category:"Logical Thinking",mode:"options",
+ code:"$data = [\"a\", \"b\", [\"c\", \"d\"]];",
+ q:"Without using COUNT_RECURSIVE, what does count($data) return, and why?",
+ options:["3 — count() by default only counts the TOP-LEVEL elements, treating the nested array as a single element",
+          "4 — count() automatically flattens nested arrays",
+          "2 — count() ignores nested arrays entirely",
+          "A fatal error, since arrays cannot contain other arrays"],
+ correct:"3 — count() by default only counts the TOP-LEVEL elements, treating the nested array as a single element",
+ exp:"By default, count() only looks at the array's immediate elements. The nested array [\"c\",\"d\"] counts as just ONE of those three top-level elements, unless COUNT_RECURSIVE mode is used."},
+
+{topic:"array_unique()",difficulty:"medium",category:"Which Code is Correct?",mode:"options",
+ q:"Which snippet correctly removes duplicate values from $nums and produces a clean, re-indexed array?",
+ options:["$clean = array_values(array_unique($nums));",
+          "$clean = array_unique($nums);",
+          "$clean = unique($nums);",
+          "$clean = array_reverse(array_unique($nums));"],
+ correct:"$clean = array_values(array_unique($nums));",
+ exp:"array_unique() alone can leave gaps in the keys, so wrapping it with array_values() produces both a duplicate-free AND cleanly re-indexed array."},
+
+{topic:"implode() & explode()",difficulty:"medium",category:"Debugging",mode:"options",
+ code:"$tags = \"php,arrays,web\";\n$list = implode(\",\", $tags);",
+ q:"This line throws a type error. What is the bug?",
+ options:["implode() expects an ARRAY as one of its arguments, but $tags is already a string; explode() should have been used instead to split it into an array",
+          "The delimiter \",\" should have been a semicolon",
+          "implode() cannot be used with string variables at all, ever",
+          "$tags needs to be wrapped in array() first with no other change"],
+ correct:"implode() expects an ARRAY as one of its arguments, but $tags is already a string; explode() should have been used instead to split it into an array",
+ exp:"implode() joins array elements into a string, so it needs an array input. To go the other way — splitting a string into an array — explode() is the correct function: explode(\",\", $tags)."},
+
+{topic:"array_map()",difficulty:"hard",category:"Logical Thinking",mode:"options",
+ q:"Why does array_map() generally NOT modify the original array it's given?",
+ options:["Because it returns a brand-new array built from the callback's results, leaving the source array untouched unless you reassign it",
+          "Because PHP arrays cannot be modified once created",
+          "Because array_map() only works on copies stored in memory that get deleted",
+          "It actually does modify the original array directly"],
+ correct:"Because it returns a brand-new array built from the callback's results, leaving the source array untouched unless you reassign it",
+ exp:"Like most PHP array functions that 'return' a result, array_map() is non-destructive: to keep the transformed data, you must assign the return value to a variable, e.g. $new = array_map(...)."},
+
+{topic:"array_filter()",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"function isPositive($n) { return $n > 0; }\n$nums = [-2, 5, -1, 8];\n$positives = ____($nums, \"isPositive\");",
+ q:"Which function call correctly completes the blank to keep only the positive numbers?",
+ options:["array_filter","array_map","array_reduce","array_walk"],correct:"array_filter",
+ exp:"array_filter() keeps only the elements for which the callback function returns a truthy value, which is exactly what's needed to isolate positive numbers."},
+
+{topic:"Indexed vs Associative Arrays",difficulty:"hard",category:"Logical Thinking",mode:"options",
+ code:"$mixed = [\"5\" => \"a\", 5 => \"b\"];",
+ q:"What happens when this array is created, given that the string key \"5\" and the integer key 5 are used?",
+ options:["PHP treats the numeric string \"5\" as the integer key 5, so the second assignment overwrites the first — the array ends up with just one element, [5 => \"b\"]",
+          "PHP keeps both as separate entries since one is a string and one is an integer",
+          "This throws a fatal error because of the duplicate-looking key",
+          "The array silently drops both entries"],
+ correct:"PHP treats the numeric string \"5\" as the integer key 5, so the second assignment overwrites the first — the array ends up with just one element, [5 => \"b\"]",
+ exp:"PHP automatically converts array keys that look like valid decimal integers (including as strings) into actual integers, so \"5\" and 5 refer to the exact same key."},
+
+{topic:"array_slice()",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$nums = [1, 2, 3, 4, 5];\n$part = array_slice($nums, 2, -1);\n// intended to get [3, 4]\necho implode(\",\", $part);",
+ q:"Assuming the developer wanted elements at indexes 2 and 3 ([3, 4]), is this code correct, and why?",
+ options:["Yes — starting at index 2 and stopping 1 element before the end (negative length) correctly yields [3, 4]",
+          "No — the length should have been a positive number like 2",
+          "No — array_slice() cannot accept negative numbers at all",
+          "No — the starting index should be 3, not 2"],
+ correct:"Yes — starting at index 2 and stopping 1 element before the end (negative length) correctly yields [3, 4]",
+ exp:"A negative length in array_slice() means 'stop that many elements from the end' rather than the usual element count, so array_slice($nums, 2, -1) correctly returns [3, 4]."},
+
+{topic:"range()",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: range('a', 'e') can be used to generate an array of consecutive letters ['a','b','c','d','e'].",
+ options:["True","False"],correct:"True",
+ exp:"range() works with letters as well as numbers, generating a sequence of consecutive characters when given two single-character string bounds."},
+
+{topic:"array_reduce()",difficulty:"hard",category:"Code Reading",mode:"text",
+ code:"function multiply($carry, $item) { return $carry * $item; }\n$nums = [1, 2, 3, 4];\necho array_reduce($nums, \"multiply\", 1);",
+ q:"What value is printed?",
+ accept:["24"],
+ exp:"Starting from 1: 1*1=1, 1*2=2, 2*3=6, 6*4=24 — the product of all the numbers (a factorial-style computation)."},
+
+{topic:"Comparing Arrays",difficulty:"medium",category:"Short Answer",mode:"text",
+ q:"Which comparison operator checks that two arrays have the same key/value pairs in the SAME ORDER and matching types? (symbol)",
+ accept:["===","==="],
+ exp:"The strict equality operator === additionally requires matching order and types, unlike the looser == which only checks the pairs themselves regardless of order."},
+
+{topic:"foreach Loop",difficulty:"hard",category:"Debugging",mode:"options",
+ code:"$nums = [1, 2, 3];\nforeach ($nums as $n) {\n  $n = $n * 2;\n}\necho implode(\",\", $nums);",
+ q:"The developer expected 2,4,6 but got 1,2,3. Why doesn't modifying $n inside the loop change the array?",
+ options:["Without a reference (&$n), $n is just a COPY of each value; changing the copy has no effect on the original array",
+          "foreach cannot be used to read numeric arrays",
+          "$n needs to be renamed to avoid a naming conflict",
+          "implode() undoes any changes made inside a loop"],
+ correct:"Without a reference (&$n), $n is just a COPY of each value; changing the copy has no effect on the original array",
+ exp:"By default, foreach ($arr as $n) gives you a copy of each element. To actually modify the original array's values, you need a reference: foreach ($arr as &$n) { $n *= 2; }."},
+
+{topic:"array_push() vs []",difficulty:"medium",category:"Logical Thinking",mode:"options",
+ q:"For adding a SINGLE element to the end of a large array, why is $arr[] = $value; often considered slightly more efficient than array_push($arr, $value);?",
+ options:["array_push() has the overhead of a function call, while $arr[] = $value; is a direct language construct",
+          "array_push() can only add elements to the beginning of an array",
+          "$arr[] = $value; does not actually add the element",
+          "There is no difference in any situation"],
+ correct:"array_push() has the overhead of a function call, while $arr[] = $value; is a direct language construct",
+ exp:"For a single element, $arr[] = $value; skips the (small) overhead of a function call that array_push() incurs. array_push() becomes more useful when adding multiple values at once."},
+
+// ---------- Extra: Fill in the Blank ----------
+{topic:"Adding Elements",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to append \"grape\" to the end of $fruits using the shorthand syntax: $fruits[____] = \"grape\";",
+ accept:["]"],
+ exp:"Leaving the brackets empty, $fruits[] = \"grape\";, tells PHP to append the value at the next available integer index."},
+
+{topic:"count() / sizeof()",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to print how many elements are in $list: echo ____($list);",
+ accept:["count","count()"],
+ exp:"count($list) returns the total number of elements currently in the array."},
+
+{topic:"foreach with Key => Value",difficulty:"medium",category:"Fill in the Blank",mode:"text",
+ q:"Complete the loop header to access both keys and values: foreach ($data as $key ____ $value) {",
+ accept:["=>"],
+ exp:"The => operator separates the key variable from the value variable in a foreach loop's key-value form."},
+
+{topic:"array_merge()",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to combine $a and $b into one array: $combined = ____($a, $b);",
+ accept:["array_merge","array_merge()"],
+ exp:"array_merge($a, $b) combines the elements of both arrays into a single new array."},
+
+{topic:"in_array()",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to check if \"cat\" exists in $animals: if (____(\"cat\", $animals)) { echo \"Found\"; }",
+ accept:["in_array","in_array()"],
+ exp:"in_array($needle, $haystack) checks whether a given value exists anywhere in the array."},
+
+{topic:"array_keys()",difficulty:"medium",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to get all the keys from $data: $allKeys = ____($data);",
+ accept:["array_keys","array_keys()"],
+ exp:"array_keys($data) returns a new array containing every key found in $data."},
+
+{topic:"implode() & explode()",difficulty:"easy",category:"Fill in the Blank",mode:"text",
+ q:"Complete the code to split \"a,b,c\" into an array using the comma: $parts = ____(\",\", \"a,b,c\");",
+ accept:["explode","explode()"],
+ exp:"explode($delimiter, $string) breaks a string apart into an array wherever the delimiter occurs."},
+
+// ---------- Extra: True / False ----------
+{topic:"array_push() vs []",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: array_push($arr, $value) can only add one element at a time.",
+ options:["True","False"],correct:"False",
+ exp:"array_push() accepts multiple values in a single call, e.g. array_push($arr, 1, 2, 3), appending all of them in order."},
+
+{topic:"array_slice()",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: array_slice() modifies the original array it is given.",
+ options:["True","False"],correct:"False",
+ exp:"array_slice() is non-destructive — it returns a new array representing the requested portion, leaving the original array unchanged."},
+
+{topic:"array_splice()",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: array_splice() modifies the original array it is given, unlike array_slice().",
+ options:["True","False"],correct:"True",
+ exp:"array_splice() directly removes and/or inserts elements into the array passed to it, changing it in place."},
+
+{topic:"Multidimensional Arrays",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: A multidimensional array is simply an array whose elements are themselves arrays.",
+ options:["True","False"],correct:"True",
+ exp:"Nesting arrays inside other arrays is exactly what creates a multidimensional (e.g. 2D) array structure in PHP."},
+
+{topic:"array_map()",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: array_map() can accept more than one array, applying the callback to corresponding elements from each.",
+ options:["True","False"],correct:"True",
+ exp:"array_map() supports multiple array arguments; the callback then receives one element from each array (at the same position) per call."},
+
+{topic:"array_unique()",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: array_unique() compares values as strings by default when checking for duplicates.",
+ options:["True","False"],correct:"True",
+ exp:"By default, array_unique() converts elements to strings for comparison, which can occasionally cause 1 and \"1\" to be treated as duplicates."},
+
+{topic:"array_reverse()",difficulty:"medium",category:"True / False",mode:"options",
+ q:"True or False: By default, array_reverse() re-indexes numeric keys starting from 0 after reversing.",
+ options:["True","False"],correct:"True",
+ exp:"Unless you pass true as the second argument (to preserve keys), array_reverse() re-numbers indexed keys after flipping the element order."},
+
+{topic:"Comparing Arrays",difficulty:"easy",category:"True / False",mode:"options",
+ q:"True or False: Two arrays with the same values but in a different order are always identical (===) to each other.",
+ options:["True","False"],correct:"False",
+ exp:"=== additionally requires the same order of key/value pairs, so reordered arrays are not strictly identical even with matching contents."},
+
+// ---------- Extra: Find the Error ----------
+{topic:"array_search()",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$fruits = [\"apple\", \"banana\"];\nif (array_search(\"kiwi\", $fruits)) {\n  echo \"Not found, but this runs anyway!\";\n}",
+ q:"array_search() returns false when nothing is found, so why might this if-check behave unexpectedly for OTHER values too?",
+ options:["If the found index happens to be 0 (a falsy value), the if-check would incorrectly treat a real match as 'not found'; a strict === false comparison is safer",
+          "array_search() cannot be used inside an if statement at all",
+          "\"kiwi\" is not a valid search value",
+          "There is no issue with this code"],
+ correct:"If the found index happens to be 0 (a falsy value), the if-check would incorrectly treat a real match as 'not found'; a strict === false comparison is safer",
+ exp:"Because array indexes can legitimately be 0, and 0 is falsy in PHP, loosely checking the return value can misinterpret a valid match at index 0 as failure. Comparing with !== false avoids that pitfall."},
+
+{topic:"Modifying Array Elements",difficulty:"easy",category:"Find the Error",mode:"options",
+ code:"$nums = [1, 2, 3]\n$nums[0] = 10;",
+ q:"What is the error in this code?",
+ options:["Missing semicolon after the array declaration on the first line",
+          "Array elements cannot be reassigned once set",
+          "$nums[0] refers to an element that doesn't exist",
+          "There is no error"],
+ correct:"Missing semicolon after the array declaration on the first line",
+ exp:"Every statement needs a terminating semicolon. Without one after [1, 2, 3], PHP cannot tell where that statement ends, causing a parse error."},
+
+{topic:"foreach with Key => Value",difficulty:"medium",category:"Find the Error",mode:"options",
+ code:"$scores = [\"Ann\" => 90, \"Ben\" => 85];\nforeach ($scores as $name -> $score) {\n  echo \"$name: $score\";\n}",
+ q:"What is the syntax error in this foreach loop?",
+ options:["The arrow should be => not ->, since -> is used for object properties, not array key-value pairs",
+          "foreach cannot use two variables",
+          "Associative arrays cannot be looped with foreach",
+          "The variable names must match the array's original variable name"],
+ correct:"The arrow should be => not ->, since -> is used for object properties, not array key-value pairs",
+ exp:"PHP's foreach key-value syntax specifically uses the => arrow. -> is reserved for accessing object properties/methods and is invalid here."},
+
+// ---------- Extra: Fix the Code ----------
+{topic:"count() / sizeof()",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$items = [\"pen\", \"book\", \"bag\"];\nfor ($i = 0; $i <= count($items); $i++) {\n  echo $items[$i];\n}",
+ q:"This loop causes an undefined-key warning on the last iteration. What is the fix?",
+ options:["Change <= to < in the loop condition, since valid indexes only go up to count($items) - 1",
+          "Change count($items) to count($items) + 1",
+          "Start the loop at $i = 1 instead of 0",
+          "Replace the for loop with a while loop, which has no such issue"],
+ correct:"Change <= to < in the loop condition, since valid indexes only go up to count($items) - 1",
+ exp:"With 3 elements, valid indexes are 0, 1, 2. Using <= count($items) lets $i reach 3, which is out of range. < count($items) correctly stops at 2."},
+
+{topic:"array_key_exists()",difficulty:"medium",category:"Fix the Code",mode:"options",
+ code:"$user = [\"role\" => null];\nif (isset($user[\"role\"])) {\n  echo \"Role field exists\";\n} else {\n  echo \"No role field\";\n}",
+ q:"This always prints \"No role field\" even though the key does exist (with a null value). What is the correct fix?",
+ options:["Replace isset($user[\"role\"]) with array_key_exists(\"role\", $user), which doesn't treat null specially",
+          "Replace isset() with empty()",
+          "Remove the else branch entirely",
+          "Change null to \"null\" (as a string)"],
+ correct:"Replace isset($user[\"role\"]) with array_key_exists(\"role\", $user), which doesn't treat null specially",
+ exp:"isset() returns false for keys whose value is null, even though the key technically exists. array_key_exists() checks presence only, regardless of the stored value."},
+
+// ---------- Extra: Short Answer ----------
+{topic:"array_reverse()",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which function returns a new array with all elements in the opposite order? (function name)",
+ accept:["array_reverse()","array_reverse"],
+ exp:"array_reverse($array) produces a new array whose elements appear in reverse order compared to the original."},
+
+{topic:"array_search()",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which function returns the KEY of the first matching value found in an array (or false if not found)? (function name)",
+ accept:["array_search()","array_search"],
+ exp:"array_search($needle, $haystack) searches for a value and returns its key when found."},
+
+{topic:"array_merge()",difficulty:"easy",category:"Short Answer",mode:"text",
+ q:"Which function combines two or more arrays into a single array? (function name)",
+ accept:["array_merge()","array_merge"],
+ exp:"array_merge() takes any number of arrays and returns one array containing all of their elements combined."},
+
+{topic:"array_slice()",difficulty:"medium",category:"Short Answer",mode:"text",
+ q:"Which function extracts a portion of an array WITHOUT modifying the original? (function name)",
+ accept:["array_slice()","array_slice"],
+ exp:"array_slice($array, $offset, $length) returns a new sub-array based on a starting position and length, leaving the source array untouched."},
+
+// ---------- Extra: Complete the Missing Code ----------
+{topic:"array_reverse()",difficulty:"easy",category:"Complete the Missing Code",mode:"options",
+ code:"$nums = [1, 2, 3];\n$rev = ____($nums);\necho implode(\",\", $rev);\n// Expected output: 3,2,1",
+ q:"Which function call correctly completes the blank?",
+ options:["array_reverse","array_unique","array_slice","array_flip"],correct:"array_reverse",
+ exp:"array_reverse() flips the order of the elements, producing the expected output 3,2,1."},
+
+{topic:"isset() & array_key_exists()",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"$settings = [\"theme\" => \"dark\"];\nif (____($settings[\"theme\"])) {\n  echo \"Theme is set\";\n}",
+ q:"Which function correctly completes the blank to check whether the \"theme\" key has a non-null value?",
+ options:["isset","strlen","array_push","sort"],correct:"isset",
+ exp:"isset() is the standard way to check whether a variable or array key exists and holds a non-null value."},
+
+{topic:"array_map()",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"function square($n) { return $n * $n; }\n$nums = [2, 3, 4];\n$squares = ____(\"square\", $nums);",
+ q:"Which function call correctly completes the blank to apply square() to every element?",
+ options:["array_map","array_filter","array_reduce","array_walk_recursive"],correct:"array_map",
+ exp:"array_map($callback, $array) applies the given function to each element and returns a new array of the transformed results."},
+
+{topic:"ksort() & krsort()",difficulty:"medium",category:"Complete the Missing Code",mode:"options",
+ code:"$data = [3 => \"c\", 1 => \"a\", 2 => \"b\"];\n____($data);\nprint_r($data);\n// Expected: keys in order 1, 2, 3",
+ q:"Which function call correctly completes the blank?",
+ options:["ksort","sort","arsort","array_values"],correct:"ksort",
+ exp:"ksort() sorts the array by its keys in ascending order, producing the expected order 1, 2, 3."},
+
+// ---------- Extra: Mini Problem Solving ----------
+{topic:"array_unique()",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"Given $votes = [\"red\", \"blue\", \"red\", \"green\", \"blue\", \"red\"], which snippet correctly finds the DISTINCT colors that were voted for?",
+ options:["array_values(array_unique($votes))","array_unique(count($votes))","array_filter($votes)","array_flip(array_flip($votes))"],
+ correct:"array_values(array_unique($votes))",
+ exp:"array_unique() removes duplicate values, and wrapping it with array_values() gives back a clean, re-indexed list of the distinct colors."},
+
+{topic:"array_merge()",difficulty:"medium",category:"Mini Problem Solving",mode:"options",
+ q:"You have $morningTasks and $eveningTasks, two separate indexed arrays of strings, and want ONE combined todo list in order. Which snippet is correct?",
+ options:["$todo = array_merge($morningTasks, $eveningTasks);",
+          "$todo = $morningTasks - $eveningTasks;",
+          "$todo = $morningTasks[] + $eveningTasks[];",
+          "$todo = array_diff($morningTasks, $eveningTasks);"],
+ correct:"$todo = array_merge($morningTasks, $eveningTasks);",
+ exp:"array_merge() is the correct tool for concatenating the two indexed arrays into a single combined list, preserving order."},
+
+{topic:"asort() & arsort()",difficulty:"hard",category:"Mini Problem Solving",mode:"options",
+ q:"You have $leaderboard = [\"Ana\" => 1200, \"Bo\" => 950, \"Cy\" => 1500] and want to display names from HIGHEST to LOWEST score, keeping names attached to scores. Which function is correct?",
+ options:["arsort($leaderboard);","sort($leaderboard);","ksort($leaderboard);","array_reverse($leaderboard);"],
+ correct:"arsort($leaderboard);",
+ exp:"arsort() sorts an associative array by value in descending order while keeping each score paired with its original name key — exactly what a leaderboard needs."}
+];
+
+/* ================= Utility ================= */
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function highlightPHP(raw){
+  let s = escapeHtml(raw);
+  const kw = "if|else|elseif|endif|while|endwhile|do|for|endfor|foreach|endforeach|switch|case|default|break|continue|return|echo|print|true|false|TRUE|FALSE|null|NULL|and|or|xor|define|isset|empty|const|var_dump|gettype";
+  const re = new RegExp("(//.*$|#.*$)|('(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\")|(\\$[a-zA-Z_][a-zA-Z0-9_]*)|\\b(" + kw + ")\\b","gm");
+  s = s.replace(re, function(match, comment, string, variable, keyword){
+    if(comment) return '<span class="cm">'+comment+'</span>';
+    if(string) return '<span class="str">'+string+'</span>';
+    if(variable) return '<span class="vr">'+variable+'</span>';
+    if(keyword) return '<span class="kw">'+keyword+'</span>';
+    return match;
+  });
+  s = s.replace(/(&lt;\?php|\?&gt;)/g, '<span class="tg">$1</span>');
+  return s;
+}
+
+function normalize(s){
+  return String(s).toLowerCase().trim().replace(/[;'"\s]+/g,'');
+}
+
+/* ================= Exam state ================= */
+const EXAM_SIZE = 30;
+const EXAM_MINUTES = 40;
+let examQuestions = [];   // built questions with shuffled options
+let userAnswers = [];     // parallel array
+let currentIndex = 0;
+let timerInterval = null;
+let secondsLeft = EXAM_MINUTES*60;
+let startTimestamp = null;
+let elapsedSeconds = 0;
+
+function buildExam(){
+  const picked = shuffleArray(BANK).slice(0, EXAM_SIZE);
+  examQuestions = picked.map(function(bq){
+    const built = Object.assign({}, bq);
+    if(bq.mode === "options"){
+      built.shuffledOptions = shuffleArray(bq.options);
+    }
+    return built;
+  });
+  userAnswers = examQuestions.map(function(){ return null; });
+  currentIndex = 0;
+}
+
+function startExam(){
+  buildExam();
+  secondsLeft = EXAM_MINUTES*60;
+  startTimestamp = Date.now();
+  showScreen('screen-exam');
+  renderQuestion();
+  renderNav();
+  updateProgress();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+}
+
+function retryExam(){
+  // Same question set, options reshuffled, answers cleared
+  examQuestions = examQuestions.map(function(bq){
+    const built = Object.assign({}, bq);
+    if(bq.mode === "options"){
+      built.shuffledOptions = shuffleArray(bq.options);
+    }
+    return built;
+  });
+  userAnswers = examQuestions.map(function(){ return null; });
+  currentIndex = 0;
+  secondsLeft = EXAM_MINUTES*60;
+  startTimestamp = Date.now();
+  showScreen('screen-exam');
+  renderQuestion();
+  renderNav();
+  updateProgress();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+  updateTimerDisplay();
+}
+
+function tickTimer(){
+  secondsLeft--;
+  updateTimerDisplay();
+  if(secondsLeft <= 0){
+    clearInterval(timerInterval);
+    finishExam();
+  }
+}
+
+function updateTimerDisplay(){
+  const m = Math.max(0,Math.floor(secondsLeft/60));
+  const s = Math.max(0,secondsLeft%60);
+  const txt = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('timerText').textContent = txt;
+  const box = document.getElementById('timerBox');
+  if(secondsLeft <= 60){ box.classList.add('low'); } else { box.classList.remove('low'); }
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderQuestion(){
+  const q = examQuestions[currentIndex];
+  document.getElementById('qTab').textContent = 'question_' + String(currentIndex+1).padStart(2,'0') + '.php';
+  document.getElementById('qCategory').textContent = q.category;
+  document.getElementById('qTopic').textContent = q.topic;
+  const diffEl = document.getElementById('qDifficulty');
+  diffEl.textContent = q.difficulty;
+  diffEl.className = 'badge diff-' + q.difficulty;
+  document.getElementById('qText').textContent = q.q;
+
+  const codeEl = document.getElementById('qCode');
+  if(q.code){
+    codeEl.style.display = 'block';
+    codeEl.innerHTML = highlightPHP(q.code);
+  } else {
+    codeEl.style.display = 'none';
+    codeEl.innerHTML = '';
+  }
+
+  const optWrap = document.getElementById('qOptions');
+  const textWrap = document.getElementById('qTextInputWrap');
+  optWrap.innerHTML = '';
+  if(q.mode === 'options'){
+    textWrap.style.display = 'none';
+    optWrap.style.display = 'flex';
+    const letters = ['A','B','C','D'];
+    q.shuffledOptions.forEach(function(opt, idx){
+      const label = document.createElement('label');
+      label.className = 'option' + (userAnswers[currentIndex] === opt ? ' selected' : '');
+      label.innerHTML = '<span class="letter">'+letters[idx]+'</span>'+
+        '<input type="radio" name="opt" '+(userAnswers[currentIndex]===opt?'checked':'')+'>'+
+        '<span>'+escapeHtml(opt)+'</span>';
+      label.addEventListener('click', function(){
+        userAnswers[currentIndex] = opt;
+        renderQuestion();
+        renderNav();
+        updateProgress();
+      });
+      optWrap.appendChild(label);
+    });
+  } else {
+    optWrap.style.display = 'none';
+    textWrap.style.display = 'block';
+    const input = document.getElementById('qTextInput');
+    input.value = userAnswers[currentIndex] || '';
+    input.oninput = function(){
+      userAnswers[currentIndex] = input.value;
+      renderNav();
+      updateProgress();
+    };
+  }
+  document.getElementById('qIndicator').textContent = 'Question ' + (currentIndex+1) + ' of ' + examQuestions.length;
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  document.getElementById('nextBtn').textContent = currentIndex === examQuestions.length-1 ? 'Finish →' : 'Next →';
+}
+
+function renderNav(){
+  const nav = document.getElementById('qNav');
+  nav.innerHTML = '';
+  examQuestions.forEach(function(q, idx){
+    const btn = document.createElement('div');
+    let cls = 'qn';
+    if(idx === currentIndex) cls += ' current';
+    else if(userAnswers[idx] !== null && userAnswers[idx] !== '' ) cls += ' answered';
+    btn.className = cls;
+    btn.textContent = idx+1;
+    btn.addEventListener('click', function(){ currentIndex = idx; renderQuestion(); renderNav(); });
+    nav.appendChild(btn);
+  });
+}
+
+function updateProgress(){
+  const answered = userAnswers.filter(function(a){ return a !== null && a !== ''; }).length;
+  const pct = Math.round((answered/examQuestions.length)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = answered + ' / ' + examQuestions.length + ' answered';
+}
+
+function gradeQuestion(q, userAns){
+  if(userAns === null || userAns === '') return false;
+  if(q.mode === 'options'){
+    return userAns === q.correct;
+  } else {
+    const na = normalize(userAns);
+    return q.accept.some(function(acc){ return normalize(acc) === na; });
+  }
+}
+
+function finishExam(){
+  clearInterval(timerInterval);
+  elapsedSeconds = Math.floor((Date.now()-startTimestamp)/1000);
+  let correct = 0;
+  examQuestions.forEach(function(q, idx){
+    if(gradeQuestion(q, userAnswers[idx])) correct++;
+  });
+  const total = examQuestions.length;
+  const wrong = total - correct;
+  const pct = Math.round((correct/total)*100);
+
+  document.getElementById('scoreRing').style.setProperty('--pct', pct);
+  document.getElementById('scorePct').innerHTML = pct + '%<small>score</small>';
+  document.getElementById('rCorrect').textContent = correct;
+  document.getElementById('rWrong').textContent = wrong;
+  document.getElementById('rTotal').textContent = total;
+  const mm = String(Math.floor(elapsedSeconds/60)).padStart(2,'0');
+  const ss = String(elapsedSeconds%60).padStart(2,'0');
+  document.getElementById('rTime').textContent = mm+':'+ss;
+
+  let headline = 'Solid effort — keep practicing!';
+  if(pct >= 90) headline = 'Outstanding! You know your PHP basics cold.';
+  else if(pct >= 75) headline = 'Great job — a strong grasp of the fundamentals.';
+  else if(pct >= 50) headline = 'Good start — a bit more review will help.';
+  document.getElementById('scoreHeadline').textContent = headline;
+
+  buildReview();
+  showScreen('screen-results');
+}
+
+function submitExam(){
+  const unanswered = userAnswers.filter(function(a){ return a === null || a === ''; }).length;
+  if(unanswered > 0){
+    const ok = confirm('You have '+unanswered+' unanswered question(s). Submit anyway?');
+    if(!ok) return;
+  }
+  finishExam();
+}
+
+function buildReview(){
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  examQuestions.forEach(function(q, idx){
+    const userAns = userAnswers[idx];
+    const isCorrect = gradeQuestion(q, userAns);
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (isCorrect ? 'is-correct' : 'is-wrong');
+
+    let html = '';
+    html += '<div class="q-meta">'+
+      '<span class="badge cat">'+q.category+'</span>'+
+      '<span class="badge">'+q.topic+'</span>'+
+      '<span class="badge diff-'+q.difficulty+'">'+q.difficulty+'</span>'+
+      '<span class="badge" style="color:'+(isCorrect?'var(--success)':'var(--danger)')+';border-color:'+(isCorrect?'var(--success)':'var(--danger)')+';">'+
+      (isCorrect ? '✔ Correct' : '✘ Wrong') + '</span></div>';
+    html += '<p class="q-text">'+(idx+1)+'. '+escapeHtml(q.q)+'</p>';
+    if(q.code){
+      html += '<pre class="snippet">'+highlightPHP(q.code)+'</pre>';
+    }
+    const userDisplay = (userAns===null||userAns==='') ? '(no answer given)' : escapeHtml(String(userAns));
+    const correctDisplay = q.mode==='options' ? escapeHtml(q.correct) : escapeHtml(q.accept[0]);
+
+    if(!isCorrect){
+      html += '<div class="ans-line your-wrong">✘ Your answer: '+userDisplay+'</div>';
+      html += '<div class="ans-line correct-line">✔ Correct answer: '+correctDisplay+'</div>';
+    } else {
+      html += '<div class="ans-line your-right">✔ Your answer: '+userDisplay+'</div>';
+    }
+    html += '<div class="explain"><b>Explanation:</b> '+escapeHtml(q.exp)+'</div>';
+    item.innerHTML = html;
+    list.appendChild(item);
+  });
+}
+
+/* ================= Theme ================= */
+function initTheme(){
+  const saved = localStorageSafeGet('phpExamTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+  localStorageSafeSet('phpExamTheme', next);
+}
+// In-memory fallback since artifact/sandbox contexts may restrict storage; safe no-op wrapper.
+let _memTheme = null;
+function localStorageSafeGet(key){
+  try { return window.localStorage.getItem(key) || _memTheme; } catch(e){ return _memTheme; }
+}
+function localStorageSafeSet(key,val){
+  _memTheme = val;
+  try { window.localStorage.setItem(key, val); } catch(e){ /* ignore */ }
+}
+
+/* ================= Init / events ================= */
+function populateTopicChips(){
+  const topics = Array.from(new Set(BANK.map(function(b){return b.topic;})));
+  const wrap = document.getElementById('topicChips');
+  topics.forEach(function(t){
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = t;
+    wrap.appendChild(c);
+  });
+  document.getElementById('statCount').textContent = Math.min(EXAM_SIZE, BANK.length);
+  const statTopicsEl = document.getElementById('statTopics');
+  if(statTopicsEl) statTopicsEl.textContent = topics.length;
+}
+
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('startBtn').addEventListener('click', startExam);
+document.getElementById('prevBtn').addEventListener('click', function(){
+  if(currentIndex>0){ currentIndex--; renderQuestion(); renderNav(); }
+});
+document.getElementById('nextBtn').addEventListener('click', function(){
+  if(currentIndex < examQuestions.length-1){ currentIndex++; renderQuestion(); renderNav(); }
+  else { submitExam(); }
+});
+document.getElementById('submitBtn').addEventListener('click', submitExam);
+document.getElementById('reviewBtn').addEventListener('click', function(){ showScreen('screen-review'); });
+document.getElementById('backToResultsBtn').addEventListener('click', function(){ showScreen('screen-results'); });
+document.getElementById('retryBtn').addEventListener('click', retryExam);
+document.getElementById('retryBtn2').addEventListener('click', retryExam);
+document.getElementById('newExamBtn').addEventListener('click', startExam);
+document.getElementById('newExamBtn2').addEventListener('click', startExam);
+
+initTheme();
+populateTopicChips();
+</script>
+</body>
+</html>

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Exam — Chapter 4: Threads &amp; Concurrency</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ============================================================
+   ROOT VARIABLES — Blue Academic Theme
+   ============================================================ */
+:root{
+  --navy-950:#071a3a;
+  --navy-900:#0b2a5c;
+  --navy-800:#0f3577;
+  --blue-700:#1450a3;
+  --blue-600:#1c63c9;
+  --blue-500:#2f7de0;
+  --blue-400:#5b9bf0;
+  --blue-100:#e7f0fd;
+  --blue-50:#f3f8ff;
+  --gold:#d9a441;
+  --green-600:#1e8e5a;
+  --green-100:#e3f8ee;
+  --red-600:#d64545;
+  --red-100:#fdeaea;
+  --ink-900:#12203d;
+  --ink-600:#4a5b78;
+  --ink-400:#8b98b2;
+  --white:#ffffff;
+  --radius-lg:18px;
+  --radius-md:12px;
+  --radius-sm:8px;
+  --shadow-soft:0 10px 30px rgba(11,42,92,0.10);
+  --shadow-card:0 4px 18px rgba(11,42,92,0.08);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background:linear-gradient(160deg,var(--blue-50) 0%, #eaf2fe 45%, #e3edfc 100%);
+  color:var(--ink-900);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+.app{
+  max-width:1000px;
+  margin:0 auto;
+  padding:20px 18px 60px;
+}
+
+/* ============================================================
+   HEADER / HERO
+   ============================================================ */
+.header{
+  background:linear-gradient(120deg,var(--navy-900), var(--blue-700) 60%, var(--blue-600));
+  border-radius:var(--radius-lg);
+  color:var(--white);
+  padding:26px 28px;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+  overflow:hidden;
+  margin-bottom:22px;
+}
+.header::after{
+  content:"";
+  position:absolute;
+  right:-60px; top:-60px;
+  width:220px;height:220px;
+  background:radial-gradient(circle, rgba(255,255,255,0.14), transparent 70%);
+  border-radius:50%;
+}
+.header .eyebrow{
+  display:flex; align-items:center; gap:8px;
+  font-size:12.5px; letter-spacing:1.2px; text-transform:uppercase;
+  color:var(--blue-100); opacity:0.9; font-weight:600;
+}
+.header h1{
+  margin:6px 0 4px;
+  font-size:26px;
+  font-weight:700;
+  letter-spacing:0.2px;
+}
+.header p.sub{
+  margin:0; color:var(--blue-100); font-size:14px; opacity:0.9;
+}
+
+/* ============================================================
+   LANDING SCREEN
+   ============================================================ */
+.card{
+  background:var(--white);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+  padding:28px;
+  border:1px solid rgba(11,42,92,0.06);
+}
+.landing-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;
+  margin:22px 0;
+}
+.info-tile{
+  background:var(--blue-50);
+  border:1px solid var(--blue-100);
+  border-radius:var(--radius-md);
+  padding:16px;
+  text-align:center;
+  transition:transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.info-tile:hover{transform:translateY(-3px); box-shadow:0 8px 18px rgba(11,42,92,0.08);}
+.info-tile i{font-size:22px;color:var(--blue-600); margin-bottom:8px;}
+.info-tile .tile-value{font-size:20px;font-weight:700;color:var(--navy-900);}
+.info-tile .tile-label{font-size:12.5px;color:var(--ink-600); margin-top:2px;}
+
+.instructions{
+  background:var(--blue-50);
+  border-left:4px solid var(--blue-500);
+  border-radius:var(--radius-sm);
+  padding:16px 18px;
+  margin:18px 0;
+  font-size:14px;
+  color:var(--ink-600);
+  line-height:1.7;
+}
+.instructions strong{color:var(--navy-900);}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  border:none; cursor:pointer;
+  font-family:inherit;
+  font-weight:600;
+  font-size:15px;
+  border-radius:999px;
+  padding:13px 26px;
+  transition:transform .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease);
+}
+.btn-primary{
+  background:linear-gradient(120deg,var(--blue-600),var(--blue-500));
+  color:var(--white);
+  box-shadow:0 8px 20px rgba(28,99,201,0.35);
+}
+.btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 26px rgba(28,99,201,0.42);}
+.btn-secondary{
+  background:var(--white);
+  color:var(--blue-600);
+  border:1.5px solid var(--blue-500);
+}
+.btn-secondary:hover{background:var(--blue-50);}
+.btn-ghost{
+  background:transparent;
+  color:var(--ink-600);
+  border:1.5px solid #d7e2f5;
+}
+.btn-ghost:hover{background:var(--blue-50);}
+.btn:disabled{opacity:0.45; cursor:not-allowed; transform:none !important; box-shadow:none !important;}
+
+.center-actions{display:flex; justify-content:center; margin-top:20px;}
+
+/* ============================================================
+   EXAM LAYOUT
+   ============================================================ */
+.exam-topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap;
+  background:var(--white);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-card);
+  padding:14px 18px;
+  margin-bottom:16px;
+  position:sticky; top:10px; z-index:20;
+  border:1px solid rgba(11,42,92,0.06);
+}
+.timer{
+  display:flex; align-items:center; gap:8px;
+  font-weight:700; font-size:16px;
+  color:var(--navy-900);
+  background:var(--blue-50);
+  padding:8px 16px;
+  border-radius:999px;
+  border:1px solid var(--blue-100);
+  min-width:118px;
+  justify-content:center;
+}
+.timer.warning{color:var(--red-600); background:var(--red-100); border-color:#f6c9c9; animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+.q-counter{font-size:14px; color:var(--ink-600); font-weight:600;}
+.q-counter b{color:var(--navy-900);}
+
+.progress-wrap{
+  height:8px; background:var(--blue-100);
+  border-radius:999px; overflow:hidden; margin-top:12px;
+}
+.progress-bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue-500),var(--gold));
+  border-radius:999px;
+  width:0%;
+  transition:width .4s var(--ease);
+}
+
+/* Navigator */
+.navigator{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:8px;
+  background:var(--white);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-card);
+  padding:16px;
+  margin-bottom:16px;
+  border:1px solid rgba(11,42,92,0.06);
+}
+.nav-btn{
+  aspect-ratio:1/1;
+  border-radius:8px;
+  border:1.5px solid #dbe6fa;
+  background:var(--blue-50);
+  color:var(--navy-900);
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s var(--ease);
+}
+.nav-btn:hover{transform:translateY(-2px);}
+.nav-btn.answered{background:var(--green-100); border-color:#b7e6cc; color:var(--green-600);}
+.nav-btn.current{background:var(--blue-600); border-color:var(--blue-600); color:#fff; box-shadow:0 4px 10px rgba(28,99,201,0.4);}
+
+/* Question Card */
+.question-card{
+  background:var(--white);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);
+  padding:30px 30px 24px;
+  border:1px solid rgba(11,42,92,0.06);
+  animation:fadeSlide .35s var(--ease);
+}
+@keyframes fadeSlide{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+.q-meta{
+  display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;
+}
+.badge{
+  font-size:11.5px; font-weight:700; letter-spacing:.4px;
+  padding:5px 12px; border-radius:999px; text-transform:uppercase;
+}
+.badge-easy{background:#e3f8ee; color:var(--green-600);}
+.badge-medium{background:#fff4e0; color:#b8760f;}
+.badge-hard{background:var(--red-100); color:var(--red-600);}
+.badge-topic{background:var(--blue-100); color:var(--blue-700);}
+
+.q-text{
+  font-size:19px; font-weight:600; color:var(--navy-900);
+  line-height:1.55; margin:6px 0 22px;
+}
+
+.options{display:flex; flex-direction:column; gap:12px;}
+.option{
+  display:flex; align-items:flex-start; gap:14px;
+  border:1.5px solid #e2eafb;
+  background:var(--blue-50);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  cursor:pointer;
+  transition:all .18s var(--ease);
+}
+.option:hover{border-color:var(--blue-400); background:#eaf2ff;}
+.option .circle{
+  width:22px; height:22px; min-width:22px;
+  border-radius:50%;
+  border:2px solid var(--blue-400);
+  margin-top:2px;
+  position:relative;
+  transition:all .18s var(--ease);
+}
+.option .circle::after{
+  content:"";
+  position:absolute; inset:4px;
+  border-radius:50%;
+  background:var(--blue-600);
+  transform:scale(0);
+  transition:transform .18s var(--ease);
+}
+.option.selected{border-color:var(--blue-600); background:var(--blue-100);}
+.option.selected .circle::after{transform:scale(1);}
+.option.selected .circle{border-color:var(--blue-600);}
+.option .opt-text{font-size:15px; color:var(--ink-900); line-height:1.5; padding-top:1px;}
+
+/* Review states */
+.option.correct-answer{border-color:var(--green-600); background:var(--green-100);}
+.option.correct-answer .circle{border-color:var(--green-600);}
+.option.correct-answer .circle::after{background:var(--green-600); transform:scale(1);}
+.option.wrong-answer{border-color:var(--red-600); background:var(--red-100);}
+.option.wrong-answer .circle{border-color:var(--red-600);}
+.option.wrong-answer .circle::after{background:var(--red-600); transform:scale(1);}
+.option.disabled{cursor:default;}
+.option .tag{
+  margin-left:auto; font-size:11.5px; font-weight:700;
+  padding:3px 10px; border-radius:999px; white-space:nowrap;
+}
+.tag-correct{background:var(--green-600); color:#fff;}
+.tag-wrong{background:var(--red-600); color:#fff;}
+
+.hint-row{
+  font-size:13px; color:var(--ink-400); margin-top:16px; min-height:18px;
+  display:flex; align-items:center; gap:6px;
+}
+.hint-row.show{color:#b8760f;}
+
+.explanation-box{
+  margin-top:18px;
+  background:var(--blue-50);
+  border-left:4px solid var(--blue-500);
+  border-radius:var(--radius-sm);
+  padding:14px 16px;
+  font-size:14px;
+  color:var(--ink-600);
+  line-height:1.65;
+}
+.explanation-box b{color:var(--navy-900);}
+
+/* Nav footer buttons */
+.footer-actions{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:22px; gap:12px; flex-wrap:wrap;
+}
+.footer-actions .left-group, .footer-actions .right-group{display:flex; gap:10px;}
+
+/* ============================================================
+   RESULTS SCREEN
+   ============================================================ */
+.result-hero{
+  text-align:center;
+  padding:34px 20px 10px;
+}
+.score-ring{
+  width:180px;height:180px; margin:0 auto 18px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--blue-600) calc(var(--pct,0)*1%), #e6edfa 0);
+  position:relative;
+}
+.score-ring::before{
+  content:""; position:absolute; inset:12px;
+  background:var(--white); border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(11,42,92,0.05);
+}
+.score-ring .score-inner{position:relative; text-align:center;}
+.score-ring .score-num{font-size:34px; font-weight:800; color:var(--navy-900);}
+.score-ring .score-den{font-size:13px; color:var(--ink-600);}
+
+.pass-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 20px; border-radius:999px; font-weight:700; font-size:15px;
+  margin-top:6px;
+}
+.pass-pill.pass{background:var(--green-100); color:var(--green-600);}
+.pass-pill.fail{background:var(--red-100); color:var(--red-600);}
+
+.stats-row{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:12px; margin:24px 0;
+}
+.stat-box{
+  background:var(--blue-50); border:1px solid var(--blue-100);
+  border-radius:var(--radius-md); padding:14px; text-align:center;
+}
+.stat-box .num{font-size:22px; font-weight:800; color:var(--navy-900);}
+.stat-box .lbl{font-size:12px; color:var(--ink-600); margin-top:2px;}
+
+.review-list{margin-top:10px;}
+.review-item{
+  background:var(--white); border:1px solid rgba(11,42,92,0.08);
+  border-radius:var(--radius-md); padding:20px; margin-bottom:14px;
+  box-shadow:var(--shadow-card);
+}
+.review-item .q-num-pill{
+  font-size:12px; font-weight:700; color:var(--blue-600);
+  background:var(--blue-100); padding:4px 10px; border-radius:999px;
+  display:inline-block; margin-bottom:8px;
+}
+.review-item.correct .q-num-pill{background:var(--green-100); color:var(--green-600);}
+.review-item.incorrect .q-num-pill{background:var(--red-100); color:var(--red-600);}
+
+.section-title{
+  font-size:18px; font-weight:700; color:var(--navy-900);
+  margin:30px 0 14px; display:flex; align-items:center; gap:8px;
+}
+
+/* Modal (confirmation) */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(7,26,58,0.55);
+  display:flex; align-items:center; justify-content:center;
+  z-index:100; padding:20px;
+  animation:fadeIn .2s var(--ease);
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-box{
+  background:var(--white); border-radius:var(--radius-lg);
+  padding:26px; max-width:420px; width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  text-align:center;
+  animation:fadeSlide .25s var(--ease);
+}
+.modal-box i.modal-icon{font-size:38px; color:var(--gold); margin-bottom:12px;}
+.modal-box h3{margin:0 0 8px; color:var(--navy-900); font-size:19px;}
+.modal-box p{color:var(--ink-600); font-size:14.5px; line-height:1.6; margin:0 0 20px;}
+.modal-actions{display:flex; gap:10px; justify-content:center;}
+
+.hidden{display:none !important;}
+
+footer.credit{
+  text-align:center; color:var(--ink-400); font-size:12.5px; margin-top:30px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:640px){
+  .app{padding:14px 10px 40px;}
+  .header{padding:20px 18px;}
+  .header h1{font-size:21px;}
+  .question-card{padding:20px 18px 18px;}
+  .q-text{font-size:17px;}
+  .navigator{grid-template-columns:repeat(5,1fr);}
+  .exam-topbar{flex-direction:column; align-items:stretch; text-align:center;}
+  .footer-actions{flex-direction:column;}
+  .footer-actions .left-group,.footer-actions .right-group{width:100%; justify-content:center;}
+  .btn{width:100%; justify-content:center;}
+  .score-ring{width:150px;height:150px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <div class="header">
+    <div class="eyebrow"><i class="fa-solid fa-graduation-cap"></i> Operating Systems — Midterm / Final Practice</div>
+    <h1>Chapter 4: Threads &amp; Concurrency</h1>
+    <p class="sub">20 Multiple-Choice Questions · Based strictly on the uploaded lecture chapter</p>
+  </div>
+
+  <!-- ============================================================
+       LANDING SCREEN
+       ============================================================ -->
+  <div id="screen-landing" class="card">
+    <div class="landing-grid">
+      <div class="info-tile"><i class="fa-solid fa-list-check"></i><div class="tile-value">20</div><div class="tile-label">Questions</div></div>
+      <div class="info-tile"><i class="fa-solid fa-clock"></i><div class="tile-value">30 min</div><div class="tile-label">Time Limit</div></div>
+      <div class="info-tile"><i class="fa-solid fa-bullseye"></i><div class="tile-value">50%</div><div class="tile-label">Pass Mark</div></div>
+      <div class="info-tile"><i class="fa-solid fa-shuffle"></i><div class="tile-value">Random</div><div class="tile-label">Order Each Attempt</div></div>
+    </div>
+    <div class="instructions">
+      <strong><i class="fa-solid fa-circle-info"></i> Instructions:</strong><br>
+      1. This exam covers <b>only</b> the material in Chapter 4: Threads &amp; Concurrency.<br>
+      2. Each question has exactly one correct answer out of four choices.<br>
+      3. You must select an answer before moving to the next question (you may still jump freely using the navigator).<br>
+      4. The exam auto-submits when the 30-minute timer reaches zero.<br>
+      5. After submission you will see your score, pass/fail status, and a full explanation for every question.<br>
+      6. Question order and answer order are shuffled every time you start or restart the exam.
+    </div>
+    <div class="center-actions">
+      <button class="btn btn-primary" id="btn-start"><i class="fa-solid fa-play"></i> Start Exam</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EXAM SCREEN
+       ============================================================ -->
+  <div id="screen-exam" class="hidden">
+    <div class="exam-topbar">
+      <div class="q-counter"><i class="fa-solid fa-file-lines"></i> Question <b id="q-current-num">1</b> of <b>20</b></div>
+      <div class="timer" id="timer-display"><i class="fa-solid fa-hourglass-half"></i> <span id="timer-text">30:00</span></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <br>
+
+    <div class="navigator" id="navigator"></div>
+
+    <div class="question-card" id="question-card">
+      <div class="q-meta">
+        <span class="badge" id="badge-difficulty">Medium</span>
+        <span class="badge badge-topic" id="badge-topic">Topic</span>
+      </div>
+      <div class="q-text" id="q-text">Question text here</div>
+      <div class="options" id="options-container"></div>
+      <div class="hint-row" id="hint-row"><i class="fa-solid fa-triangle-exclamation"></i> Please select an answer to continue.</div>
+    </div>
+
+    <div class="footer-actions">
+      <div class="left-group">
+        <button class="btn btn-ghost" id="btn-prev"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+      </div>
+      <div class="right-group">
+        <button class="btn btn-secondary hidden" id="btn-submit-exam"><i class="fa-solid fa-flag-checkered"></i> Submit Exam</button>
+        <button class="btn btn-primary" id="btn-next">Next <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       RESULTS SCREEN
+       ============================================================ -->
+  <div id="screen-results" class="hidden">
+    <div class="card result-hero">
+      <div class="score-ring" id="score-ring" style="--pct:0;">
+        <div class="score-inner">
+          <div class="score-num" id="score-percent">0%</div>
+          <div class="score-den" id="score-fraction">0 / 20</div>
+        </div>
+      </div>
+      <div id="pass-pill" class="pass-pill pass"><i class="fa-solid fa-award"></i> <span id="pass-text">PASS</span></div>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="num" id="stat-correct">0</div><div class="lbl">Correct</div></div>
+        <div class="stat-box"><div class="num" id="stat-incorrect">0</div><div class="lbl">Incorrect</div></div>
+        <div class="stat-box"><div class="num" id="stat-unanswered">0</div><div class="lbl">Unanswered</div></div>
+        <div class="stat-box"><div class="num" id="stat-time">0:00</div><div class="lbl">Time Used</div></div>
+      </div>
+
+      <div class="center-actions" style="gap:12px;">
+        <button class="btn btn-primary" id="btn-restart"><i class="fa-solid fa-rotate-right"></i> Restart Exam</button>
+        <button class="btn btn-ghost" id="btn-review-jump"><i class="fa-solid fa-magnifying-glass"></i> Jump to Review</button>
+      </div>
+    </div>
+
+    <div class="section-title" id="review-anchor"><i class="fa-solid fa-book-open"></i> Detailed Review</div>
+    <div class="review-list" id="review-list"></div>
+
+    <div class="center-actions">
+      <button class="btn btn-primary" id="btn-restart-bottom"><i class="fa-solid fa-rotate-right"></i> Restart Exam</button>
+    </div>
+  </div>
+
+  <footer class="credit">Operating Systems · Chapter 4: Threads &amp; Concurrency · Practice Exam Generator</footer>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal-box">
+    <i class="fa-solid fa-circle-question modal-icon"></i>
+    <h3 id="modal-title">Submit Exam?</h3>
+    <p id="modal-text">You still have unanswered questions. Are you sure you want to submit the exam now? This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-confirm">Yes, Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   QUESTION BANK
+   Source: Uploaded Chapter 4 — "Threads & Concurrency" slides only.
+   Each question: topic, difficulty, question text, 4 options,
+   correctIndex (index into the ORIGINAL options array below),
+   explanation (grounded strictly in the chapter).
+   ================================================================ */
+const QUESTION_BANK = [
+  {
+    topic: "Overview",
+    difficulty: "Easy",
+    question: "According to the chapter, why is thread creation generally favored over process creation for implementing multiple concurrent tasks within an application?",
+    options: [
+      "Process creation is heavy-weight while thread creation is light-weight",
+      "Threads require completely separate memory address spaces for safety",
+      "Threads cannot share any resources, which improves protection",
+      "Process creation does not require any operating system involvement"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter's Motivation slide states directly: \"Process creation is heavy-weight while thread creation is light-weight,\" which is a core reason multithreading can simplify code and increase efficiency."
+  },
+  {
+    topic: "Multicore Programming",
+    difficulty: "Easy",
+    question: "Which statement correctly distinguishes data parallelism from task parallelism, as presented in the chapter?",
+    options: [
+      "Data parallelism distributes subsets of the same data across multiple cores performing the same operation, while task parallelism distributes threads across cores each performing a unique operation",
+      "Data parallelism distributes unique operations across cores while task parallelism repeats one operation on identical data",
+      "Data parallelism can only be used on single-core systems",
+      "Task parallelism requires every thread to process identical data"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter defines: \"Data parallelism – distributes subsets of the same data across multiple cores, same operation on each\" and \"Task parallelism – distributing threads across cores, each thread performing unique operation.\""
+  },
+  {
+    topic: "Multithreading Models",
+    difficulty: "Easy",
+    question: "What is the fundamental difference between user threads and kernel threads as described in the chapter?",
+    options: [
+      "User threads are managed by a user-level threads library, while kernel threads are supported directly by the kernel",
+      "User threads can only run on multicore systems while kernel threads run only on single-core systems",
+      "Kernel threads are always faster to create than user threads in every operating system",
+      "User threads are exclusive to the Java programming language"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"User threads - management done by user-level threads library\" and \"Kernel threads - Supported by the Kernel,\" listing virtually all general-purpose OSes (Windows, Linux, Mac OS X, iOS, Android) as kernel-thread examples."
+  },
+  {
+    topic: "Thread Libraries",
+    difficulty: "Easy",
+    question: "According to the chapter, what is the standard practice for creating a thread in Java?",
+    options: [
+      "Implementing the Runnable interface",
+      "Extending the Thread class",
+      "Calling pthread_create() directly",
+      "Using an OpenMP compiler directive"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states Java threads may be created either by extending the Thread class or implementing Runnable, but explicitly notes: \"Standard practice is to implement Runnable interface.\""
+  },
+  {
+    topic: "Operating System Examples",
+    difficulty: "Easy",
+    question: "In Linux, thread creation is accomplished through which system call, as stated in the chapter?",
+    options: [
+      "clone()",
+      "fork()",
+      "pthread_create()",
+      "exec()"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"Thread creation is done through clone() system call\" and that clone() allows a child task to share the address space of the parent task."
+  },
+  {
+    topic: "Overview",
+    difficulty: "Medium",
+    question: "All of the following are listed in the chapter as benefits of multithreading EXCEPT:",
+    options: [
+      "Increased isolation, since threads never share any resources of the process",
+      "Responsiveness — may allow continued execution if part of a process is blocked",
+      "Resource Sharing — threads share the resources of the process",
+      "Economy — thread creation and switching is cheaper than process creation and context switching"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter lists exactly four benefits: Responsiveness, Resource Sharing, Economy, and Scalability. It explicitly states threads \"share resources of process,\" which is the opposite of isolation, so this option is false and not a listed benefit."
+  },
+  {
+    topic: "Multicore Programming",
+    difficulty: "Medium",
+    question: "A system has a single processor core, but the scheduler rapidly switches between several tasks so that they all appear to make progress. According to the chapter's definitions, this scenario best illustrates:",
+    options: [
+      "Concurrency",
+      "Parallelism",
+      "Data parallelism",
+      "Amdahl's Law"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"Single processor / core, scheduler providing concurrency\" and defines concurrency as supporting more than one task making progress, whereas parallelism implies a system can perform more than one task simultaneously (requiring multiple cores)."
+  },
+  {
+    topic: "Multicore Programming",
+    difficulty: "Medium",
+    question: "A programmer splits a large array into four equal chunks and assigns one chunk to each of four cores, where every core executes the exact same summation operation on its own chunk. Based on the chapter's definitions, this is an example of:",
+    options: [
+      "Data parallelism",
+      "Task parallelism",
+      "The Many-to-One threading model",
+      "Thread pooling"
+    ],
+    correctIndex: 0,
+    explanation: "This matches the chapter's definition of data parallelism: \"distributes subsets of the same data across multiple cores, same operation on each,\" as opposed to task parallelism, where each thread performs a unique operation."
+  },
+  {
+    topic: "Multithreading Models",
+    difficulty: "Medium",
+    question: "Compared to the Many-to-One threading model, what advantage does the One-to-One model provide, according to the chapter?",
+    options: [
+      "It provides more concurrency, since each user-level thread maps to its own kernel thread",
+      "It allows an unlimited number of threads with absolutely no overhead restrictions",
+      "It requires only a single kernel thread to manage the entire process",
+      "It behaves identically to the Many-to-Many model in every respect"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states for One-to-One: \"Each user-level thread maps to kernel thread... More concurrency than many-to-one,\" though it notes the number of threads is \"sometimes restricted due to overhead.\" In contrast, Many-to-One has all threads blocking if one blocks, since only one may be in the kernel at a time."
+  },
+  {
+    topic: "Multithreading Models",
+    difficulty: "Medium",
+    question: "What advantage does the Many-to-Many multithreading model offer over the Many-to-One model, as described in the chapter?",
+    options: [
+      "It allows the operating system to create a sufficient number of kernel threads, so threads are not limited to running on only one kernel thread at a time",
+      "It maps every single user thread to its own dedicated kernel thread, exactly like the One-to-One model",
+      "It eliminates the need for any kernel threads whatsoever",
+      "It forces all threads to block whenever any one thread blocks"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states Many-to-Many \"Allows many user level threads to be mapped to many kernel threads\" and \"Allows the operating system to create a sufficient number of kernel threads,\" solving the Many-to-One problem where \"only one may be in kernel at a time.\""
+  },
+  {
+    topic: "Thread Libraries",
+    difficulty: "Medium",
+    question: "The chapter describes Pthreads as being a \"specification, not an implementation.\" What does this statement mean?",
+    options: [
+      "The API specifies the required behavior of the thread library, but the actual implementation is left to the developers of the library",
+      "Pthreads code can never be compiled on any operating system",
+      "Pthreads is a library that only works within Java virtual machines",
+      "Pthreads is a proprietary API exclusive to the Windows operating system"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"Specification, not implementation... API specifies behavior of the thread library, implementation is up to development of the library,\" and notes Pthreads is common in UNIX systems like Linux and Mac OS X."
+  },
+  {
+    topic: "Implicit Threading",
+    difficulty: "Medium",
+    question: "Which of the following is stated in the chapter as an advantage of using a thread pool rather than creating a brand-new thread for every incoming request?",
+    options: [
+      "Servicing a request with an existing thread in the pool is usually slightly faster than creating a new thread",
+      "Thread pools guarantee requests are always processed strictly in the order they arrive",
+      "Thread pools completely remove the need for any thread synchronization",
+      "Thread pools automatically convert every user thread into a kernel thread"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter lists thread pool advantages including: \"Usually slightly faster to service a request with an existing thread than create a new thread,\" and that the pool size bounds the number of threads in the application."
+  },
+  {
+    topic: "Implicit Threading",
+    difficulty: "Medium",
+    question: "In the fork-join parallelism model described in the chapter, what happens after multiple threads (tasks) are \"forked\"?",
+    options: [
+      "The forked threads are eventually joined back together",
+      "The forked threads run forever and are never joined",
+      "The forked threads are automatically converted into separate processes",
+      "The forked threads can only communicate through signal handlers"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states plainly under Fork-Join Parallelism: \"Multiple threads (tasks) are forked, and then joined.\""
+  },
+  {
+    topic: "Threading Issues",
+    difficulty: "Medium",
+    question: "A multithreaded process calls fork(). According to the chapter, what key semantic question does this raise?",
+    options: [
+      "Whether fork() duplicates only the calling thread or all threads of the process",
+      "Whether fork() will always immediately terminate the calling process",
+      "Whether fork() converts the entire process into a single kernel thread",
+      "Whether fork() requires a user-defined signal handler in order to execute"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states under Semantics of fork() and exec(): \"Does fork() duplicate only the calling thread or all threads? Some UNIXes have two versions of fork,\" while exec() usually replaces the running process, including all its threads."
+  },
+  {
+    topic: "Threading Issues",
+    difficulty: "Medium",
+    question: "The chapter lists several possible options for where a signal should be delivered in a multithreaded process. Which of the following is NOT one of the options mentioned in the chapter?",
+    options: [
+      "Deliver the signal only to the kernel scheduler, bypassing every thread in the process",
+      "Deliver the signal to the thread to which the signal applies",
+      "Deliver the signal to every thread in the process",
+      "Assign a specific thread to receive all signals for the process"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter's listed options are: deliver to the thread to which the signal applies, deliver to every thread, deliver to certain threads, or assign a specific thread to receive all signals. Delivering only to \"the kernel scheduler\" is not among these options."
+  },
+  {
+    topic: "Multicore Programming",
+    difficulty: "Hard",
+    question: "According to Amdahl's Law as illustrated in the chapter, if an application is 75% parallel and 25% serial, what is the approximate speedup when moving from 1 to 2 processing cores?",
+    options: [
+      "1.6 times",
+      "2.0 times",
+      "4.0 times",
+      "0.75 times"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states this exact example: \"if application is 75% parallel / 25% serial, moving from 1 to 2 cores results in speedup of 1.6 times,\" illustrating that the serial portion has a disproportionate effect on performance gains."
+  },
+  {
+    topic: "Implicit Threading",
+    difficulty: "Hard",
+    question: "In OpenMP, what is the effect of the compiler directive `#pragma omp parallel`, according to the chapter?",
+    options: [
+      "It identifies a parallel region of code and creates as many threads as there are cores",
+      "It forces the enclosed block of code to execute on a single core only",
+      "It immediately cancels every currently running thread in the program",
+      "It converts the enclosed code block into a Java Runnable object"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter describes OpenMP as identifying \"parallel regions – blocks of code that can run in parallel\" via directives such as `#pragma omp parallel`, which \"Create[s] as many threads as there are cores.\""
+  },
+  {
+    topic: "Implicit Threading",
+    difficulty: "Hard",
+    question: "According to the chapter's description of Grand Central Dispatch (GCD), what distinguishes a \"serial\" dispatch queue from a \"concurrent\" dispatch queue?",
+    options: [
+      "A serial queue removes blocks in FIFO order one at a time, while a concurrent queue also removes blocks in FIFO order but may remove several at a time",
+      "A serial queue can only exist system-wide, while concurrent queues can only be created per process",
+      "A concurrent queue processes blocks in LIFO order, while a serial queue always uses FIFO order",
+      "A serial queue runs its blocks on many threads simultaneously, while a concurrent queue is limited to one thread"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"serial – blocks removed in FIFO order, queue is per process, called main queue\" and \"concurrent – removed in FIFO order but several may be removed at a time.\""
+  },
+  {
+    topic: "Threading Issues",
+    difficulty: "Hard",
+    question: "A programmer requests cancellation of a target thread whose cancellation type is set to \"deferred\" (the Pthreads default). Based on the chapter, when does the actual cancellation take effect?",
+    options: [
+      "Only when the thread reaches a cancellation point, such as pthread_testcancel()",
+      "Immediately, the instant the cancellation request is invoked",
+      "Only after the entire process has terminated",
+      "Never — deferred cancellation permanently disables cancellation for that thread"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"Cancellation only occurs when thread reaches cancellation point, i.e., pthread_testcancel(). Then cleanup handler is invoked,\" and notes deferred is the default cancellation type, distinct from asynchronous cancellation which terminates the thread immediately."
+  },
+  {
+    topic: "Operating System Examples",
+    difficulty: "Hard",
+    question: "According to the chapter, which Windows thread data structure resides in user space and contains the thread id, the user-mode stack, and thread-local storage?",
+    options: [
+      "TEB (Thread Environment Block)",
+      "ETHREAD (Executive Thread Block)",
+      "KTHREAD (Kernel Thread Block)",
+      "LWP (Lightweight Process)"
+    ],
+    correctIndex: 0,
+    explanation: "The chapter states: \"TEB (thread environment block) – thread id, user-mode stack, thread-local storage, in user space,\" while ETHREAD and KTHREAD are both explicitly described as residing \"in kernel space.\""
+  }
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+const EXAM_DURATION_SECONDS = 30 * 60; // 30 minutes
+let examQuestions = [];   // shuffled questions with shuffled options
+let userAnswers = [];     // index into shuffled options, or null
+let currentIndex = 0;
+let timeRemaining = EXAM_DURATION_SECONDS;
+let timerInterval = null;
+let timeUsed = 0;
+let examSubmitted = false;
+
+/* ================================================================
+   UTIL — Fisher-Yates shuffle
+   ================================================================ */
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* Build a shuffled copy of the question bank, with options shuffled per question */
+function buildExam(){
+  const shuffledQuestions = shuffleArray(QUESTION_BANK);
+  return shuffledQuestions.map(q => {
+    const optionIndices = shuffleArray(q.options.map((_, i) => i));
+    const shuffledOptions = optionIndices.map(i => q.options[i]);
+    const newCorrectIndex = optionIndices.indexOf(q.correctIndex);
+    return {
+      topic: q.topic,
+      difficulty: q.difficulty,
+      question: q.question,
+      options: shuffledOptions,
+      correctIndex: newCorrectIndex,
+      explanation: q.explanation
+    };
+  });
+}
+
+/* ================================================================
+   DOM REFERENCES
+   ================================================================ */
+const screenLanding = document.getElementById('screen-landing');
+const screenExam = document.getElementById('screen-exam');
+const screenResults = document.getElementById('screen-results');
+
+const btnStart = document.getElementById('btn-start');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const btnSubmitExam = document.getElementById('btn-submit-exam');
+const btnRestart = document.getElementById('btn-restart');
+const btnRestartBottom = document.getElementById('btn-restart-bottom');
+const btnReviewJump = document.getElementById('btn-review-jump');
+
+const qCurrentNum = document.getElementById('q-current-num');
+const timerText = document.getElementById('timer-text');
+const timerDisplay = document.getElementById('timer-display');
+const progressBar = document.getElementById('progress-bar');
+const navigatorEl = document.getElementById('navigator');
+const badgeDifficulty = document.getElementById('badge-difficulty');
+const badgeTopic = document.getElementById('badge-topic');
+const qText = document.getElementById('q-text');
+const optionsContainer = document.getElementById('options-container');
+const hintRow = document.getElementById('hint-row');
+
+const modalOverlay = document.getElementById('modal-overlay');
+const modalTitle = document.getElementById('modal-title');
+const modalText = document.getElementById('modal-text');
+const modalCancel = document.getElementById('modal-cancel');
+const modalConfirm = document.getElementById('modal-confirm');
+
+/* ================================================================
+   INIT / START
+   ================================================================ */
+btnStart.addEventListener('click', startExam);
+btnRestart.addEventListener('click', restartExam);
+btnRestartBottom.addEventListener('click', restartExam);
+btnReviewJump.addEventListener('click', () => {
+  document.getElementById('review-anchor').scrollIntoView({behavior:'smooth'});
+});
+
+function startExam(){
+  examQuestions = buildExam();
+  userAnswers = new Array(examQuestions.length).fill(null);
+  currentIndex = 0;
+  timeRemaining = EXAM_DURATION_SECONDS;
+  examSubmitted = false;
+
+  screenLanding.classList.add('hidden');
+  screenResults.classList.add('hidden');
+  screenExam.classList.remove('hidden');
+
+  buildNavigator();
+  renderQuestion();
+  startTimer();
+}
+
+function restartExam(){
+  clearInterval(timerInterval);
+  screenResults.classList.add('hidden');
+  screenLanding.classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ================================================================
+   TIMER
+   ================================================================ */
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeRemaining--;
+    if(timeRemaining <= 0){
+      timeRemaining = 0;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+      finishExam(true); // auto-submit
+      return;
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function updateTimerDisplay(){
+  const m = Math.floor(timeRemaining / 60);
+  const s = timeRemaining % 60;
+  timerText.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(timeRemaining <= 60){
+    timerDisplay.classList.add('warning');
+  } else {
+    timerDisplay.classList.remove('warning');
+  }
+}
+
+/* ================================================================
+   NAVIGATOR
+   ================================================================ */
+function buildNavigator(){
+  navigatorEl.innerHTML = '';
+  examQuestions.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn';
+    btn.textContent = i + 1;
+    btn.addEventListener('click', () => {
+      currentIndex = i;
+      renderQuestion();
+    });
+    navigatorEl.appendChild(btn);
+  });
+  updateNavigator();
+}
+
+function updateNavigator(){
+  const btns = navigatorEl.querySelectorAll('.nav-btn');
+  btns.forEach((btn, i) => {
+    btn.classList.remove('answered','current');
+    if(userAnswers[i] !== null) btn.classList.add('answered');
+    if(i === currentIndex) btn.classList.add('current');
+  });
+}
+
+/* ================================================================
+   RENDER QUESTION
+   ================================================================ */
+function renderQuestion(){
+  const q = examQuestions[currentIndex];
+  qCurrentNum.textContent = currentIndex + 1;
+
+  badgeDifficulty.textContent = q.difficulty;
+  badgeDifficulty.className = 'badge ' +
+    (q.difficulty === 'Easy' ? 'badge-easy' : q.difficulty === 'Hard' ? 'badge-hard' : 'badge-medium');
+  badgeTopic.textContent = q.topic;
+
+  qText.textContent = q.question;
+
+  optionsContainer.innerHTML = '';
+  q.options.forEach((optText, idx) => {
+    const opt = document.createElement('div');
+    opt.className = 'option';
+    if(userAnswers[currentIndex] === idx) opt.classList.add('selected');
+    opt.innerHTML = `<div class="circle"></div><div class="opt-text">${optText}</div>`;
+    opt.addEventListener('click', () => selectAnswer(idx));
+    optionsContainer.appendChild(opt);
+  });
+
+  hintRow.classList.remove('show');
+  hintRow.style.visibility = userAnswers[currentIndex] === null ? 'visible' : 'hidden';
+
+  // progress bar based on answered count
+  const answeredCount = userAnswers.filter(a => a !== null).length;
+  progressBar.style.width = `${(answeredCount / examQuestions.length) * 100}%`;
+
+  // prev/next button states
+  btnPrev.disabled = currentIndex === 0;
+  const isLast = currentIndex === examQuestions.length - 1;
+  btnNext.classList.toggle('hidden', isLast);
+  btnSubmitExam.classList.toggle('hidden', !isLast);
+
+  updateNavigator();
+  window.scrollTo({top: 0, behavior:'smooth'});
+}
+
+function selectAnswer(idx){
+  userAnswers[currentIndex] = idx;
+  renderQuestion();
+}
+
+/* ================================================================
+   NAVIGATION BUTTONS
+   ================================================================ */
+btnNext.addEventListener('click', () => {
+  if(userAnswers[currentIndex] === null){
+    hintRow.classList.add('show');
+    hintRow.style.visibility = 'visible';
+    return;
+  }
+  if(currentIndex < examQuestions.length - 1){
+    currentIndex++;
+    renderQuestion();
+  }
+});
+
+btnPrev.addEventListener('click', () => {
+  if(currentIndex > 0){
+    currentIndex--;
+    renderQuestion();
+  }
+});
+
+btnSubmitExam.addEventListener('click', () => {
+  const unanswered = userAnswers.filter(a => a === null).length;
+  modalTitle.textContent = 'Submit Exam?';
+  modalText.textContent = unanswered > 0
+    ? `You still have ${unanswered} unanswered question(s). Are you sure you want to submit the exam now? This action cannot be undone.`
+    : `You have answered all 20 questions. Are you sure you want to submit the exam? This action cannot be undone.`;
+  modalOverlay.classList.remove('hidden');
+});
+
+modalCancel.addEventListener('click', () => modalOverlay.classList.add('hidden'));
+modalConfirm.addEventListener('click', () => {
+  modalOverlay.classList.add('hidden');
+  finishExam(false);
+});
+
+/* ================================================================
+   FINISH / SCORE / RESULTS
+   ================================================================ */
+function finishExam(autoSubmitted){
+  if(examSubmitted) return;
+  examSubmitted = true;
+  clearInterval(timerInterval);
+  timeUsed = EXAM_DURATION_SECONDS - timeRemaining;
+
+  let correct = 0, incorrect = 0, unanswered = 0;
+  examQuestions.forEach((q, i) => {
+    if(userAnswers[i] === null) unanswered++;
+    else if(userAnswers[i] === q.correctIndex) correct++;
+    else incorrect++;
+  });
+
+  const pct = Math.round((correct / examQuestions.length) * 100);
+  const passed = pct >= 50;
+
+  // Update hero
+  document.getElementById('score-percent').textContent = `${pct}%`;
+  document.getElementById('score-fraction').textContent = `${correct} / ${examQuestions.length}`;
+  document.getElementById('score-ring').style.setProperty('--pct', pct);
+
+  const passPill = document.getElementById('pass-pill');
+  const passText = document.getElementById('pass-text');
+  if(passed){
+    passPill.className = 'pass-pill pass';
+    passText.textContent = 'PASS';
+    passPill.querySelector('i').className = 'fa-solid fa-award';
+  } else {
+    passPill.className = 'pass-pill fail';
+    passText.textContent = 'FAIL';
+    passPill.querySelector('i').className = 'fa-solid fa-circle-xmark';
+  }
+
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-incorrect').textContent = incorrect;
+  document.getElementById('stat-unanswered').textContent = unanswered;
+  const tm = Math.floor(timeUsed/60), ts = timeUsed%60;
+  document.getElementById('stat-time').textContent = `${tm}:${String(ts).padStart(2,'0')}`;
+
+  renderReview();
+
+  screenExam.classList.add('hidden');
+  screenResults.classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderReview(){
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+
+  examQuestions.forEach((q, i) => {
+    const userIdx = userAnswers[i];
+    const isCorrect = userIdx === q.correctIndex;
+    const isUnanswered = userIdx === null;
+
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (isUnanswered ? 'incorrect' : isCorrect ? 'correct' : 'incorrect');
+
+    let pillLabel = isUnanswered ? 'Unanswered' : isCorrect ? 'Correct' : 'Incorrect';
+    let pillIcon = isUnanswered ? 'fa-circle-minus' : isCorrect ? 'fa-circle-check' : 'fa-circle-xmark';
+
+    let optionsHtml = '';
+    q.options.forEach((optText, idx) => {
+      let cls = 'option disabled';
+      let tagHtml = '';
+      if(idx === q.correctIndex){
+        cls += ' correct-answer';
+        tagHtml = '<span class="tag tag-correct">Correct Answer</span>';
+      } else if(idx === userIdx){
+        cls += ' wrong-answer';
+        tagHtml = '<span class="tag tag-wrong">Your Answer</span>';
+      }
+      optionsHtml += `<div class="${cls}"><div class="circle"></div><div class="opt-text">${optText}</div>${tagHtml}</div>`;
+    });
+
+    item.innerHTML = `
+      <span class="q-num-pill"><i class="fa-solid ${pillIcon}"></i> Question ${i+1} · ${pillLabel} · ${q.difficulty}</span>
+      <div class="q-text" style="font-size:16.5px; margin-bottom:16px;">${q.question}</div>
+      <div class="options">${optionsHtml}</div>
+      <div class="explanation-box"><b><i class="fa-solid fa-lightbulb"></i> Explanation:</b> ${q.explanation}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+</script>
+</body>
+</html>

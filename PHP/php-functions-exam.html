@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PHP Functions — Chapter Exam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0c0e14;
+    --bg-1:#12151f;
+    --bg-2:#181c29;
+    --bg-3:#1f2433;
+    --line:#2a3040;
+    --line-soft:#232838;
+    --text-hi:#eef0f6;
+    --text-mid:#a9b0c3;
+    --text-low:#6b7280;
+    --php-purple:#8892bf;
+    --php-purple-soft:rgba(136,146,191,0.14);
+    --accent:#f2a65a;
+    --accent-soft:rgba(242,166,90,0.14);
+    --good:#5fd694;
+    --good-soft:rgba(95,214,148,0.14);
+    --bad:#f16d75;
+    --bad-soft:rgba(241,109,117,0.14);
+    --easy:#5fd694;
+    --medium:#f2c25a;
+    --hard:#f16d75;
+    --radius:14px;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-mono:'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 12% -10%, rgba(136,146,191,0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(242,166,90,0.07), transparent 55%),
+      var(--bg-0);
+    color:var(--text-hi);
+    font-family:var(--font-mono);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  ::selection{ background:var(--php-purple-soft); color:var(--text-hi); }
+
+  .app{
+    max-width:900px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  /* ---------- Top bar (terminal chrome) ---------- */
+  .chrome{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-bottom:none;
+    border-radius:12px 12px 0 0;
+    padding:10px 14px;
+  }
+  .dot{width:11px;height:11px;border-radius:50%;}
+  .dot.red{background:#f16d75;}
+  .dot.yellow{background:#f2c25a;}
+  .dot.green{background:#5fd694;}
+  .chrome-title{
+    margin-left:10px;
+    font-size:12.5px;
+    color:var(--text-low);
+    letter-spacing:0.02em;
+  }
+  .chrome-title b{color:var(--text-mid); font-weight:600;}
+
+  .panel{
+    background:var(--bg-1);
+    border:1px solid var(--line);
+    border-radius:0 0 12px 12px;
+    padding:26px 26px 30px;
+  }
+  @media (max-width:600px){
+    .panel{padding:18px 16px 24px;}
+  }
+
+  h1,h2,h3{ font-family:var(--font-display); margin:0; }
+
+  /* ---------- Start screen ---------- */
+  .brand{
+    display:flex; align-items:center; gap:12px; margin-bottom:6px;
+  }
+  .brand-mark{
+    width:38px; height:38px; border-radius:9px;
+    background:linear-gradient(135deg, var(--php-purple), #5a6494);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; color:#0c0e14; font-size:15px;
+    flex-shrink:0;
+  }
+  .eyebrow{
+    text-transform:uppercase; letter-spacing:0.14em; font-size:11.5px;
+    color:var(--php-purple); font-weight:600; margin-bottom:8px;
+  }
+  h1.title{ font-size:30px; font-weight:700; color:var(--text-hi); line-height:1.25; }
+  @media (max-width:600px){ h1.title{font-size:24px;} }
+
+  .lede{ color:var(--text-mid); font-size:14.5px; line-height:1.7; margin:14px 0 22px; max-width:60ch;}
+
+  .stat-row{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:22px 0;
+  }
+  @media (max-width:600px){ .stat-row{grid-template-columns:repeat(2,1fr);} }
+  .stat{
+    background:var(--bg-2); border:1px solid var(--line-soft); border-radius:10px;
+    padding:14px 12px; text-align:center;
+  }
+  .stat .num{ font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--text-hi); }
+  .stat .lbl{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-low); margin-top:4px; }
+  .stat.easy .num{color:var(--easy);}
+  .stat.medium .num{color:var(--medium);}
+  .stat.hard .num{color:var(--hard);}
+
+  .rules{
+    background:var(--bg-2); border:1px solid var(--line-soft); border-radius:10px;
+    padding:16px 18px; margin:20px 0; font-size:13px; color:var(--text-mid); line-height:1.9;
+  }
+  .rules div::before{ content:"//"; color:var(--php-purple); margin-right:8px; }
+
+  .btn{
+    font-family:var(--font-mono); font-weight:600; font-size:14px;
+    border:none; border-radius:9px; padding:13px 22px; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--php-purple), #6b76a8);
+    color:#0b0d13;
+    box-shadow:0 8px 24px -8px rgba(136,146,191,0.55);
+  }
+  .btn-primary:hover{ box-shadow:0 10px 28px -6px rgba(136,146,191,0.7); }
+  .btn-ghost{
+    background:transparent; color:var(--text-mid); border:1px solid var(--line);
+  }
+  .btn-ghost:hover{ color:var(--text-hi); border-color:var(--php-purple); }
+  .btn-danger-outline{
+    background:transparent; color:var(--bad); border:1px solid rgba(241,109,117,0.4);
+  }
+  .btn-danger-outline:hover{ background:var(--bad-soft); }
+  .btn[disabled]{ opacity:0.4; cursor:not-allowed; }
+
+  .start-actions{ display:flex; gap:12px; margin-top:26px; flex-wrap:wrap; }
+
+  /* ---------- Quiz screen ---------- */
+  .hidden{ display:none !important; }
+
+  .quiz-top{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    margin-bottom:16px; flex-wrap:wrap;
+  }
+  .q-index{ font-size:12.5px; color:var(--text-low); letter-spacing:0.03em; }
+  .q-index b{ color:var(--text-hi); font-weight:700;}
+
+  .timer{
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg-2); border:1px solid var(--line-soft);
+    padding:8px 14px; border-radius:20px; font-size:13.5px; font-weight:600;
+    color:var(--text-hi);
+  }
+  .timer.warn{ color:var(--accent); border-color:rgba(242,166,90,0.4); }
+  .timer.danger{ color:var(--bad); border-color:rgba(241,109,117,0.5); animation:pulse 1s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.55;} }
+  .timer-dot{ width:7px; height:7px; border-radius:50%; background:var(--good); flex-shrink:0; }
+  .timer.warn .timer-dot{ background:var(--accent); }
+  .timer.danger .timer-dot{ background:var(--bad); }
+
+  .progress-track{
+    height:7px; background:var(--bg-2); border-radius:99px; overflow:hidden;
+    border:1px solid var(--line-soft); margin-bottom:22px;
+  }
+  .progress-fill{
+    height:100%; border-radius:99px;
+    background:linear-gradient(90deg, var(--php-purple), var(--accent));
+    width:0%; transition:width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; font-weight:700;
+    padding:4px 10px; border-radius:99px; margin-right:8px;
+  }
+  .badge.easy{ color:var(--easy); background:var(--good-soft); }
+  .badge.medium{ color:var(--medium); background:var(--accent-soft); }
+  .badge.hard{ color:var(--hard); background:var(--bad-soft); }
+  .badge.type{ color:var(--text-mid); background:var(--bg-3); }
+
+  .q-card{
+    animation:qEnter .35s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes qEnter{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .q-meta{ margin-bottom:12px; }
+  .q-text{
+    font-family:var(--font-display); font-size:19px; font-weight:600;
+    color:var(--text-hi); line-height:1.5; margin-bottom:16px;
+  }
+  @media (max-width:600px){ .q-text{font-size:16.5px;} }
+
+  .code-block{
+    background:#0a0c12; border:1px solid var(--line); border-radius:10px;
+    margin-bottom:18px; overflow:hidden;
+  }
+  .code-head{
+    display:flex; align-items:center; gap:6px; padding:9px 12px;
+    border-bottom:1px solid var(--line); background:#0e1017;
+  }
+  .code-head .dot{ width:8px; height:8px; }
+  .code-file{ margin-left:8px; font-size:11px; color:var(--text-low); }
+  .code-body{
+    padding:16px 18px; font-size:13.5px; line-height:1.75; overflow-x:auto;
+    color:#dbe1f0;
+  }
+  .code-body .tag{ color:#6b7a99; }
+  .code-body .kw{ color:#c792ea; }
+  .code-body .fn{ color:#82aaff; }
+  .code-body .str{ color:#c3e88d; }
+  .code-body .var{ color:#f07178; }
+  .code-body .cmt{ color:#5b6577; font-style:italic; }
+  .code-body .num{ color:#f78c6c; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .option{
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--bg-2); border:1.5px solid var(--line-soft); border-radius:10px;
+    padding:13px 15px; cursor:pointer; transition:border-color .15s, background .15s, transform .1s;
+    font-size:14px; color:var(--text-mid); text-align:left;
+  }
+  .option:hover{ border-color:var(--php-purple); color:var(--text-hi); }
+  .option:active{ transform:scale(0.995); }
+  .option .letter{
+    flex-shrink:0; width:24px; height:24px; border-radius:6px;
+    background:var(--bg-3); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11.5px; font-weight:700; color:var(--text-low);
+  }
+  .option .label{ padding-top:2px; }
+  .option.selected{ border-color:var(--php-purple); background:var(--php-purple-soft); color:var(--text-hi); }
+  .option.selected .letter{ background:var(--php-purple); color:#0b0d13; border-color:var(--php-purple); }
+
+  .option.correct{ border-color:var(--good); background:var(--good-soft); color:var(--text-hi); }
+  .option.correct .letter{ background:var(--good); color:#0b0d13; border-color:var(--good); }
+  .option.incorrect{ border-color:var(--bad); background:var(--bad-soft); color:var(--text-hi); }
+  .option.incorrect .letter{ background:var(--bad); color:#0b0d13; border-color:var(--bad); }
+  .option.locked{ cursor:default; }
+
+  .explain-box{
+    margin-top:16px; padding:14px 16px; border-radius:10px;
+    background:var(--bg-2); border:1px solid var(--line-soft);
+    font-size:13.5px; color:var(--text-mid); line-height:1.7;
+    animation:qEnter .3s ease;
+  }
+  .explain-box b{ color:var(--good); }
+  .explain-box.wrong b{ color:var(--bad); }
+
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-top:26px; flex-wrap:wrap;
+  }
+  .nav-left, .nav-right{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  .flag-strip{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:20px; padding-top:18px;
+    border-top:1px dashed var(--line);
+  }
+  .flag-dot{
+    width:26px; height:26px; border-radius:6px; font-size:10.5px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-2); border:1px solid var(--line-soft); color:var(--text-low);
+    cursor:pointer; font-weight:700; transition:all .15s;
+  }
+  .flag-dot:hover{ border-color:var(--php-purple); }
+  .flag-dot.current{ border-color:var(--php-purple); color:var(--php-purple); }
+  .flag-dot.answered{ background:var(--good-soft); color:var(--good); border-color:transparent; }
+  .flag-dot.current.answered{ border-color:var(--good); }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(6,7,11,0.72); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+    animation:fadeIn .2s ease;
+  }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .modal{
+    background:var(--bg-2); border:1px solid var(--line); border-radius:14px;
+    padding:24px; max-width:380px; width:100%;
+    animation:qEnter .25s cubic-bezier(.16,1,.3,1);
+  }
+  .modal h3{ font-size:16px; margin-bottom:10px; color:var(--text-hi); }
+  .modal p{ font-size:13.5px; color:var(--text-mid); line-height:1.6; margin:0 0 20px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+
+  /* ---------- Results ---------- */
+  .score-hero{
+    text-align:center; padding:30px 10px 10px;
+  }
+  .score-ring{
+    width:170px; height:170px; margin:0 auto 18px; position:relative;
+  }
+  .score-ring svg{ transform:rotate(-90deg); }
+  .score-ring-bg{ fill:none; stroke:var(--bg-3); stroke-width:10; }
+  .score-ring-fill{ fill:none; stroke:url(#ringGrad); stroke-width:10; stroke-linecap:round;
+    transition:stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1); }
+  .score-ring-text{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .score-ring-text .pct{ font-family:var(--font-display); font-size:34px; font-weight:700; color:var(--text-hi); }
+  .score-ring-text .frac{ font-size:12px; color:var(--text-low); margin-top:2px; }
+
+  .verdict{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:6px; }
+  .verdict-sub{ font-size:13.5px; color:var(--text-mid); margin-bottom:24px; }
+
+  .result-stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:28px;
+  }
+  @media (max-width:600px){ .result-stats{grid-template-columns:1fr 1fr; } }
+  .rstat{
+    background:var(--bg-2); border:1px solid var(--line-soft); border-radius:10px; padding:16px 10px; text-align:center;
+  }
+  .rstat .num{ font-family:var(--font-display); font-size:24px; font-weight:700; }
+  .rstat.good .num{ color:var(--good); }
+  .rstat.bad .num{ color:var(--bad); }
+  .rstat .lbl{ font-size:10.5px; text-transform:uppercase; color:var(--text-low); letter-spacing:0.07em; margin-top:4px; }
+
+  .section-label{
+    font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--php-purple);
+    font-weight:700; margin:30px 0 14px; display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  .review-item{
+    background:var(--bg-2); border:1px solid var(--line-soft); border-radius:12px;
+    padding:18px 18px 16px; margin-bottom:14px;
+  }
+  .review-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .review-num{ font-size:12px; color:var(--text-low); font-weight:700; }
+  .review-status{
+    font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .review-status.correct{ background:var(--good-soft); color:var(--good); }
+  .review-status.incorrect{ background:var(--bad-soft); color:var(--bad); }
+  .review-q{ font-size:14.5px; color:var(--text-hi); font-weight:600; margin-bottom:10px; line-height:1.5; }
+  .review-ans{ font-size:13px; color:var(--text-mid); line-height:1.9; }
+  .review-ans .yours{ color:var(--bad); }
+  .review-ans .correctline{ color:var(--good); }
+  .review-explain{
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    font-size:13px; color:var(--text-mid); line-height:1.7;
+  }
+
+  .footer-actions{ display:flex; gap:12px; justify-content:center; margin-top:30px; flex-wrap:wrap; }
+
+  a{ color:inherit; }
+
+  ::-webkit-scrollbar{ width:9px; height:9px; }
+  ::-webkit-scrollbar-track{ background:var(--bg-1); }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:99px; }
+  ::-webkit-scrollbar-thumb:hover{ background:var(--php-purple); }
+
+  :focus-visible{ outline:2px solid var(--php-purple); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="chrome">
+    <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+    <span class="chrome-title"><b>functions.php</b> — chapter-exam.exe</span>
+  </div>
+
+  <div class="panel">
+
+    <!-- ============ START SCREEN ============ -->
+    <section id="screen-start">
+      <div class="brand">
+        <div class="brand-mark">&lt;/&gt;</div>
+        <div class="eyebrow">Chapter Exam</div>
+      </div>
+      <h1 class="title">PHP Functions — Built-in Function Mastery</h1>
+      <p class="lede">
+        20 questions pulled from string, array, pointer, math, date/time, variable, and general-purpose
+        PHP functions. Expect code-output puzzles, debugging traps, and near-identical function pairs
+        designed to catch assumptions — not just memorized syntax.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat"><div class="num">20</div><div class="lbl">Questions</div></div>
+        <div class="stat"><div class="num">30:00</div><div class="lbl">Time Limit</div></div>
+        <div class="stat easy"><div class="num">6</div><div class="lbl">Easy</div></div>
+        <div class="stat medium"><div class="num">8</div><div class="lbl">Medium</div></div>
+      </div>
+
+      <div class="rules">
+        <div>Order of questions and answer choices is shuffled every attempt.</div>
+        <div>You must answer (or explicitly skip) a question before moving forward.</div>
+        <div>Jump to any visited question using the number strip at the bottom of the quiz.</div>
+        <div>Timer auto-submits your exam at 00:00 — unanswered items count as wrong.</div>
+        <div>Full answer key with explanations is generated at the end.</div>
+      </div>
+
+      <div class="start-actions">
+        <button class="btn btn-primary" id="btn-start">Start Exam →</button>
+      </div>
+    </section>
+
+    <!-- ============ QUIZ SCREEN ============ -->
+    <section id="screen-quiz" class="hidden">
+      <div class="quiz-top">
+        <div class="q-index">Question <b id="q-current">1</b> / <span id="q-total">20</span></div>
+        <div class="timer" id="timer">
+          <span class="timer-dot"></span>
+          <span id="timer-text">30:00</span>
+        </div>
+      </div>
+
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+      <div class="q-card" id="q-card">
+        <div class="q-meta">
+          <span class="badge" id="badge-diff">Easy</span>
+          <span class="badge type" id="badge-type">MCQ</span>
+        </div>
+        <div class="q-text" id="q-text">Question text goes here</div>
+
+        <div class="code-block hidden" id="code-block">
+          <div class="code-head">
+            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            <span class="code-file">snippet.php</span>
+          </div>
+          <pre class="code-body" id="code-body"></pre>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div class="explain-box hidden" id="explain-box"></div>
+      </div>
+
+      <div class="nav-row">
+        <div class="nav-left">
+          <button class="btn btn-ghost" id="btn-prev">← Previous</button>
+        </div>
+        <div class="nav-right">
+          <button class="btn btn-ghost" id="btn-skip">Skip →</button>
+          <button class="btn btn-primary" id="btn-next">Next →</button>
+        </div>
+      </div>
+
+      <div class="flag-strip" id="flag-strip"></div>
+    </section>
+
+    <!-- ============ RESULTS SCREEN ============ -->
+    <section id="screen-results" class="hidden">
+      <div class="score-hero">
+        <div class="score-ring">
+          <svg width="170" height="170" viewBox="0 0 170 170">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#8892bf"/>
+                <stop offset="100%" stop-color="#f2a65a"/>
+              </linearGradient>
+            </defs>
+            <circle class="score-ring-bg" cx="85" cy="85" r="74"></circle>
+            <circle class="score-ring-fill" id="score-ring-fill" cx="85" cy="85" r="74"
+                    stroke-dasharray="464.9" stroke-dashoffset="464.9"></circle>
+          </svg>
+          <div class="score-ring-text">
+            <div class="pct" id="result-pct">0%</div>
+            <div class="frac" id="result-frac">0 / 20</div>
+          </div>
+        </div>
+        <div class="verdict" id="result-verdict">—</div>
+        <div class="verdict-sub" id="result-verdict-sub">—</div>
+      </div>
+
+      <div class="result-stats">
+        <div class="rstat good"><div class="num" id="stat-correct">0</div><div class="lbl">Correct</div></div>
+        <div class="rstat bad"><div class="num" id="stat-wrong">0</div><div class="lbl">Wrong</div></div>
+        <div class="rstat"><div class="num" id="stat-time">0:00</div><div class="lbl">Time Used</div></div>
+      </div>
+
+      <div class="section-label">Answer Key &amp; Detailed Review</div>
+      <div id="review-list"></div>
+
+      <div class="footer-actions">
+        <button class="btn btn-primary" id="btn-retry">Retake Exam (New Shuffle)</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ============ MODAL (skip confirm / time up) ============ -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Skip this question?</h3>
+    <p id="modal-body">You haven't answered yet. You can come back to it later using the number strip.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-confirm">Skip anyway</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================
+     1. QUESTION BANK — 20 PHP Functions questions
+     ===================================================== */
+  const BANK = [
+    {
+      id:1, difficulty:"easy", type:"MCQ",
+      text:"Which built-in function returns the number of characters in a string?",
+      code:null,
+      options:["strlen()","count()","sizeof()","str_count()"],
+      correct:"strlen()",
+      explain:"<b>strlen()</b> returns the length of a string in bytes/characters. count() and its alias sizeof() operate on arrays and Countable objects, not strings."
+    },
+    {
+      id:2, difficulty:"easy", type:"MCQ",
+      text:"Which function returns the number of elements in an array?",
+      code:null,
+      options:["count()","strlen()","array_length()","len()"],
+      correct:"count()",
+      explain:"<b>count()</b> (aliased as sizeof()) returns how many elements an array holds. strlen() is for strings, and array_length()/len() do not exist in PHP."
+    },
+    {
+      id:3, difficulty:"easy", type:"Code Output",
+      text:"What does this PHP script output?",
+      code:'<?php\n$name = "hello";\necho strtoupper($name);',
+      options:["HELLO","hello","Hello","hELLO"],
+      correct:"HELLO",
+      explain:"<b>strtoupper()</b> converts every alphabetic character in the string to uppercase, producing \"HELLO\"."
+    },
+    {
+      id:4, difficulty:"easy", type:"Identify Function",
+      text:"Which function reverses the characters of a string (e.g. \"abc\" becomes \"cba\")?",
+      code:null,
+      options:["strrev()","array_reverse()","str_flip()","reverse()"],
+      correct:"strrev()",
+      explain:"<b>strrev()</b> reverses a string. array_reverse() is its array counterpart and reverses element order instead — str_flip() and reverse() don't exist in PHP."
+    },
+    {
+      id:5, difficulty:"easy", type:"MCQ",
+      text:"Which function checks whether a variable exists and its value is not NULL?",
+      code:null,
+      options:["isset()","empty()","unset()","is_null()"],
+      correct:"isset()",
+      explain:"<b>isset()</b> returns true when a variable is declared and holds a non-NULL value. empty() checks for \"falsy\" values, unset() destroys a variable, and is_null() checks specifically for NULL."
+    },
+    {
+      id:6, difficulty:"easy", type:"Code Output",
+      text:"What does this script print?",
+      code:'<?php\n$nums = [3, 1, 2];\nsort($nums);\nprint_r($nums);',
+      options:[
+        "Array ( [0] => 1 [1] => 2 [2] => 3 )",
+        "Array ( [0] => 3 [1] => 1 [2] => 2 )",
+        "Array ( [0] => 3 [1] => 2 [2] => 1 )",
+        "Array ( [0] => 2 [1] => 1 [2] => 3 )"
+      ],
+      correct:"Array ( [0] => 1 [1] => 2 [2] => 3 )",
+      explain:"<b>sort()</b> re-orders values in ascending order and reindexes the array's numeric keys starting from 0."
+    },
+    {
+      id:7, difficulty:"medium", type:"Code Output",
+      text:"What is printed by this script? (Pay attention to the brackets marking the string edges.)",
+      code:'<?php\n$text = "  Hello PHP  ";\necho "[" . trim($text) . "]";',
+      options:["[Hello PHP]","[  Hello PHP  ]","[Hello PHP  ]","[  Hello PHP]"],
+      correct:"[Hello PHP]",
+      explain:"<b>trim()</b> strips whitespace from <i>both</i> ends of a string by default. ltrim() would only remove it from the left, and rtrim() only from the right."
+    },
+    {
+      id:8, difficulty:"medium", type:"Identify Function",
+      text:"You have the string \"a,b,c\" and need to convert it into the array [\"a\",\"b\",\"c\"]. Which function does this?",
+      code:null,
+      options:["explode()","implode()","join()","array_map()"],
+      correct:"explode()",
+      explain:"<b>explode()</b> splits a string into an array using a delimiter. implode() — also callable as join(), its alias — does the opposite: it glues an array back into a string."
+    },
+    {
+      id:9, difficulty:"medium", type:"Code Output",
+      text:"What does this script output?",
+      code:'<?php\n$parts = explode(",", "a,b,c");\necho implode("-", $parts);',
+      options:["a-b-c","a,b,c","a b c","Array"],
+      correct:"a-b-c",
+      explain:"explode(\",\", \"a,b,c\") produces [\"a\",\"b\",\"c\"]. <b>implode(\"-\", ...)</b> then glues those elements together separated by \"-\", giving \"a-b-c\"."
+    },
+    {
+      id:10, difficulty:"medium", type:"Debug the Code",
+      text:"strcmp() is case-sensitive. What does this script output?",
+      code:'<?php\n$result = strcmp("Hello", "hello");\necho ($result < 0) ? "negative"\n   : (($result > 0) ? "positive" : "zero");',
+      options:["negative","positive","zero","Hello"],
+      correct:"negative",
+      explain:"<b>strcmp()</b> compares strings byte-by-byte using ASCII values. Uppercase 'H' (72) is numerically less than lowercase 'h' (104), so it returns a negative number. Use strcasecmp() for a case-insensitive comparison."
+    },
+    {
+      id:11, difficulty:"medium", type:"Code Output",
+      text:"What does this script output?",
+      code:'<?php\nvar_dump(strcasecmp("Hello", "hello"));',
+      options:["int(0)","bool(true)","int(1)","NULL"],
+      correct:"int(0)",
+      explain:"<b>strcasecmp()</b> ignores letter case, so \"Hello\" and \"hello\" are considered equal and it returns int(0)."
+    },
+    {
+      id:12, difficulty:"medium", type:"Identify Function",
+      text:"Which function adds one or more elements to the END of an array?",
+      code:null,
+      options:["array_push()","array_pop()","array_shift()","array_unshift()"],
+      correct:"array_push()",
+      explain:"<b>array_push()</b> appends elements to the end of an array. array_pop() removes from the end, while array_shift()/array_unshift() operate on the beginning."
+    },
+    {
+      id:13, difficulty:"medium", type:"Code Output",
+      text:"What is printed by this script?",
+      code:'<?php\n$a = [1, 2, 3];\n$b = [4, 5];\nprint_r(array_merge($a, $b));',
+      options:[
+        "Array ( [0] => 1 [1] => 2 [2] => 3 [3] => 4 [4] => 5 )",
+        "Array ( [0] => 4 [1] => 5 [2] => 1 [3] => 2 [4] => 3 )",
+        "Array ( [0] => 1 [1] => 2 [2] => 3 [3] => 1 [4] => 2 )",
+        "Array ( [0] => [1,2,3] [1] => [4,5] )"
+      ],
+      correct:"Array ( [0] => 1 [1] => 2 [2] => 3 [3] => 4 [4] => 5 )",
+      explain:"<b>array_merge()</b> appends the second array's values after the first array's values, and reindexes numeric keys sequentially starting from 0."
+    },
+    {
+      id:14, difficulty:"medium", type:"Identify Function",
+      text:"Which function returns the value the array's internal pointer currently points to, WITHOUT moving the pointer?",
+      code:null,
+      options:["current()","next()","reset()","key()"],
+      correct:"current()",
+      explain:"<b>current()</b> (alias pos()) reads the value at the pointer's position without moving it. next()/prev() move the pointer, reset() moves it to the first element, and key() returns the current key, not the value."
+    },
+    {
+      id:15, difficulty:"hard", type:"Code Output",
+      text:"What does this script output?",
+      code:'<?php\necho round(4.5) . " " . floor(4.5) . " " . ceil(4.1);',
+      options:["5 4 5","4 4 5","5 5 5","4 4 4"],
+      correct:"5 4 5",
+      explain:"<b>round(4.5)</b> rounds half away from zero, giving 5. <b>floor(4.5)</b> truncates down to 4. <b>ceil(4.1)</b> rounds up to the next integer, 5. Result: \"5 4 5\"."
+    },
+    {
+      id:16, difficulty:"hard", type:"Debug the Code",
+      text:"This code has a classic PHP bug. What does it output, and why?",
+      code:'<?php\n$fruits = ["apple", "banana", "cherry"];\n$index = array_search("apple", $fruits);\nif ($index) {\n    echo "Found";\n} else {\n    echo "Not found";\n}',
+      options:[
+        "\"Not found\" — index 0 is loosely falsy, so the if condition fails even though \"apple\" exists",
+        "\"Found\" — array_search() located \"apple\" at index 0",
+        "\"Not found\" — array_search() cannot locate the first element of an array",
+        "Fatal error — array_search() requires string keys in the haystack"
+      ],
+      correct:"\"Not found\" — index 0 is loosely falsy, so the if condition fails even though \"apple\" exists",
+      explain:"array_search() returns <b>0</b> for \"apple\" (its index). In a loose boolean check, 0 evaluates to false, so the code wrongly prints \"Not found\". The fix is an explicit check: <code>if ($index !== false)</code>."
+    },
+    {
+      id:17, difficulty:"hard", type:"Code Output",
+      text:"What does this script output?",
+      code:'<?php\n$count = 0;\nvar_dump(empty($count));\nvar_dump(isset($count));',
+      options:["bool(true) then bool(true)","bool(false) then bool(true)","bool(true) then bool(false)","bool(false) then bool(false)"],
+      correct:"bool(true) then bool(true)",
+      explain:"<b>empty(0)</b> is true because 0 is one of PHP's recognized \"empty\" values. But the variable was still assigned, so <b>isset($count)</b> is also true — empty() and isset() answer different questions."
+    },
+    {
+      id:18, difficulty:"hard", type:"Code Output",
+      text:"Functions can be nested. What does this script output?",
+      code:'<?php\n$sentence = "hello world from php";\necho strtoupper(substr($sentence, 0, 11));',
+      options:["HELLO WORLD","hello world","HELLO WORL","Hello World"],
+      correct:"HELLO WORLD",
+      explain:"The innermost call runs first: <b>substr($sentence, 0, 11)</b> extracts the first 11 characters, \"hello world\". Then <b>strtoupper()</b> converts it to \"HELLO WORLD\"."
+    },
+    {
+      id:19, difficulty:"hard", type:"Code Output",
+      text:"What does this script print?",
+      code:'<?php\n$scores = ["Sam" => 92, "Ana" => 78, "Lee" => 85];\nasort($scores);\nprint_r($scores);',
+      options:[
+        "Array ( [Ana] => 78 [Lee] => 85 [Sam] => 92 )",
+        "Array ( [Sam] => 92 [Ana] => 78 [Lee] => 85 )",
+        "Array ( [0] => 78 [1] => 85 [2] => 92 )",
+        "Array ( [Sam] => 92 [Lee] => 85 [Ana] => 78 )"
+      ],
+      correct:"Array ( [Ana] => 78 [Lee] => 85 [Sam] => 92 )",
+      explain:"<b>asort()</b> sorts an array by its values in ascending order while preserving the original keys — unlike sort(), which reindexes and discards the original keys."
+    },
+    {
+      id:20, difficulty:"hard", type:"Code Output",
+      text:"mktime() normalizes out-of-range arguments. What does this script output?",
+      code:'<?php\necho date("Y-m-d", mktime(0, 0, 0, 13, 1, 2023));',
+      options:["2024-01-01","2023-13-01","2023-01-01","Fatal error: invalid month"],
+      correct:"2024-01-01",
+      explain:"<b>mktime()</b> rolls invalid values over instead of erroring. Month 13 overflows into month 1 of the following year, so the resulting timestamp is January 1st, 2024."
+    }
+  ];
+
+  /* =====================================================
+     2. STATE
+     ===================================================== */
+  const TOTAL_TIME = 30 * 60; // seconds
+  let questions = [];      // shuffled bank, each with shuffled options
+  let current = 0;
+  let answers = [];        // { selected: string|null, locked: bool, skipped: bool }
+  let timeLeft = TOTAL_TIME;
+  let timerInterval = null;
+  let startTimestamp = null;
+  let pendingModalAction = null;
+
+  /* =====================================================
+     3. HELPERS
+     ===================================================== */
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // Lightweight PHP-ish syntax highlighter for display only
+  function highlightPhp(code){
+    let out = escapeHtml(code);
+    out = out.replace(/(&lt;\?php|\?&gt;)/g, '<span class="tag">$1</span>');
+    out = out.replace(/(&quot;.*?&quot;|"(?:[^"\\]|\\.)*")/g, m => '<span class="str">'+m+'</span>');
+    out = out.replace(/\$[a-zA-Z_][a-zA-Z0-9_]*/g, m => '<span class="var">'+m+'</span>');
+    out = out.replace(/\b(echo|if|else|foreach|for|while|return|function|as|print)\b/g, '<span class="kw">$1</span>');
+    out = out.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)(\()/g, '<span class="fn">$1</span>$2');
+    out = out.replace(/(?<![a-zA-Z_])\b(\d+(\.\d+)?)\b/g, '<span class="num">$1</span>');
+    return out;
+  }
+
+  function formatTime(sec){
+    const m = Math.floor(sec / 60).toString().padStart(2,"0");
+    const s = Math.floor(sec % 60).toString().padStart(2,"0");
+    return m + ":" + s;
+  }
+
+  function letterFor(i){ return String.fromCharCode(65 + i); }
+
+  /* =====================================================
+     4. INIT / SETUP
+     ===================================================== */
+  function buildQuestions(){
+    const shuffledBank = shuffle(BANK);
+    questions = shuffledBank.map(q => {
+      const opts = shuffle(q.options);
+      return Object.assign({}, q, { shuffledOptions: opts });
+    });
+    answers = questions.map(() => ({ selected:null, locked:false, skipped:false }));
+  }
+
+  function startExam(){
+    buildQuestions();
+    current = 0;
+    timeLeft = TOTAL_TIME;
+    startTimestamp = Date.now();
+    document.getElementById("screen-start").classList.add("hidden");
+    document.getElementById("screen-results").classList.add("hidden");
+    document.getElementById("screen-quiz").classList.remove("hidden");
+    document.getElementById("q-total").textContent = questions.length;
+    buildFlagStrip();
+    renderQuestion();
+    startTimer();
+  }
+
+  /* =====================================================
+     5. TIMER
+     ===================================================== */
+  function startTimer(){
+    clearInterval(timerInterval);
+    updateTimerUI();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      if(timeLeft <= 0){
+        timeLeft = 0;
+        updateTimerUI();
+        clearInterval(timerInterval);
+        finishExam(true);
+        return;
+      }
+      updateTimerUI();
+    }, 1000);
+  }
+
+  function updateTimerUI(){
+    const el = document.getElementById("timer");
+    const txt = document.getElementById("timer-text");
+    txt.textContent = formatTime(timeLeft);
+    el.classList.remove("warn","danger");
+    if(timeLeft <= 60) el.classList.add("danger");
+    else if(timeLeft <= 300) el.classList.add("warn");
+  }
+
+  /* =====================================================
+     6. RENDER QUESTION
+     ===================================================== */
+  function renderQuestion(){
+    const q = questions[current];
+    const state = answers[current];
+
+    document.getElementById("q-current").textContent = current + 1;
+
+    const badgeDiff = document.getElementById("badge-diff");
+    badgeDiff.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    badgeDiff.className = "badge " + q.difficulty;
+
+    document.getElementById("badge-type").textContent = q.type;
+    document.getElementById("q-text").textContent = q.text;
+
+    const codeBlock = document.getElementById("code-block");
+    const codeBody = document.getElementById("code-body");
+    if(q.code){
+      codeBlock.classList.remove("hidden");
+      codeBody.innerHTML = highlightPhp(q.code);
+    } else {
+      codeBlock.classList.add("hidden");
+      codeBody.innerHTML = "";
+    }
+
+    const optionsEl = document.getElementById("options");
+    optionsEl.innerHTML = "";
+    q.shuffledOptions.forEach((optText, i) => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.type = "button";
+      btn.innerHTML = '<span class="letter">'+letterFor(i)+'</span><span class="label"></span>';
+      btn.querySelector(".label").textContent = optText;
+      btn.addEventListener("click", () => selectOption(optText));
+
+      if(state.locked){
+        btn.classList.add("locked");
+        if(optText === q.correct) btn.classList.add("correct");
+        else if(optText === state.selected) btn.classList.add("incorrect");
+      } else if(state.selected === optText){
+        btn.classList.add("selected");
+      }
+      optionsEl.appendChild(btn);
+    });
+
+    const explainBox = document.getElementById("explain-box");
+    if(state.locked){
+      explainBox.classList.remove("hidden");
+      const isCorrect = state.selected === q.correct;
+      explainBox.className = "explain-box" + (isCorrect ? "" : " wrong");
+      explainBox.innerHTML = (isCorrect ? "✅ Correct — " : "❌ Not quite — ") + q.explain;
+    } else {
+      explainBox.classList.add("hidden");
+      explainBox.innerHTML = "";
+    }
+
+    document.getElementById("btn-prev").disabled = current === 0;
+    document.getElementById("btn-next").textContent = current === questions.length - 1 ? "Finish Exam →" : "Next →";
+    document.getElementById("btn-skip").classList.toggle("hidden", state.locked);
+
+    updateProgress();
+    updateFlagStrip();
+
+    // retrigger entrance animation
+    const card = document.getElementById("q-card");
+    card.style.animation = "none";
+    void card.offsetWidth;
+    card.style.animation = "";
+  }
+
+  function selectOption(optText){
+    const state = answers[current];
+    if(state.locked) return;
+    state.selected = optText;
+    state.locked = true;
+    state.skipped = false;
+    renderQuestion();
+  }
+
+  /* =====================================================
+     7. PROGRESS + FLAG STRIP
+     ===================================================== */
+  function updateProgress(){
+    const answeredCount = answers.filter(a => a.locked || a.skipped).length;
+    const pct = Math.round((answeredCount / questions.length) * 100);
+    document.getElementById("progress-fill").style.width = pct + "%";
+  }
+
+  function buildFlagStrip(){
+    const strip = document.getElementById("flag-strip");
+    strip.innerHTML = "";
+    questions.forEach((q, i) => {
+      const d = document.createElement("div");
+      d.className = "flag-dot";
+      d.textContent = i + 1;
+      d.addEventListener("click", () => { current = i; renderQuestion(); });
+      strip.appendChild(d);
+    });
+    updateFlagStrip();
+  }
+
+  function updateFlagStrip(){
+    const dots = document.querySelectorAll(".flag-dot");
+    dots.forEach((d, i) => {
+      d.classList.toggle("current", i === current);
+      d.classList.toggle("answered", !!answers[i].locked);
+    });
+  }
+
+  /* =====================================================
+     8. NAVIGATION + MODAL
+     ===================================================== */
+  function goNext(){
+    const state = answers[current];
+    if(!state.locked && !state.skipped){
+      openModal(
+        "Unanswered question",
+        "You haven't answered this question yet. You can skip it and come back later, or go back and answer it now.",
+        "Skip anyway",
+        () => {
+          answers[current].skipped = true;
+          proceedNext();
+        }
+      );
+      return;
+    }
+    proceedNext();
+  }
+
+  function proceedNext(){
+    if(current === questions.length - 1){
+      finishExam(false);
+    } else {
+      current++;
+      renderQuestion();
+    }
+  }
+
+  function goPrev(){
+    if(current > 0){ current--; renderQuestion(); }
+  }
+
+  function goSkip(){
+    const state = answers[current];
+    if(state.locked){ // already answered, just move on
+      proceedNext();
+      return;
+    }
+    openModal(
+      "Skip this question?",
+      "You haven't answered yet. It'll be marked unanswered but you can return to it via the number strip below.",
+      "Skip anyway",
+      () => {
+        answers[current].skipped = true;
+        proceedNext();
+      }
+    );
+  }
+
+  function openModal(title, body, confirmLabel, onConfirm){
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-body").textContent = body;
+    document.getElementById("modal-confirm").textContent = confirmLabel;
+    pendingModalAction = onConfirm;
+    document.getElementById("modal-overlay").classList.remove("hidden");
+  }
+
+  function closeModal(){
+    document.getElementById("modal-overlay").classList.add("hidden");
+    pendingModalAction = null;
+  }
+
+  /* =====================================================
+     9. RESULTS
+     ===================================================== */
+  function finishExam(timeUp){
+    clearInterval(timerInterval);
+
+    let correctCount = 0;
+    questions.forEach((q, i) => {
+      if(answers[i].locked && answers[i].selected === q.correct) correctCount++;
+    });
+    const wrongCount = questions.length - correctCount;
+    const pct = Math.round((correctCount / questions.length) * 100);
+    const timeUsed = TOTAL_TIME - timeLeft;
+
+    document.getElementById("screen-quiz").classList.add("hidden");
+    document.getElementById("screen-results").classList.remove("hidden");
+
+    document.getElementById("result-pct").textContent = pct + "%";
+    document.getElementById("result-frac").textContent = correctCount + " / " + questions.length;
+    document.getElementById("stat-correct").textContent = correctCount;
+    document.getElementById("stat-wrong").textContent = wrongCount;
+    document.getElementById("stat-time").textContent = formatTime(timeUsed);
+
+    const circumference = 2 * Math.PI * 74;
+    const ring = document.getElementById("score-ring-fill");
+    ring.setAttribute("stroke-dasharray", circumference.toFixed(1));
+    requestAnimationFrame(() => {
+      ring.style.strokeDashoffset = (circumference * (1 - pct/100)).toFixed(1);
+    });
+
+    let verdict, sub;
+    if(pct >= 90){ verdict = "Outstanding — Function Fluent 🏆"; sub = "You clearly know your PHP built-ins cold."; }
+    else if(pct >= 75){ verdict = "Strong Pass 💪"; sub = "Solid grasp of PHP functions, with a few gaps to polish."; }
+    else if(pct >= 50){ verdict = "Passable, Keep Practicing 📘"; sub = "You know the basics — review the tricky pairs below."; }
+    else { verdict = "Needs Review 🔁"; sub = "Revisit the PHP manual's function reference and retry."; }
+    if(timeUp) sub += " (Time ran out — remaining questions were auto-submitted.)";
+    document.getElementById("result-verdict").textContent = verdict;
+    document.getElementById("result-verdict-sub").textContent = sub;
+
+    renderReview();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function renderReview(){
+    const list = document.getElementById("review-list");
+    list.innerHTML = "";
+    questions.forEach((q, i) => {
+      const state = answers[i];
+      const wasCorrect = state.locked && state.selected === q.correct;
+      const item = document.createElement("div");
+      item.className = "review-item";
+
+      let codeHtml = "";
+      if(q.code){
+        codeHtml = '<div class="code-block" style="margin-bottom:12px;">'
+          + '<div class="code-head"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="code-file">snippet.php</span></div>'
+          + '<pre class="code-body">' + highlightPhp(q.code) + '</pre></div>';
+      }
+
+      const yourAnswerText = state.locked ? state.selected : (state.skipped ? "Skipped / not answered" : "Not answered");
+
+      item.innerHTML =
+        '<div class="review-head">'
+          + '<span class="review-num">Q' + (i+1) + ' · ' + q.difficulty.toUpperCase() + ' · ' + q.type + '</span>'
+          + '<span class="review-status ' + (wasCorrect ? "correct" : "incorrect") + '">' + (wasCorrect ? "Correct" : "Incorrect") + '</span>'
+        + '</div>'
+        + '<div class="review-q"></div>'
+        + codeHtml
+        + '<div class="review-ans">'
+          + '<div>Your answer: <span class="your-answer ' + (wasCorrect ? "correctline" : "yours") + '"></span></div>'
+          + (wasCorrect ? "" : '<div>Correct answer: <span class="correct-answer correctline"></span></div>')
+        + '</div>'
+        + '<div class="review-explain"></div>';
+
+      item.querySelector(".review-q").textContent = q.text;
+      item.querySelector(".your-answer").textContent = yourAnswerText;
+      const correctAnswerEl = item.querySelector(".correct-answer");
+      if(correctAnswerEl) correctAnswerEl.textContent = q.correct;
+      item.querySelector(".review-explain").innerHTML = "💡 " + q.explain;
+
+      list.appendChild(item);
+    });
+  }
+
+  /* =====================================================
+     10. EVENT WIRING
+     ===================================================== */
+  document.getElementById("btn-start").addEventListener("click", startExam);
+  document.getElementById("btn-next").addEventListener("click", goNext);
+  document.getElementById("btn-prev").addEventListener("click", goPrev);
+  document.getElementById("btn-skip").addEventListener("click", goSkip);
+  document.getElementById("btn-retry").addEventListener("click", startExam);
+
+  document.getElementById("modal-cancel").addEventListener("click", closeModal);
+  document.getElementById("modal-confirm").addEventListener("click", () => {
+    const action = pendingModalAction;
+    closeModal();
+    if(action) action();
+  });
+  document.getElementById("modal-overlay").addEventListener("click", (e) => {
+    if(e.target.id === "modal-overlay") closeModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const quizVisible = !document.getElementById("screen-quiz").classList.contains("hidden");
+    const modalVisible = !document.getElementById("modal-overlay").classList.contains("hidden");
+    if(modalVisible) return;
+    if(!quizVisible) return;
+    if(e.key === "ArrowRight") goNext();
+    if(e.key === "ArrowLeft") goPrev();
+    if(["1","2","3","4"].includes(e.key)){
+      const idx = parseInt(e.key,10) - 1;
+      const q = questions[current];
+      if(q && q.shuffledOptions[idx] !== undefined) selectOption(q.shuffledOptions[idx]);
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

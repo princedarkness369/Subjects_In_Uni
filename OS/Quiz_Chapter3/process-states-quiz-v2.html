@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Process &amp; Process States — Quiz (Set Y)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #11141a;
+    --surface: #171b23;
+    --surface-2: #1d2229;
+    --border: #2a303b;
+    --text: #e7e9ee;
+    --muted: #8b93a7;
+    --new: #7c8aad;
+    --ready: #45d0a5;
+    --running: #f2b134;
+    --waiting: #e2607e;
+    --terminated: #a78bfa;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", monospace;
+    --sans: "Inter", system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(124,138,173,0.08), transparent),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:var(--mono);
+    font-size:clamp(24px, 4vw, 32px);
+    font-weight:700;
+    margin:0 0 18px;
+    letter-spacing:-0.01em;
+  }
+  .lifecycle{
+    display:flex;align-items:center;gap:0;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .lc-step{
+    display:flex;align-items:center;gap:8px;flex:1;
+    opacity:0.35;transition:opacity 0.4s ease;
+    font-family:var(--mono);font-size:12px;white-space:nowrap;
+  }
+  .lc-step.active{opacity:1;}
+  .lc-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background 0.4s ease, box-shadow 0.4s ease;}
+  .lc-step.active .lc-dot{box-shadow:0 0 0 4px currentColor22;}
+  .lc-step[data-state="NEW"].active .lc-dot{background:var(--new);}
+  .lc-step[data-state="READY"].active .lc-dot{background:var(--ready);}
+  .lc-step[data-state="RUNNING"].active .lc-dot{background:var(--running);}
+  .lc-step[data-state="TERMINATED"].active .lc-dot{background:var(--terminated);}
+  .lc-arrow{color:var(--border);font-size:11px;margin:0 4px;flex-shrink:0;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;}
+  .intro p{color:var(--muted);line-height:1.6;font-size:15px;}
+  .intro .stat-row{display:flex;gap:24px;margin:22px 0;font-family:var(--mono);}
+  .stat-row div{flex:1;}
+  .stat-num{font-size:22px;font-weight:700;color:var(--ready);}
+  .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+
+  button.primary{
+    font-family:var(--mono);font-size:14px;font-weight:600;
+    background:var(--ready);color:#0b1210;border:none;border-radius:8px;
+    padding:13px 22px;cursor:pointer;transition:transform 0.15s ease, filter 0.15s ease;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  button.primary:active{transform:scale(0.98);}
+  button.primary:disabled{opacity:0.4;cursor:not-allowed;filter:none;}
+  button.ghost{
+    font-family:var(--mono);font-size:13px;background:transparent;color:var(--muted);
+    border:1px solid var(--border);border-radius:8px;padding:10px 16px;cursor:pointer;
+  }
+  button.ghost:hover{color:var(--text);border-color:var(--muted);}
+
+  .pid{font-family:var(--mono);font-size:11px;color:var(--running);letter-spacing:0.06em;margin-bottom:10px;}
+  .qtext{font-size:17px;font-weight:600;line-height:1.5;margin:0 0 20px;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:10px;padding:13px 15px;cursor:pointer;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .opt:hover{border-color:var(--muted);}
+  .opt.selected{border-color:var(--running);background:#242018;}
+  .opt.correct{border-color:var(--ready);background:#132621;}
+  .opt.incorrect{border-color:var(--waiting);background:#2a161d;}
+  .opt-letter{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted);width:20px;flex-shrink:0;}
+  .opt.selected .opt-letter{color:var(--running);}
+  .opt.correct .opt-letter{color:var(--ready);}
+  .opt.incorrect .opt-letter{color:var(--waiting);}
+  .opt-text{font-size:14.5px;line-height:1.5;}
+
+  .explain{
+    margin-top:16px;padding:14px 16px;background:var(--surface-2);
+    border-left:2px solid var(--running);border-radius:6px;
+    font-size:13.5px;color:var(--muted);line-height:1.55;display:none;
+  }
+  .explain.show{display:block;}
+  .explain b{color:var(--text);}
+
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:24px;}
+  .progress-text{font-family:var(--mono);font-size:12px;color:var(--muted);}
+
+  .score-hero{text-align:center;padding:8px 0 24px;}
+  .score-num{font-family:var(--mono);font-size:56px;font-weight:700;color:var(--ready);line-height:1;}
+  .score-sub{color:var(--muted);font-size:14px;margin-top:8px;}
+  .review-item{border-top:1px solid var(--border);padding:16px 0;}
+  .review-item:first-child{border-top:none;}
+  .review-q{font-size:14.5px;font-weight:600;margin-bottom:8px;}
+  .review-tag{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.05em;padding:2px 8px;border-radius:4px;margin-right:8px;}
+  .review-tag.ok{background:#132621;color:var(--ready);}
+  .review-tag.bad{background:#2a161d;color:var(--waiting);}
+  .review-answer{font-size:13.5px;color:var(--muted);line-height:1.5;}
+
+  .hidden{display:none;}
+  @media (max-width:520px){
+    .lifecycle{flex-wrap:wrap;gap:8px;}
+    .lc-arrow{display:none;}
+    .card{padding:20px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">OS · Chapter 3 · Exam Set Y</div>
+    <h1>Process &amp; Process States</h1>
+    <div class="lifecycle" id="lifecycle">
+      <div class="lc-step" data-state="NEW"><span class="lc-dot"></span>NEW</div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-step" data-state="READY"><span class="lc-dot"></span>READY</div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-step" data-state="RUNNING"><span class="lc-dot"></span>RUNNING</div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-step" data-state="TERMINATED"><span class="lc-dot"></span>TERMINATED</div>
+    </div>
+  </header>
+
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+/* ============ QUESTION BANK — SET Y (independently written, different angles from Set X) ============ */
+const BANK = [
+  {
+    q: "Fill in the blanks: a(n) ___ is a passive entity stored on disk, while a(n) ___ is the active entity created once it's loaded into memory and begins executing.",
+    opts: [
+      "process ... program",
+      "thread ... process",
+      "program ... process",
+      "PCB ... thread"
+    ],
+    correct: 2,
+    exp: "A <b>program</b> is passive (just an executable file on disk); it becomes a <b>process</b> — active — once loaded into memory and started."
+  },
+  {
+    q: "Which statement about a single process's execution is FALSE?",
+    opts: [
+      "It must progress in sequential fashion",
+      "Its instructions can execute in parallel with themselves on one core",
+      "It has its own program counter",
+      "It can be interrupted and later resumed"
+    ],
+    correct: 1,
+    exp: "A single process cannot execute its own instructions in parallel — execution is sequential. (Multiple threads within a process are a different matter.)"
+  },
+  {
+    q: "Which part of a process holds function parameters, return addresses, and local variables?",
+    opts: [
+      "Heap",
+      "Data section",
+      "Text section",
+      "Stack"
+    ],
+    correct: 3,
+    exp: "The <b>stack</b> holds temporary data such as function parameters, return addresses, and local variables."
+  },
+  {
+    q: "Global variables of a running process live in which memory section?",
+    opts: [
+      "Data section",
+      "Stack",
+      "Text section",
+      "Heap"
+    ],
+    correct: 0,
+    exp: "The <b>data section</b> contains global variables, separate from the code itself (text section) and the dynamically-allocated heap."
+  },
+  {
+    q: "Which best describes the heap in a process's memory layout?",
+    opts: [
+      "Read-only compiled machine instructions",
+      "Memory dynamically allocated during run time",
+      "A fixed-size block reserved only for global constants",
+      "The section that stores the program counter"
+    ],
+    correct: 1,
+    exp: "The <b>heap</b> is memory allocated dynamically while the program runs — e.g. via malloc()."
+  },
+  {
+    q: "The operating system has just finished loading an executable into memory but the process hasn't started executing any instructions yet. What state is it in?",
+    opts: [
+      "Ready",
+      "Running",
+      "New",
+      "Waiting"
+    ],
+    correct: 2,
+    exp: "<b>New</b> describes a process still being created/set up — it hasn't yet reached the point of running or waiting to run."
+  },
+  {
+    q: "A process is blocked, sitting idle, because it is expecting a keystroke from the user that hasn't arrived. Which state is it in?",
+    opts: [
+      "Ready",
+      "Waiting",
+      "Running",
+      "Terminated"
+    ],
+    correct: 1,
+    exp: "It's <b>waiting</b> — blocked on an external event (user input) rather than merely waiting its turn for the CPU."
+  },
+  {
+    q: "Which of the following state transitions is NOT valid in the basic five-state process model?",
+    opts: [
+      "Ready → Running",
+      "Running → Waiting",
+      "Waiting → Running (directly, skipping Ready)",
+      "Running → Terminated"
+    ],
+    correct: 2,
+    exp: "A waiting process must first become ready (once its event completes) before the scheduler dispatches it to Running — it can't jump straight from Waiting to Running."
+  },
+  {
+    q: "The task control block, another name for the data structure holding a process's scheduling and memory information, is more commonly known as the:",
+    opts: [
+      "Ready queue",
+      "Interrupt table",
+      "Process Control Block (PCB)",
+      "Address space register"
+    ],
+    correct: 2,
+    exp: "'Task control block' is simply another name for the <b>PCB</b>."
+  },
+  {
+    q: "Which of the following is NOT something a PCB records about a process?",
+    opts: [
+      "Program counter",
+      "CPU scheduling priority",
+      "List of open I/O files",
+      "The number of times the OS has been reinstalled on the machine"
+    ],
+    correct: 3,
+    exp: "PCBs track state, program counter, registers, scheduling info, memory info, accounting info, and I/O status — not OS reinstall history, which isn't process-specific data at all."
+  },
+  {
+    q: "A process's PCB is extended to hold several program counters and separate storage for each one's execution context. What capability does this enable?",
+    opts: [
+      "Multiple threads of control within the same process",
+      "Automatic termination of the process",
+      "Direct communication with hardware interrupts",
+      "Conversion of the process into a zombie"
+    ],
+    correct: 0,
+    exp: "Storing multiple program counters per process is exactly what's needed to support <b>threads</b> — multiple locations executing at once within one process."
+  },
+  {
+    q: "Which queue holds processes that are in main memory, fully able to run, and just need a CPU core assigned to them?",
+    opts: [
+      "Wait queue",
+      "Zombie queue",
+      "Job queue",
+      "Ready queue"
+    ],
+    correct: 3,
+    exp: "The <b>ready queue</b> specifically holds processes in memory that are ready and waiting for CPU time."
+  },
+  {
+    q: "Process P1 is executing on the CPU when it issues a request to read from disk. What queue transition does P1 make?",
+    opts: [
+      "It leaves the ready queue and moves into a wait queue",
+      "It is removed from all scheduling entirely",
+      "It moves to a second CPU core immediately",
+      "Nothing changes until the disk request finishes"
+    ],
+    correct: 0,
+    exp: "Requesting I/O moves a process out of active execution and into the appropriate <b>wait queue</b> until that event completes."
+  },
+  {
+    q: "True or False: during a context switch, the CPU is doing useful process work while saving and loading state.",
+    opts: [
+      "True — the process being switched to keeps executing meanwhile",
+      "False — no useful work is done during the switch itself; it's pure overhead",
+      "True, but only on multi-core systems",
+      "False, because context switches never actually happen"
+    ],
+    correct: 1,
+    exp: "Context-switch time is <b>pure overhead</b> — the system isn't doing useful process work while it saves the old process's state and loads the new one's."
+  },
+  {
+    q: "Which of the following would most directly help REDUCE context-switch time?",
+    opts: [
+      "Making the PCB larger and more detailed",
+      "Adding more layers of OS complexity",
+      "Hardware that provides multiple sets of registers per CPU",
+      "Increasing the number of ready-queue processes"
+    ],
+    correct: 2,
+    exp: "Hardware support such as multiple register sets lets multiple contexts be loaded at once, reducing the switching cost — the opposite of a larger PCB or more OS complexity, which increase it."
+  },
+  {
+    q: "All of the following are true about context switches EXCEPT:",
+    opts: [
+      "They occur when the CPU switches from one process to another",
+      "The process's context is stored in its PCB",
+      "Switch time depends on hardware support",
+      "They always make the system run programs faster"
+    ],
+    correct: 3,
+    exp: "Context switches are overhead, not a speed boost — everything else listed (PCB storage, hardware dependence, occurring on process switches) is accurate."
+  },
+  {
+    q: "On an early iOS device, a user is using a maps app, then presses the home button to check a different app. What most likely happens to the maps app?",
+    opts: [
+      "It continues running exactly as before, fully visible",
+      "It becomes a suspended background process, with only limited exceptions (like audio playback) allowed to keep running",
+      "It is permanently deleted from the device",
+      "It merges into a single combined process with the new app"
+    ],
+    correct: 1,
+    exp: "Early iOS restricted background activity heavily due to UI/screen constraints — most apps get suspended, with only specific allowed tasks (like audio) continuing."
+  },
+  {
+    q: "Which statement about Android's approach to multitasking is TRUE?",
+    opts: [
+      "Android does not allow any background processes",
+      "Android background processes use a service, which can keep running with no user interface and a small memory footprint",
+      "Android only allows one process to exist at any time",
+      "Android services always require a visible notification UI"
+    ],
+    correct: 1,
+    exp: "Android background work runs via a <b>service</b> — no UI, minimal memory use, and it can persist even if its parent background process is suspended."
+  },
+  {
+    q: "A parent process calls fork(). Immediately afterward, what best describes the child process's address space?",
+    opts: [
+      "It's empty until the parent manually populates it",
+      "It starts out as a duplicate of the parent's address space",
+      "It automatically becomes the operating system kernel",
+      "It shares zero memory pages under any circumstance"
+    ],
+    correct: 1,
+    exp: "Right after <b>fork()</b>, the child starts as a duplicate of its parent's address space, before anything else (like exec()) changes that."
+  },
+  {
+    q: "A child process, right after being forked, needs to run a completely different program than its parent (e.g., replace itself with `ls`). Which system call accomplishes this?",
+    opts: [
+      "wait()",
+      "abort()",
+      "exec()",
+      "fork()"
+    ],
+    correct: 2,
+    exp: "<b>exec()</b> replaces a process's memory space with a new program — exactly what's needed after fork() if the child should run something different."
+  },
+  {
+    q: "A parent process wants to pause its own execution until its child finishes and also collect that child's exit status. Which system call does it use?",
+    opts: [
+      "exec()",
+      "wait()",
+      "fork()",
+      "exit()"
+    ],
+    correct: 1,
+    exp: "<b>wait()</b> lets a parent block until a child terminates, and it returns status information (and the child's pid)."
+  },
+  {
+    q: "Which of these is NOT one of the resource-sharing arrangements available between a parent and its newly created child process?",
+    opts: [
+      "Parent and child share all resources",
+      "Child shares a subset of the parent's resources",
+      "Parent and child share no resources at all",
+      "Child automatically takes ownership of all parent resources, leaving the parent with none"
+    ],
+    correct: 3,
+    exp: "The real options are: share everything, share a subset, or share nothing. A child taking over and stripping the parent of its own resources isn't one of the standard sharing models."
+  },
+  {
+    q: "A process finishes executing and calls exit(). What generally happens to its allocated resources?",
+    opts: [
+      "They remain permanently reserved even after the process is gone",
+      "They are deallocated by the operating system",
+      "They are transferred automatically to a randomly chosen process",
+      "They are converted into a new child process"
+    ],
+    correct: 1,
+    exp: "After exit(), the operating system deallocates the process's resources; status data may also be returned to a parent via wait()."
+  },
+  {
+    q: "A child process has terminated, but its parent never called wait() to retrieve its exit status. What is this leftover process entry called?",
+    opts: [
+      "A zombie",
+      "An orphan",
+      "A daemon",
+      "A rendezvous"
+    ],
+    correct: 0,
+    exp: "A terminated process whose parent hasn't collected its status via wait() is called a <b>zombie</b>."
+  },
+  {
+    q: "A process's parent terminates while the child is still running, and the system doesn't allow children to outlive a terminated parent. What describes what happens next?",
+    opts: [
+      "The child becomes an orphan and keeps running indefinitely",
+      "Cascading termination is initiated by the OS, terminating the child (and its descendants)",
+      "The child is promoted to be its own parent",
+      "Nothing happens; only exit() can end a process"
+    ],
+    correct: 1,
+    exp: "If orphaned children aren't permitted, the OS initiates <b>cascading termination</b>, ending the child and any of its own descendants."
+  },
+  {
+    q: "The system is critically low on memory. According to Android's process importance hierarchy, which process type is killed FIRST?",
+    opts: [
+      "Foreground process",
+      "Visible process",
+      "Empty process",
+      "Service process"
+    ],
+    correct: 2,
+    exp: "Android reclaims memory by killing the least important processes first — an <b>empty process</b> (holding nothing actively needed) is the first to go, while the foreground process is the last."
+  },
+  {
+    q: "In Chrome's multiprocess architecture, which process type is responsible for parsing HTML and running JavaScript for a given website?",
+    opts: [
+      "Browser process",
+      "Renderer process",
+      "Plug-in process",
+      "Kernel process"
+    ],
+    correct: 1,
+    exp: "The <b>renderer process</b> handles rendering web pages — HTML, JavaScript — with a new one typically created per site opened."
+  },
+  {
+    q: "What is a key security benefit of Chrome creating a separate renderer process, sandboxed with restricted disk/network access, for each website?",
+    opts: [
+      "It makes every website load instantly with zero latency",
+      "It minimizes the effect of a security exploit on one site from spreading to the rest of the browser",
+      "It removes the need for a browser process entirely",
+      "It guarantees the website cannot use JavaScript"
+    ],
+    correct: 1,
+    exp: "Sandboxing each renderer restricts what a compromised site's process can touch, limiting the blast radius of a security exploit."
+  }
+];
+
+/* ============ helpers ============ */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function buildSession(){
+  const qOrder = shuffle(BANK);
+  return qOrder.map(item=>{
+    const optIdx = shuffle(item.opts.map((o,i)=>i));
+    const opts = optIdx.map(i=>item.opts[i]);
+    const correct = optIdx.indexOf(item.correct);
+    return {q:item.q, opts, correct, exp:item.exp};
+  });
+}
+
+let session = buildSession();
+let current = 0;
+let answers = new Array(session.length).fill(null);
+let stage = "intro";
+
+const card = document.getElementById("card");
+const LETTERS = ["A","B","C","D"];
+
+function setLifecycle(state){
+  document.querySelectorAll(".lc-step").forEach(el=>{
+    el.classList.toggle("active", el.dataset.state === state);
+  });
+}
+
+function renderIntro(){
+  setLifecycle("NEW");
+  card.innerHTML = `
+    <div class="intro">
+      <p>Exam Set Y — a separately written question set covering the same material: <b style="color:var(--text)">Process Concept, Process States, PCBs, Scheduling, Context Switches, and Process Creation/Termination.</b></p>
+      <div class="stat-row">
+        <div><div class="stat-num">${session.length}</div><div class="stat-label">Questions</div></div>
+        <div><div class="stat-num">4</div><div class="stat-label">Options each</div></div>
+        <div><div class="stat-num">∞</div><div class="stat-label">Retakes</div></div>
+      </div>
+      <p style="font-size:13px;">Order and answer positions reshuffle on every attempt.</p>
+      <button class="primary" id="startBtn">fork() → start quiz</button>
+    </div>
+  `;
+  document.getElementById("startBtn").onclick = ()=>{
+    stage="quiz";
+    current=0;
+    renderQuestion();
+  };
+}
+
+function renderQuestion(){
+  setLifecycle("RUNNING");
+  const item = session[current];
+  const chosen = answers[current];
+  const pid = String(current+1).padStart(4,"0");
+
+  let optsHtml = item.opts.map((opt,i)=>{
+    let cls = "opt";
+    if(chosen!==null){
+      if(i===item.correct) cls+=" correct";
+      else if(i===chosen && i!==item.correct) cls+=" incorrect";
+    } else if(i===chosen){
+      cls+=" selected";
+    }
+    return `<div class="${cls}" data-idx="${i}">
+      <span class="opt-letter">${LETTERS[i]}</span>
+      <span class="opt-text">${opt}</span>
+    </div>`;
+  }).join("");
+
+  card.innerHTML = `
+    <div class="pid">PID ${pid} / ${String(session.length).padStart(4,"0")}</div>
+    <p class="qtext">${item.q}</p>
+    <div class="options">${optsHtml}</div>
+    <div class="explain ${chosen!==null ? 'show':''}">${chosen!==null ? item.exp : ''}</div>
+    <div class="nav-row">
+      <span class="progress-text">${current+1} of ${session.length} answered: ${answers.filter(a=>a!==null).length}</span>
+      <div style="display:flex;gap:10px;">
+        ${current>0 ? '<button class="ghost" id="prevBtn">← back</button>' : ''}
+        <button class="primary" id="nextBtn" ${chosen===null?'disabled':''}>${current===session.length-1 ? 'finish →' : 'next →'}</button>
+      </div>
+    </div>
+  `;
+
+  if(chosen===null){
+    card.querySelectorAll(".opt").forEach(el=>{
+      el.onclick = ()=>{
+        answers[current] = parseInt(el.dataset.idx);
+        renderQuestion();
+      };
+    });
+  }
+  const prevBtn = document.getElementById("prevBtn");
+  if(prevBtn) prevBtn.onclick = ()=>{ current--; renderQuestion(); };
+  document.getElementById("nextBtn").onclick = ()=>{
+    if(current===session.length-1){
+      stage="results";
+      renderResults();
+    } else {
+      current++;
+      renderQuestion();
+    }
+  };
+}
+
+function renderResults(){
+  setLifecycle("TERMINATED");
+  const scoreCount = session.reduce((acc,item,i)=> acc + (answers[i]===item.correct?1:0), 0);
+  const pct = Math.round((scoreCount/session.length)*100);
+
+  const reviewHtml = session.map((item,i)=>{
+    const ok = answers[i]===item.correct;
+    return `<div class="review-item">
+      <div class="review-q">${i+1}. ${item.q}</div>
+      <span class="review-tag ${ok?'ok':'bad'}">${ok?'CORRECT':'MISS'}</span>
+      <div class="review-answer" style="margin-top:8px;">
+        <b style="color:var(--text)">Answer:</b> ${item.opts[item.correct]}<br>
+        ${item.exp}
+      </div>
+    </div>`;
+  }).join("");
+
+  card.innerHTML = `
+    <div class="score-hero">
+      <div class="score-num">${scoreCount}/${session.length}</div>
+      <div class="score-sub">${pct}% — process exited with this status code</div>
+    </div>
+    <button class="primary" id="retryBtn" style="width:100%;margin-bottom:8px;">exit() &amp; fork() a new attempt</button>
+    <div style="margin-top:20px;">${reviewHtml}</div>
+  `;
+  document.getElementById("retryBtn").onclick = ()=>{
+    session = buildSession();
+    current = 0;
+    answers = new Array(session.length).fill(null);
+    stage = "intro";
+    renderIntro();
+    window.scrollTo({top:0,behavior:"smooth"});
+  };
+}
+
+renderIntro();
+</script>
+</body>
+</html>

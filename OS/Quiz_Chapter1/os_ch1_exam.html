@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Chapter 1 — Interrogation Deck</title>
+<style>
+:root{
+  --bg-0:#050b14;
+  --bg-1:#0a1626;
+  --bg-2:#0f2138;
+  --panel:#0d1c30;
+  --line:#1c3350;
+  --cyan:#3fe8e0;
+  --cyan-dim:#1f9490;
+  --blue:#4f8dff;
+  --blue-deep:#1b3a73;
+  --text:#dbe9f5;
+  --text-dim:#7f9bb8;
+  --ok:#39d98a;
+  --bad:#ff5c72;
+  --warn:#ffb454;
+  --mono:'JetBrains Mono','Courier New',monospace;
+  --serif:'Iowan Old Style','Georgia',serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(1200px 700px at 15% -10%, #10233d 0%, transparent 60%),
+    radial-gradient(1000px 600px at 110% 10%, #0c2a3a 0%, transparent 55%),
+    var(--bg-0);
+  color:var(--text);
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  min-height:100vh;
+  line-height:1.5;
+}
+.wrap{max-width:920px;margin:0 auto;padding:28px 20px 80px;}
+::selection{background:var(--cyan);color:#00201e;}
+
+/* Circuit motif background lines */
+.circuit-bg{
+  position:fixed;inset:0;z-index:-1;opacity:.35;pointer-events:none;
+  background-image:
+    linear-gradient(90deg, rgba(63,232,224,0.035) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(63,232,224,0.035) 1px, transparent 1px);
+  background-size:42px 42px;
+}
+
+header.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 4px 20px;border-bottom:1px solid var(--line);margin-bottom:26px;
+}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);letter-spacing:.5px;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);}
+.brand b{color:var(--cyan);font-weight:700;}
+.brand span.sub{color:var(--text-dim);font-size:12.5px;}
+nav.pill{
+  display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;
+  font-family:var(--mono);font-size:12px;
+}
+nav.pill span{padding:6px 12px;border-radius:999px;color:var(--text-dim);}
+nav.pill span.active{background:var(--blue-deep);color:var(--cyan);}
+
+/* Home */
+.hero{padding:36px 0 10px;}
+.eyebrow{font-family:var(--mono);color:var(--cyan-dim);letter-spacing:3px;font-size:12px;text-transform:uppercase;margin-bottom:14px;}
+h1.title{
+  font-family:var(--serif);font-size:44px;line-height:1.1;margin:0 0 16px;
+  color:#f2f9ff;font-weight:600;
+}
+h1.title em{color:var(--cyan);font-style:normal;}
+.lede{color:var(--text-dim);font-size:16px;max-width:620px;margin-bottom:30px;}
+
+.chapter-map{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:22px 0 34px;
+}
+.chapter-map .node{
+  border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),#0a1728);
+  border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-dim);
+  position:relative;overflow:hidden;
+}
+.chapter-map .node::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cyan-dim);
+}
+.chapter-map .node b{display:block;color:var(--text);font-size:13.5px;margin-bottom:2px;}
+
+.stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0 34px;}
+.stat{
+  border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:14px 18px;min-width:120px;
+}
+.stat .n{font-family:var(--mono);font-size:26px;color:var(--cyan);font-weight:700;}
+.stat .l{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+.btn{
+  appearance:none;border:none;cursor:pointer;font-family:'Segoe UI',sans-serif;font-weight:600;
+  padding:14px 26px;border-radius:10px;font-size:15px;letter-spacing:.3px;transition:transform .12s ease, box-shadow .12s ease;
+}
+.btn-primary{background:linear-gradient(135deg,var(--cyan) 0%, var(--blue) 100%);color:#00151a;box-shadow:0 6px 24px -6px rgba(63,232,224,.45);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 28px -6px rgba(63,232,224,.6);}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text);}
+.btn-ghost:hover{border-color:var(--cyan-dim);color:var(--cyan);}
+.btn-sm{padding:9px 16px;font-size:13px;border-radius:8px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+/* Setup page */
+.card{
+  border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:26px;margin-bottom:20px;
+}
+.card h2{margin:0 0 4px;font-family:var(--serif);font-weight:600;font-size:22px;color:#f2f9ff;}
+.card .hint{color:var(--text-dim);font-size:13px;margin-bottom:18px;}
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;}
+.opt-btn{
+  border:1px solid var(--line);background:#0a1728;color:var(--text-dim);border-radius:10px;padding:12px 8px;
+  text-align:center;cursor:pointer;font-family:var(--mono);font-size:14px;
+}
+.opt-btn.sel{border-color:var(--cyan);color:var(--cyan);background:rgba(63,232,224,.08);box-shadow:0 0 0 1px var(--cyan) inset;}
+.opt-btn:hover{border-color:var(--cyan-dim);}
+.mode-row{display:flex;gap:12px;flex-wrap:wrap;}
+.mode-card{
+  flex:1;min-width:220px;border:1px solid var(--line);background:#0a1728;border-radius:12px;padding:16px;cursor:pointer;
+}
+.mode-card b{display:block;color:var(--text);margin-bottom:4px;}
+.mode-card p{margin:0;color:var(--text-dim);font-size:12.5px;}
+.mode-card.sel{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue) inset;background:rgba(79,141,255,.07);}
+
+/* Exam page */
+.exam-head{position:sticky;top:0;background:linear-gradient(180deg, var(--bg-0) 80%, transparent); padding:10px 0 14px;z-index:5;}
+.progress-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-bottom:8px;}
+.timer{color:var(--cyan);font-weight:700;}
+.timer.low{color:var(--bad);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.progress-bar{height:6px;background:#0a1728;border-radius:999px;overflow:hidden;border:1px solid var(--line);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));transition:width .25s ease;}
+
+.qtag{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:12px;}
+.qtag .badge{padding:3px 9px;border-radius:999px;border:1px solid var(--line);text-transform:uppercase;letter-spacing:.5px;}
+.badge.easy{color:var(--ok);border-color:var(--ok);}
+.badge.medium{color:var(--warn);border-color:var(--warn);}
+.badge.hard{color:var(--bad);border-color:var(--bad);}
+.badge.topic{color:var(--cyan);border-color:var(--cyan-dim);}
+
+.qtext{font-size:19px;color:#f2f9ff;margin:0 0 20px;font-weight:500;line-height:1.45;}
+.choices{display:flex;flex-direction:column;gap:10px;}
+.choice{
+  border:1px solid var(--line);background:#0a1728;border-radius:10px;padding:13px 16px;cursor:pointer;
+  display:flex;gap:12px;align-items:flex-start;font-size:14.5px;
+}
+.choice .mark{width:20px;height:20px;flex:none;border-radius:5px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-dim);margin-top:1px;}
+.choice.radio .mark{border-radius:50%;}
+.choice:hover{border-color:var(--cyan-dim);}
+.choice.chosen{border-color:var(--blue);background:rgba(79,141,255,.08);}
+.choice.chosen .mark{background:var(--blue);border-color:var(--blue);color:#fff;}
+.choice.correct{border-color:var(--ok);background:rgba(57,217,138,.09);}
+.choice.correct .mark{background:var(--ok);border-color:var(--ok);color:#00170b;}
+.choice.incorrect{border-color:var(--bad);background:rgba(255,92,114,.09);}
+.choice.incorrect .mark{background:var(--bad);border-color:var(--bad);color:#1a0004;}
+
+textarea.fillbox,input.fillbox{
+  width:100%;background:#0a1728;border:1px solid var(--line);border-radius:10px;color:var(--text);
+  padding:13px 14px;font-size:15px;font-family:inherit;
+}
+textarea.fillbox{min-height:80px;resize:vertical;}
+.fillbox:focus{outline:none;border-color:var(--cyan);}
+
+.match-row,.order-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);}
+.match-row:last-child,.order-row:last-child{border-bottom:none;}
+.match-left{flex:1;font-size:14px;color:var(--text);}
+select.mselect{
+  background:#0a1728;border:1px solid var(--line);color:var(--cyan);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:13px;min-width:170px;
+}
+
+.feedback-box{margin-top:18px;border-radius:10px;padding:14px 16px;font-size:13.5px;border:1px solid;}
+.feedback-box.ok{border-color:var(--ok);background:rgba(57,217,138,.08);color:#c9ffe4;}
+.feedback-box.bad{border-color:var(--bad);background:rgba(255,92,114,.08);color:#ffd6dc;}
+.feedback-box b{display:block;margin-bottom:4px;font-size:14px;}
+
+.nav-row{display:flex;justify-content:space-between;margin-top:26px;gap:10px;}
+.nav-row .spacer{flex:1;}
+
+/* Results */
+.score-hero{text-align:center;padding:20px 0 10px;}
+.score-ring{
+  width:170px;height:170px;border-radius:50%;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  background:conic-gradient(var(--cyan) calc(var(--pct)*1%), #0a1728 0);
+  position:relative;
+}
+.score-ring::before{content:'';position:absolute;inset:10px;border-radius:50%;background:var(--bg-0);}
+.score-ring .num{position:relative;font-family:var(--mono);font-size:38px;font-weight:700;color:#f2f9ff;}
+.score-ring .lbl{position:relative;font-size:12px;color:var(--text-dim);}
+.pass-tag{display:inline-block;padding:6px 18px;border-radius:999px;font-family:var(--mono);font-weight:700;letter-spacing:1px;margin-top:6px;}
+.pass-tag.pass{background:rgba(57,217,138,.15);color:var(--ok);border:1px solid var(--ok);}
+.pass-tag.fail{background:rgba(255,92,114,.15);color:var(--bad);border:1px solid var(--bad);}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:26px;}
+.metric{border:1px solid var(--line);background:#0a1728;border-radius:12px;padding:14px;text-align:center;}
+.metric .v{font-family:var(--mono);font-size:22px;font-weight:700;}
+.metric .k{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;}
+.v.ok{color:var(--ok);}.v.bad{color:var(--bad);}.v.warn{color:var(--warn);}.v.cyan{color:var(--cyan);}
+
+/* Review */
+.rev-item{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+.rev-item .status{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid;text-transform:uppercase;letter-spacing:.5px;}
+.status.right{color:var(--ok);border-color:var(--ok);}
+.status.wrong{color:var(--bad);border-color:var(--bad);}
+.status.skip{color:var(--text-dim);border-color:var(--line);}
+.rev-q{font-size:15.5px;color:#f2f9ff;margin:8px 0 12px;font-weight:500;}
+.rev-block{font-size:13.5px;margin-bottom:6px;}
+.rev-block b{color:var(--text-dim);font-weight:600;margin-right:6px;}
+.rev-ans{color:var(--text);}
+.rev-explain{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--text-dim);font-size:13px;}
+
+footer.foot{text-align:center;color:var(--text-dim);font-size:12px;margin-top:50px;font-family:var(--mono);}
+
+@media (max-width:600px){
+  h1.title{font-size:32px;}
+  .score-ring{width:140px;height:140px;}
+}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="circuit-bg"></div>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span><b>OS·CH1</b><span class="sub">Interrogation Deck</span></div>
+    <nav class="pill" id="navPill">
+      <span data-p="home">Home</span>
+      <span data-p="setup">Start</span>
+      <span data-p="exam">Exam</span>
+      <span data-p="results">Results</span>
+      <span data-p="review">Review</span>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="foot">Generated exclusively from the uploaded Chapter 1 slide deck — no outside material.</footer>
+</div>
+
+<script>
+/* ============================================================
+   QUESTION BANK — sourced only from the uploaded Chapter 1 deck
+   Types: mcq, tf, fill, select, match, order, short
+   ============================================================ */
+const BANK = [
+
+// ---------- What is an OS / Definitions (slides 4-10) ----------
+{t:'mcq',d:'easy',topic:'OS Definitions',q:'According to the chapter, an operating system is best described as:',
+ o:['A program that acts as an intermediary between a user of a computer and the computer hardware','A piece of hardware that stores user files','A compiler that translates user programs into machine code','A network protocol for connecting computers'],c:0,
+ e:'The slides define an operating system as a program that acts as an intermediary between a user of a computer and the computer hardware.'},
+
+{t:'select',d:'medium',topic:'OS Definitions',q:'Which of the following are listed as goals of an operating system? (select all that apply)',
+ o:['Execute user programs and make solving user problems easier','Make the computer system convenient to use','Use the computer hardware in an efficient manner','Maximize the price of the hardware for the manufacturer'],c:[0,1,2],
+ e:'The three OS goals given are executing user programs/easing problem solving, convenience of use, and efficient use of hardware. Maximizing hardware price is not mentioned anywhere in the chapter.'},
+
+{t:'match',d:'medium',topic:'Computer System Structure',q:'Match each computer-system component to its role.',
+ pairs:[['Hardware','Provides basic computing resources (CPU, memory, I/O devices)'],
+        ['Operating system','Controls and coordinates use of hardware among applications and users'],
+        ['Application programs','Define the ways system resources are used to solve users\' computing problems'],
+        ['Users','People, machines, other computers that use the system']],
+ e:'Slide 6 divides a computer system into four components: hardware, the operating system, application programs, and users, each with the role shown.'},
+
+{t:'tf',d:'easy',topic:'OS Definitions',q:'True or False: The chapter states there is a single, universally accepted definition of an operating system.',
+ o:['True','False'],c:1,
+ e:'The slides explicitly say there is "no universally accepted definition" of an operating system.'},
+
+{t:'mcq',d:'medium',topic:'OS Definitions',q:'The chapter describes "the one program running at all times on the computer" as the:',
+ o:['Kernel','Middleware','System program','Application program'],c:0,
+ e:'"The one program running at all times on the computer" is identified as the kernel, which is part of the operating system.'},
+
+{t:'mcq',d:'medium',topic:'OS Definitions',q:'A program that ships with the operating system but is not part of the kernel is called a:',
+ o:['System program','Application program','Middleware layer','Device driver only'],c:0,
+ e:'The chapter distinguishes a system program (ships with the OS but is not part of the kernel) from an application program (not associated with the OS at all).'},
+
+{t:'fill',d:'medium',topic:'OS Definitions',q:'Complete the sentence: In today\'s general-purpose and mobile computing OSes, ______ is a set of software frameworks that provide additional services (databases, multimedia, graphics) to application developers.',
+ a:['middleware'],
+ e:'The chapter states that today\'s OSes also include middleware, a set of software frameworks providing extra services like databases, multimedia, and graphics.'},
+
+{t:'short',d:'easy',topic:'OS Definitions',q:'In your own words, what is the "good approximation" the chapter gives for defining an operating system when no formal definition exists?',
+ a:'"Everything a vendor ships when you order an operating system" — though the chapter notes this varies wildly between vendors.',
+ e:'The slides offer this vendor-shipment description as a practical, if imprecise, definition.'},
+
+{t:'mcq',d:'hard',topic:'OS Definitions',q:'According to the chapter, the concept of an operating system was "born" when:',
+ o:['Fixed-use computers built for military purposes became more general purpose and needed resource management and program control','The first graphical user interface was invented','Personal computers were introduced to the mass market','The Internet was first connected to home computers'],c:0,
+ e:'Slide 9 states the OS concept originated as fixed-use military computers evolved into general-purpose machines needing resource management and program control.'},
+
+// ---------- Users' perspective / points of view (slide 8) ----------
+{t:'mcq',d:'medium',topic:'Points of View',q:'According to the chapter, users of dedicated systems such as workstations:',
+ o:['Have dedicated resources but frequently use shared resources from servers','Never use any shared resources','Always share a single mainframe CPU','Have no user interface at all'],c:0,
+ e:'The slides state that workstation users have dedicated resources but frequently use shared resources from servers.'},
+
+{t:'mcq',d:'easy',topic:'Points of View',q:'Which statement about mobile devices (smartphones, tablets) is TRUE according to the chapter?',
+ o:['They are resource-poor and optimized for usability and battery life','They have unlimited resources compared to workstations','They never use touch-screen or voice interfaces','They always require a mainframe connection'],c:0,
+ e:'The chapter describes mobile devices as resource-poor, optimized for usability and battery life, using interfaces like touch screens and voice recognition.'},
+
+{t:'tf',d:'medium',topic:'Points of View',q:'True or False: Embedded computers in devices and automobiles, as described in the chapter, typically run with significant user intervention.',
+ o:['True','False'],c:1,
+ e:'The chapter states embedded computers often have little or no user interface and run primarily without user intervention.'},
+
+// ---------- Computer System Organization / Interrupts (12-20) ----------
+{t:'mcq',d:'easy',topic:'System Organization',q:'In the computer-system organization described in the chapter, CPUs and device controllers communicate through:',
+ o:['A common bus providing access to shared memory','Separate dedicated memory for each device','A single serial cable','Direct wiring to the power supply'],c:0,
+ e:'The slides describe one or more CPUs and device controllers connected through a common bus that provides access to shared memory.'},
+
+{t:'select',d:'medium',topic:'System Organization',q:'Which of the following are true about I/O device controllers, according to the chapter? (select all that apply)',
+ o:['Each device controller is in charge of a particular device type','Each device controller has a local buffer','Device controllers execute user application code directly','Each device controller type has an OS device driver to manage it'],c:[0,1,3],
+ e:'The chapter states each controller manages a particular device type, has a local buffer, and has a corresponding OS device driver. Controllers do not execute user application code.'},
+
+{t:'mcq',d:'medium',topic:'Interrupts',q:'How does a device controller inform the CPU that it has finished an operation?',
+ o:['By causing an interrupt','By writing to the disk','By restarting the CPU','By sending an email to the OS log'],c:0,
+ e:'The chapter states the device controller informs the CPU it has finished by causing an interrupt.'},
+
+{t:'mcq',d:'medium',topic:'Interrupts',q:'Which statement correctly describes how an interrupt transfers control, per the chapter?',
+ o:['Generally through the interrupt vector, which contains the addresses of all the service routines','Directly by overwriting the operating system kernel','By restarting the bootstrap program','Through a system call table only, never a vector'],c:0,
+ e:'The chapter states an interrupt transfers control to the interrupt service routine generally through the interrupt vector, which contains addresses of all service routines.'},
+
+{t:'fill',d:'medium',topic:'Interrupts',q:'Fill in the blank: A ______ or exception is a software-generated interrupt caused either by an error or a user request.',
+ a:['trap'],
+ e:'The chapter defines a trap (or exception) as a software-generated interrupt caused by an error or a user request.'},
+
+{t:'tf',d:'easy',topic:'Interrupts',q:'True or False: According to the chapter, an operating system is interrupt driven.',
+ o:['True','False'],c:0,
+ e:'The chapter explicitly states "An operating system is interrupt driven."'},
+
+{t:'mcq',d:'hard',topic:'Interrupts',q:'When handling an interrupt, what must the interrupt architecture do first regarding the interrupted instruction?',
+ o:['Save the address of the interrupted instruction','Delete the interrupted instruction','Immediately reboot the system','Convert the instruction into a system call'],c:0,
+ e:'The chapter states the interrupt architecture must save the address of the interrupted instruction so execution can resume.'},
+
+{t:'mcq',d:'medium',topic:'Interrupts',q:'During interrupt handling, how does the operating system preserve the state of the CPU?',
+ o:['By storing the registers and the program counter','By storing only the mode bit','By clearing the interrupt vector','By halting all device controllers permanently'],c:0,
+ e:'The chapter states the OS preserves CPU state by storing the registers and the program counter.'},
+
+{t:'select',d:'hard',topic:'I/O Structure',q:'The chapter describes two methods for handling I/O. Which of these are among them? (select all that apply)',
+ o:['Control returns to the user program only upon I/O completion','Control returns to the user program without waiting for I/O completion','I/O always completes before the program even starts','I/O completion is never signaled to the OS'],c:[0,1],
+ e:'The two methods described are: control returns only upon I/O completion, or control returns without waiting for completion (using a system call and device-status table).'},
+
+{t:'mcq',d:'hard',topic:'I/O Structure',q:'In the I/O method where control returns to the user program without waiting for completion, what mechanism allows the user to request to wait for I/O completion?',
+ o:['A system call','A trap only','The bootstrap program','The interrupt vector directly'],c:0,
+ e:'The chapter states a system call is the request to the OS that allows the user to wait for I/O completion in this method.'},
+
+{t:'short',d:'medium',topic:'I/O Structure',q:'What does the device-status table contain, according to the chapter?',
+ a:'An entry for each I/O device indicating its type, address, and state; the OS indexes into this table to determine device status and to modify entries to include interrupts.',
+ e:'Described on slide 19.'},
+
+{t:'mcq',d:'easy',topic:'Computer Startup',q:'What is the bootstrap program responsible for, according to the chapter?',
+ o:['Initializing the system and loading the operating system kernel to start execution','Managing user file permissions','Compiling user application code','Running the interrupt vector table only'],c:0,
+ e:'The chapter states the bootstrap program is loaded at power-up/reboot, initializes all aspects of the system, and loads the OS kernel to start execution.'},
+
+{t:'fill',d:'easy',topic:'Computer Startup',q:'Fill in the blank: The bootstrap program is typically stored in ROM or EPROM, generally known as ______.',
+ a:['firmware'],
+ e:'The chapter states the bootstrap program is typically stored in ROM or EPROM, known as firmware.'},
+
+// ---------- Storage Structure / Hierarchy / DMA (21-28) ----------
+{t:'mcq',d:'easy',topic:'Storage Structure',q:'According to the chapter, which is the only large storage media that the CPU can access directly?',
+ o:['Main memory','Hard disk drives','Secondary storage tape','Cloud storage'],c:0,
+ e:'The chapter states main memory is the only large storage media the CPU can access directly.'},
+
+{t:'tf',d:'easy',topic:'Storage Structure',q:'True or False: According to the chapter, main memory is typically volatile.',
+ o:['True','False'],c:0,
+ e:'The chapter states main memory (typically DRAM) is typically volatile and provides random access.'},
+
+{t:'mcq',d:'medium',topic:'Storage Structure',q:'What is secondary storage, as defined in the chapter?',
+ o:['An extension of main memory that provides large nonvolatile storage capacity','A type of interrupt handler','A cache located inside the CPU register file','A device driver for the bootstrap program'],c:0,
+ e:'The chapter defines secondary storage as an extension of main memory providing large, nonvolatile storage capacity.'},
+
+{t:'mcq',d:'medium',topic:'Storage Structure',q:'On a hard disk drive, the disk surface is logically divided into tracks, which are subdivided into:',
+ o:['Sectors','Bytes','Words','Interrupts'],c:0,
+ e:'The chapter states the disk surface is logically divided into tracks, which are subdivided into sectors.'},
+
+{t:'mcq',d:'medium',topic:'Storage Structure',q:'Which of the following describes non-volatile memory (NVM) devices, per the chapter?',
+ o:['Faster than hard disks, nonvolatile, becoming more popular as capacity/performance increases and price drops','Slower than hard disks and always volatile','Only usable inside device controllers, never in computers','Identical in every way to DRAM'],c:0,
+ e:'The chapter describes NVM devices as faster than hard disks, nonvolatile, and increasingly popular as capacity/performance rise and price drops.'},
+
+{t:'fill',d:'easy',topic:'Storage Definitions',q:'Fill in the blank: The basic unit of computer storage is the ______, which can hold one of two values, 0 or 1.',
+ a:['bit'],
+ e:'The chapter states the basic unit of computer storage is the bit, holding a value of 0 or 1.'},
+
+{t:'mcq',d:'easy',topic:'Storage Definitions',q:'According to the chapter, a byte is:',
+ o:['8 bits','16 bits','1 word','1024 bits'],c:0,
+ e:'The chapter defines a byte as 8 bits, the smallest convenient chunk of storage on most computers.'},
+
+{t:'mcq',d:'medium',topic:'Storage Definitions',q:'The chapter defines a "word" as:',
+ o:['A given computer architecture\'s native unit of data, made up of one or more bytes','Exactly 8 bits, same as a byte','A unit only used for networking measurements','A fixed 1024-byte block'],c:0,
+ e:'The chapter defines a word as a computer architecture\'s native unit of data, composed of one or more bytes (e.g., 8 bytes for 64-bit systems).'},
+
+{t:'mcq',d:'hard',topic:'Storage Definitions',q:'According to the chapter, why are networking measurements an exception to the general byte-based measurement rule?',
+ o:['Because networks move data a bit at a time','Because networks only use kilobytes','Because networking hardware cannot measure bytes','Because network speed is measured in words'],c:0,
+ e:'The chapter explains networking measurements are given in bits because networks move data a bit at a time.'},
+
+{t:'select',d:'medium',topic:'Storage Definitions',q:'Per the chapter\'s rounding conventions, computer manufacturers often say: (select all that apply)',
+ o:['A megabyte is 1 million bytes','A gigabyte is 1 billion bytes','A kilobyte is exactly 1000 bytes with no rounding involved','A terabyte is smaller than a gigabyte'],c:[0,1],
+ e:'The chapter states manufacturers often round a megabyte to 1 million bytes and a gigabyte to 1 billion bytes (versus the precise 1024-based values).'},
+
+{t:'mcq',d:'medium',topic:'Storage Hierarchy',q:'Storage systems are organized in a hierarchy based on which factors, according to the chapter?',
+ o:['Speed, cost, and volatility','Color, brand, and manufacturer','Only physical size','Only the operating system vendor'],c:0,
+ e:'The chapter states storage systems are organized hierarchically by speed, cost, and volatility.'},
+
+{t:'mcq',d:'easy',topic:'Storage Hierarchy',q:'According to the chapter, "caching" refers to:',
+ o:['Copying information into a faster storage system temporarily','Permanently deleting old data from disk','Encrypting data before storage','Compressing files for network transfer'],c:0,
+ e:'The chapter defines caching as copying information into a faster storage system temporarily; main memory can be viewed as a cache for secondary storage.'},
+
+{t:'short',d:'medium',topic:'Storage Hierarchy',q:'What is the purpose of a device driver, according to the chapter?',
+ a:'A device driver exists for each device controller to manage I/O, and it provides a uniform interface between the controller and the kernel.',
+ e:'Described on slide 25.'},
+
+{t:'mcq',d:'hard',topic:'Storage Hierarchy',q:'In a multiprocessor environment, what must be provided to ensure all CPUs see the most recent value of a datum, according to the chapter?',
+ o:['Cache coherency in hardware','A slower disk controller','A single-threaded kernel only','Removal of all caches'],c:0,
+ e:'The chapter states a multiprocessor environment must provide cache coherency in hardware so all CPUs have the most recent cached value.'},
+
+{t:'tf',d:'medium',topic:'Storage Hierarchy',q:'True or False: The chapter states that in a distributed environment, several copies of a datum can exist, making the situation even more complex than in a multiprocessor environment.',
+ o:['True','False'],c:0,
+ e:'The chapter states the distributed environment situation is even more complex, since several copies of a datum can exist.'},
+
+{t:'mcq',d:'medium',topic:'DMA',q:'Direct Memory Access (DMA) is used for:',
+ o:['High-speed I/O devices able to transmit information at close to memory speeds','Only keyboard input','Slow devices like printers exclusively','Managing the mode bit'],c:0,
+ e:'The chapter states DMA is used for high-speed I/O devices able to transmit at close to memory speeds.'},
+
+{t:'mcq',d:'medium',topic:'DMA',q:'What is the key advantage of DMA described in the chapter, compared to non-DMA transfer?',
+ o:['Only one interrupt is generated per block, rather than one interrupt per byte','It eliminates the need for interrupts entirely','It requires the CPU to copy every byte manually','It only works with volatile memory'],c:0,
+ e:'The chapter states DMA generates only one interrupt per block transferred, rather than one interrupt per byte.'},
+
+{t:'mcq',d:'hard',topic:'System Architecture Basics',q:'Which architecture does the chapter associate with the general model of "How a Modern Computer Works"?',
+ o:['A von Neumann architecture','A quantum computing architecture','A purely distributed architecture','A peer-to-peer architecture'],c:0,
+ e:'Slide 27 labels the modern computer diagram as a von Neumann architecture.'},
+
+// ---------- OS Operations / Multiprogramming / Multitasking / Dual mode / Timer (29-35) ----------
+{t:'select',d:'medium',topic:'OS Operations',q:'According to the chapter, kernel interrupts can be triggered by which of the following? (select all that apply)',
+ o:['A hardware interrupt from one of the devices','A software error such as division by zero','A request for an operating system service (system call)','The bootstrap program finishing its own execution'],c:[0,1,2],
+ e:'The chapter lists hardware interrupts, software errors (traps), and system calls as sources of kernel interrupts.'},
+
+{t:'mcq',d:'medium',topic:'OS Operations',q:'System daemons, as described in the chapter, are:',
+ o:['Services provided outside of the kernel, started after the kernel loads','Part of the kernel itself','Hardware components on the motherboard','User application programs only'],c:0,
+ e:'The chapter states the kernel starts system daemons, which are services provided outside of the kernel.'},
+
+{t:'mcq',d:'easy',topic:'Multiprogramming',q:'What is the main purpose of multiprogramming, according to the chapter?',
+ o:['To organize jobs so the CPU always has one to execute, since a single user cannot always keep CPU and I/O busy','To allow only one job to run at a time for safety','To disable I/O devices while the CPU works','To increase the size of secondary storage'],c:0,
+ e:'The chapter states multiprogramming organizes jobs so the CPU always has one to execute, addressing the fact that a single user cannot always keep CPU and I/O devices busy.'},
+
+{t:'mcq',d:'medium',topic:'Multiprogramming',q:'In a multiprogrammed (batch) system, what happens when a job has to wait, for example for I/O?',
+ o:['The OS switches to another job','The entire system halts until I/O completes','The job is permanently deleted','The CPU begins re-executing the bootstrap program'],c:0,
+ e:'The chapter states that when a job has to wait, the OS switches to another job.'},
+
+{t:'mcq',d:'medium',topic:'Multitasking',q:'The chapter describes multitasking (timesharing) as a logical extension of which system?',
+ o:['Batch systems','Real-time embedded systems','Peer-to-peer systems','Cloud computing systems'],c:0,
+ e:'The chapter describes multitasking/timesharing as a logical extension of batch systems, where the CPU switches jobs frequently enough to create interactive computing.'},
+
+{t:'fill',d:'medium',topic:'Multitasking',q:'Fill in the blank: In a timesharing system, response time should generally be less than ______ second(s), according to the chapter.',
+ a:['1','one'],
+ e:'The chapter states response time should be less than 1 second for interactive computing.'},
+
+{t:'mcq',d:'medium',topic:'Multitasking',q:'According to the chapter, what allows execution of processes that are not completely loaded into memory?',
+ o:['Virtual memory','The bootstrap program','A trap handler','Firmware'],c:0,
+ e:'The chapter states virtual memory allows execution of processes not completely in memory.'},
+
+{t:'mcq',d:'medium',topic:'Multitasking',q:'When processes don\'t fit in memory, what mechanism, described in the chapter, moves them in and out to allow execution?',
+ o:['Swapping','Bootstrapping','Interrupt vectoring','Direct memory access'],c:0,
+ e:'The chapter states swapping moves processes in and out of memory when they don\'t all fit.'},
+
+{t:'mcq',d:'easy',topic:'Dual-mode Operation',q:'Dual-mode operation, as described in the chapter, allows the OS to:',
+ o:['Protect itself and other system components','Increase disk capacity','Compile user programs faster','Eliminate the need for interrupts'],c:0,
+ e:'The chapter states dual-mode operation allows the OS to protect itself and other system components, distinguishing user mode from kernel mode.'},
+
+{t:'select',d:'medium',topic:'Dual-mode Operation',q:'Which statements about dual-mode operation are TRUE according to the chapter? (select all that apply)',
+ o:['A mode bit is provided by hardware to distinguish user code from kernel code','A system call changes the mode to kernel; returning from the call resets it to user','Some instructions are privileged and only executable in kernel mode','Users can freely set the mode bit to "kernel" themselves at any time'],c:[0,1,2],
+ e:'The chapter describes the hardware mode bit, system calls switching modes, and privileged instructions. Users cannot freely set the mode bit themselves — that is precisely what dual-mode operation prevents.'},
+
+{t:'short',d:'hard',topic:'Dual-mode Operation',q:'How does the chapter say the system guarantees a user cannot explicitly set the mode bit to "kernel"?',
+ a:'Only a system call can change the mode to kernel, and returning from that call resets the mode back to user; certain instructions are privileged and only executable in kernel mode.',
+ e:'Covered on slide 33.'},
+
+{t:'mcq',d:'medium',topic:'Timer',q:'What is the primary purpose of the timer, according to the chapter?',
+ o:['To prevent an infinite loop or a process from hogging resources','To measure the CPU\'s clock speed only','To synchronize network packets','To manage the interrupt vector table'],c:0,
+ e:'The chapter states the timer prevents infinite loops or processes hogging resources by interrupting after a set period.'},
+
+{t:'mcq',d:'medium',topic:'Timer',q:'How is the timer counter decremented, according to the chapter?',
+ o:['By the physical clock','By the bootstrap program','By the device controller','By the application program'],c:0,
+ e:'The chapter states a counter is kept and decremented by the physical clock; when it reaches zero, an interrupt is generated.'},
+
+{t:'tf',d:'medium',topic:'Timer',q:'True or False: According to the chapter, setting the timer counter is a privileged instruction performed by the operating system.',
+ o:['True','False'],c:0,
+ e:'The chapter states the operating system sets the counter and that this is a privileged instruction.'},
+
+// ---------- Process, Memory, File, Mass-storage Management (36-41) ----------
+{t:'mcq',d:'easy',topic:'Process Management',q:'According to the chapter, a process is:',
+ o:['A program in execution, a unit of work within the system','A passive entity stored only on disk','The same thing as a program','A type of device controller'],c:0,
+ e:'The chapter defines a process as a program in execution, and notes that a program is passive while a process is active.'},
+
+{t:'mcq',d:'medium',topic:'Process Management',q:'What is the key difference between a program and a process, as stated in the chapter?',
+ o:['A program is a passive entity; a process is an active entity','A program can only run once; a process can run many times','A process is stored on disk; a program is stored only in memory','There is no difference — they are the same thing'],c:0,
+ e:'The chapter explicitly contrasts: "Program is a passive entity; process is an active entity."'},
+
+{t:'select',d:'medium',topic:'Process Management',q:'Which resources does the chapter say a process needs to accomplish its task? (select all that apply)',
+ o:['CPU','Memory','I/O','Files'],c:[0,1,2,3],
+ e:'The chapter lists CPU, memory, I/O, and files as resources a process needs, along with initialization data.'},
+
+{t:'mcq',d:'medium',topic:'Process Management',q:'What distinguishes a multi-threaded process from a single-threaded process, according to the chapter?',
+ o:['A multi-threaded process has one program counter per thread, rather than a single program counter','A multi-threaded process cannot use any CPU resources','A single-threaded process runs on multiple CPUs simultaneously','A multi-threaded process has no program counter at all'],c:0,
+ e:'The chapter states single-threaded processes have one program counter, while multi-threaded processes have one program counter per thread.'},
+
+{t:'select',d:'hard',topic:'Process Management',q:'Which of the following are listed in the chapter as process management activities the OS is responsible for? (select all that apply)',
+ o:['Creating and deleting both user and system processes','Suspending and resuming processes','Providing mechanisms for process synchronization and communication','Providing mechanisms for deadlock handling'],c:[0,1,2,3],
+ e:'All four are listed as process management activities in the chapter.'},
+
+{t:'mcq',d:'easy',topic:'Memory Management',q:'What must memory management determine, according to the chapter?',
+ o:['What is in memory and when','Which users are allowed to log in','How many device controllers exist','The clock speed of the CPU'],c:0,
+ e:'The chapter states memory management determines what is in memory and when, optimizing CPU utilization and response to users.'},
+
+{t:'select',d:'medium',topic:'Memory Management',q:'Which of the following are memory management activities described in the chapter? (select all that apply)',
+ o:['Keeping track of which parts of memory are used and by whom','Deciding which processes/data to move into and out of memory','Allocating and deallocating memory space as needed','Physically manufacturing new RAM chips'],c:[0,1,2],
+ e:'The chapter lists tracking usage, deciding what to move in/out, and allocating/deallocating memory space. Manufacturing RAM is not an OS activity.'},
+
+{t:'mcq',d:'medium',topic:'File-System Management',q:'The chapter states that the OS abstracts physical storage properties into what logical storage unit?',
+ o:['A file','A word','A sector','A register'],c:0,
+ e:'The chapter states the OS abstracts physical properties to a logical storage unit called a file.'},
+
+{t:'select',d:'medium',topic:'File-System Management',q:'Which OS activities related to file-system management are listed in the chapter? (select all that apply)',
+ o:['Creating and deleting files and directories','Mapping files onto secondary storage','Backing up files onto stable, non-volatile storage media','Manufacturing new hard disk drives'],c:[0,1,2],
+ e:'The chapter lists creating/deleting files and directories, mapping files to storage, and backup as file-system management activities.'},
+
+{t:'mcq',d:'medium',topic:'Mass-Storage Management',q:'According to the chapter, why is proper mass-storage management of central importance?',
+ o:['The entire speed of computer operation hinges on the disk subsystem and its algorithms','Disks never fail so management is optional','Mass storage has no effect on system performance','Only network speed matters for overall performance'],c:0,
+ e:'The chapter states the entire speed of computer operation hinges on the disk subsystem and its algorithms.'},
+
+{t:'select',d:'hard',topic:'Mass-Storage Management',q:'Which of the following are listed as OS mass-storage management activities in the chapter? (select all that apply)',
+ o:['Mounting and unmounting','Free-space management','Disk scheduling and partitioning','Compiling application source code'],c:[0,1,2],
+ e:'The chapter lists mounting/unmounting, free-space management, storage allocation, disk scheduling, partitioning, and protection. Compiling source code is not part of mass-storage management.'},
+
+// ---------- Caching / I/O Subsystem (41, 44) ----------
+{t:'mcq',d:'easy',topic:'Caching',q:'Where is caching performed, according to the chapter?',
+ o:['At many levels in a computer — in hardware, operating system, and software','Only inside the CPU registers','Only on the hard disk','Only in the bootstrap program'],c:0,
+ e:'The chapter states caching is an important principle performed at many levels: hardware, operating system, and software.'},
+
+{t:'mcq',d:'medium',topic:'Caching',q:'What happens if requested information IS found in the cache, according to the chapter?',
+ o:['The information is used directly from the cache (fast)','The system must always re-fetch it from the original slower storage','An interrupt is triggered to reload it','The cache is immediately cleared'],c:0,
+ e:'The chapter states that if the information is in the cache, it is used directly from the cache, which is fast.'},
+
+{t:'tf',d:'medium',topic:'Caching',q:'True or False: The chapter states that cache is generally larger than the storage being cached.',
+ o:['True','False'],c:1,
+ e:'The chapter states the cache is smaller than the storage being cached — that is what makes cache management (size and replacement policy) a design problem.'},
+
+{t:'select',d:'hard',topic:'I/O Subsystem',q:'According to the chapter, what does memory management of I/O within the I/O subsystem include? (select all that apply)',
+ o:['Buffering — temporarily storing data while it is being transferred','Caching — storing parts of data in faster storage for performance','Spooling — overlapping output of one job with input of others','Deleting all I/O data permanently after each use'],c:[0,1,2],
+ e:'The chapter lists buffering, caching, and spooling as part of the I/O subsystem\'s memory management responsibilities.'},
+
+{t:'mcq',d:'medium',topic:'I/O Subsystem',q:'What is one stated purpose of the operating system regarding I/O hardware, according to the chapter?',
+ o:['To hide peculiarities of hardware devices from the user','To expose every hardware detail directly to the user','To prevent any device drivers from being installed','To eliminate the need for a general device-driver interface'],c:0,
+ e:'The chapter states one purpose of the OS is to hide peculiarities of hardware devices from the user.'},
+
+// ---------- Protection and Security (45) ----------
+{t:'mcq',d:'easy',topic:'Protection and Security',q:'According to the chapter, "protection" refers to:',
+ o:['Any mechanism for controlling access of processes or users to resources defined by the OS','Only antivirus software','Physical locks on server room doors','A type of network cable'],c:0,
+ e:'The chapter defines protection as any mechanism for controlling access of processes or users to resources defined by the OS.'},
+
+{t:'mcq',d:'easy',topic:'Protection and Security',q:'According to the chapter, "security" refers to:',
+ o:['Defense of the system against internal and external attacks','The same concept as protection with no distinction','Only backup and recovery procedures','The color scheme of the login screen'],c:0,
+ e:'The chapter defines security as defense of the system against internal and external attacks, distinct from protection.'},
+
+{t:'select',d:'medium',topic:'Protection and Security',q:'Which of the following are mentioned in the chapter as examples within the range of security threats? (select all that apply)',
+ o:['Denial-of-service attacks','Worms and viruses','Identity theft and theft of service','Improved battery life'],c:[0,1,2],
+ e:'The chapter mentions denial-of-service, worms, viruses, identity theft, and theft of service as examples of security threats.'},
+
+{t:'mcq',d:'medium',topic:'Protection and Security',q:'What does a group identifier (group ID) allow, according to the chapter?',
+ o:['A set of users to be defined and controls managed as a group','Only one user to ever log in at a time','The OS to skip user authentication','Devices to bypass the interrupt vector'],c:0,
+ e:'The chapter states a group ID allows a set of users to be defined and controls to be managed, then associated with processes/files.'},
+
+{t:'fill',d:'hard',topic:'Protection and Security',q:'Fill in the blank: ______ allows a user to change to an effective ID with more rights, as described in the chapter.',
+ a:['privilege escalation'],
+ e:'The chapter states privilege escalation allows a user to change to an effective ID with more rights.'},
+
+// ---------- Virtualization (46-48) ----------
+{t:'mcq',d:'easy',topic:'Virtualization',q:'According to the chapter, virtualization allows:',
+ o:['Operating systems to run applications within other OSes','CPUs to run without any operating system','Hard disks to become volatile memory','Networks to eliminate the need for protocols'],c:0,
+ e:'The chapter states virtualization allows operating systems to run applications within other OSes.'},
+
+{t:'mcq',d:'medium',topic:'Virtualization',q:'The chapter states that emulation, used when the source CPU type differs from the target type, is generally:',
+ o:['The slowest method','The fastest method','Impossible to achieve','Only usable for networking'],c:0,
+ e:'The chapter states emulation (e.g., PowerPC to Intel x86) is generally the slowest method.'},
+
+{t:'mcq',d:'medium',topic:'Virtualization',q:'In true virtualization as described in the chapter, what is true of both the host OS and guest OSes?',
+ o:['Both are natively compiled for the CPU','Only the guest OS is natively compiled; the host is interpreted','Neither OS is compiled — both are interpreted','The guest OS must always be emulated, never natively compiled'],c:0,
+ e:'The chapter states virtualization involves an OS natively compiled for the CPU, running guest OSes that are also natively compiled.'},
+
+{t:'mcq',d:'medium',topic:'Virtualization',q:'What does VMM stand for, and what does it provide, according to the chapter?',
+ o:['Virtual Machine Manager — it provides virtualization services','Virtual Memory Module — it manages RAM allocation only','Verified Machine Method — it authenticates users','Variable Memory Mapping — it maps disk sectors'],c:0,
+ e:'The chapter states VMM (Virtual Machine Manager) provides virtualization services.'},
+
+{t:'select',d:'medium',topic:'Virtualization',q:'Which use cases for virtualization does the chapter mention? (select all that apply)',
+ o:['Developing apps for multiple OSes without having multiple physical systems','Quality assurance testing applications without multiple systems','Executing and managing compute environments within data centers','Replacing the need for any operating system entirely'],c:[0,1,2],
+ e:'The chapter lists app development, QA testing, and data center compute management as virtualization use cases; it never claims virtualization removes the need for an OS.'},
+
+{t:'tf',d:'hard',topic:'Virtualization',q:'True or False: According to the chapter, a VMM can run natively, in which case it is also the host, and there is no general-purpose host OS (e.g., VMware ESX, Citrix XenServer).',
+ o:['True','False'],c:0,
+ e:'The chapter states VMMs can run natively as the host itself, with no general-purpose host OS, citing VMware ESX and Citrix XenServer.'},
+
+// ---------- Distributed Systems (49) ----------
+{t:'mcq',d:'easy',topic:'Distributed Systems',q:'According to the chapter, a distributed system is:',
+ o:['A collection of separate, possibly heterogeneous, systems networked together','A single computer with multiple cores','A cache located inside the CPU','A type of bootstrap program'],c:0,
+ e:'The chapter defines a distributed system as a collection of separate, possibly heterogeneous, systems networked together.'},
+
+{t:'mcq',d:'medium',topic:'Distributed Systems',q:'Which network type is described in the chapter as the most common communications path for distributed systems?',
+ o:['TCP/IP','Bluetooth only','A single dedicated fiber line','A private satellite uplink'],c:0,
+ e:'The chapter states TCP/IP is the most common communications path (network) for distributed systems.'},
+
+{t:'select',d:'medium',topic:'Distributed Systems',q:'Which network scopes are listed in the chapter? (select all that apply)',
+ o:['Local Area Network (LAN)','Wide Area Network (WAN)','Metropolitan Area Network (MAN)','Personal Area Network (PAN)'],c:[0,1,2,3],
+ e:'The chapter lists LAN, WAN, MAN, and PAN as network scopes.'},
+
+{t:'short',d:'medium',topic:'Distributed Systems',q:'What does the chapter say a Network Operating System provides?',
+ a:'Features between systems across the network, including a communication scheme that allows systems to exchange messages and creates the illusion of a single system.',
+ e:'Described on slide 49.'},
+
+// ---------- Computer System Architecture (50-57) ----------
+{t:'mcq',d:'easy',topic:'System Architecture',q:'According to the chapter, most computer systems use:',
+ o:['A single general-purpose processor, though most also have special-purpose processors','Only special-purpose processors and no general-purpose processor','No processors at all, only device controllers','A minimum of eight general-purpose processors'],c:0,
+ e:'The chapter states most systems use a single general-purpose processor, and most also have special-purpose processors.'},
+
+{t:'select',d:'medium',topic:'System Architecture',q:'Which advantages of multiprocessor systems are listed in the chapter? (select all that apply)',
+ o:['Increased throughput','Economy of scale','Increased reliability (graceful degradation / fault tolerance)','Elimination of the need for an operating system'],c:[0,1,2],
+ e:'The chapter lists increased throughput, economy of scale, and increased reliability as multiprocessor advantages.'},
+
+{t:'mcq',d:'medium',topic:'System Architecture',q:'In Asymmetric Multiprocessing, as described in the chapter:',
+ o:['Each processor is assigned a specific task','Each processor performs all tasks identically','There is only ever one processor','Processors never communicate with each other'],c:0,
+ e:'The chapter states in Asymmetric Multiprocessing, each processor is assigned a specific task, as opposed to Symmetric Multiprocessing where each processor performs all tasks.'},
+
+{t:'mcq',d:'medium',topic:'System Architecture',q:'What is the key difference between Asymmetric and Symmetric Multiprocessing, according to the chapter?',
+ o:['Asymmetric assigns each processor a specific task, while Symmetric has each processor perform all tasks','Asymmetric uses no processors at all','Symmetric only works with a single CPU','There is no meaningful difference between them'],c:0,
+ e:'This directly compares the two multiprocessing types defined in the chapter.'},
+
+{t:'tf',d:'medium',topic:'Clustered Systems',q:'True or False: According to the chapter, clustered systems are like multiprocessor systems, but consist of multiple systems working together, usually sharing storage via a storage-area network (SAN).',
+ o:['True','False'],c:0,
+ e:'The chapter states clustered systems resemble multiprocessor systems but involve multiple systems working together, typically sharing storage via a SAN.'},
+
+{t:'mcq',d:'medium',topic:'Clustered Systems',q:'In asymmetric clustering, as described in the chapter:',
+ o:['One machine is in hot-standby mode','All machines run applications simultaneously with no standby','There is no way to survive a node failure','Clustering requires exactly two nodes'],c:0,
+ e:'The chapter states asymmetric clustering has one machine in hot-standby mode, ready to take over if another fails.'},
+
+{t:'mcq',d:'medium',topic:'Clustered Systems',q:'In symmetric clustering, as described in the chapter:',
+ o:['Multiple nodes run applications and monitor each other','Only one node is ever active','Nodes cannot communicate with each other','It is identical to asymmetric clustering'],c:0,
+ e:'The chapter states symmetric clustering has multiple nodes running applications while monitoring each other.'},
+
+{t:'short',d:'hard',topic:'Clustered Systems',q:'What is a distributed lock manager (DLM), and why is it used, according to the chapter?',
+ a:'Some clusters have a distributed lock manager to avoid conflicting operations between nodes.',
+ e:'Mentioned on slide 55 in the context of clustered systems.'},
+
+{t:'mcq',d:'medium',topic:'Clustered Systems',q:'The chapter notes some clusters are built for high-performance computing (HPC). What must applications be written to do in this case?',
+ o:['Use parallelization','Run only on a single processor','Avoid using any shared storage','Disable all interrupts'],c:0,
+ e:'The chapter states HPC clusters require applications to be written to use parallelization.'},
+
+// ---------- Computing Environments (58-67) ----------
+{t:'select',d:'easy',topic:'Computing Environments',q:'Which computing environments are listed in the chapter? (select all that apply)',
+ o:['Traditional','Mobile','Client Server','Peer-to-Peer','Cloud computing','Real-time Embedded'],c:[0,1,2,3,4,5],
+ e:'The chapter lists Traditional, Mobile, Client Server, Peer-to-Peer, Cloud computing, and Real-time Embedded as computing environments.'},
+
+{t:'mcq',d:'medium',topic:'Traditional Environments',q:'According to the chapter, what has blurred the boundaries of traditional stand-alone general-purpose machines?',
+ o:['Most systems now interconnect with others, such as the Internet','Traditional machines were never connected to networks','Mobile computers cannot connect wirelessly','Portals no longer provide web access'],c:0,
+ e:'The chapter states the traditional model is blurred because most systems interconnect with others, such as the Internet.'},
+
+{t:'mcq',d:'medium',topic:'Traditional Environments',q:'What are "network computers" described as in the chapter?',
+ o:['Thin clients, like Web terminals','Full standalone servers','Mobile smartphones only','Devices with no network capability'],c:0,
+ e:'The chapter describes network computers (thin clients) as being like Web terminals.'},
+
+{t:'mcq',d:'easy',topic:'Mobile Computing',q:'According to the chapter, which extra OS features do mobile devices offer compared to traditional laptops?',
+ o:['GPS and gyroscope, enabling new app types like augmented reality','Larger hard disk drives only','A dedicated mainframe connection','No wireless connectivity at all'],c:0,
+ e:'The chapter states mobile devices offer extra features like GPS and gyroscope, enabling new app types such as augmented reality.'},
+
+{t:'mcq',d:'medium',topic:'Mobile Computing',q:'According to the chapter, which two platforms are named as leaders in mobile operating systems?',
+ o:['Apple iOS and Google Android','Windows Mobile and BlackBerry OS','Linux Mobile and Symbian','Palm OS and webOS'],c:0,
+ e:'The chapter names Apple iOS and Google Android as the leading mobile OS platforms.'},
+
+{t:'mcq',d:'medium',topic:'Client Server',q:'What does a compute-server system provide, according to the chapter?',
+ o:['An interface to the client to request services, such as a database','An interface only for file storage, never services','A dumb terminal emulator','A peer-to-peer discovery protocol'],c:0,
+ e:'The chapter states a compute-server system provides an interface to the client to request services (e.g., a database).'},
+
+{t:'mcq',d:'medium',topic:'Client Server',q:'What does a file-server system provide, according to the chapter?',
+ o:['An interface for clients to store and retrieve files','Only compute services, never file services','Only network routing between peers','Access exclusively for kernel-mode operations'],c:0,
+ e:'The chapter states a file-server system provides an interface for clients to store and retrieve files.'},
+
+{t:'mcq',d:'easy',topic:'Peer-to-Peer',q:'What is the defining characteristic of peer-to-peer (P2P) systems, according to the chapter?',
+ o:['P2P does not distinguish clients and servers; all nodes are considered peers','P2P always requires a central mainframe server','P2P nodes can never act as servers','P2P is identical to client-server computing'],c:0,
+ e:'The chapter states P2P does not distinguish clients from servers — all nodes are peers that may act as client, server, or both.'},
+
+{t:'select',d:'medium',topic:'Peer-to-Peer',q:'How does a node join a P2P network, according to the chapter? (select all that apply)',
+ o:['By registering its service with a central lookup service on the network','By broadcasting a request for service and responding via a discovery protocol','By purchasing a dedicated server license','By disabling its own networking hardware'],c:[0,1],
+ e:'The chapter describes two joining methods: registering with a central lookup service, or broadcast/discovery protocol.'},
+
+{t:'mcq',d:'medium',topic:'Peer-to-Peer',q:'Which examples of P2P systems are named in the chapter?',
+ o:['Napster, Gnutella, and Skype (VoIP)','Amazon EC2 and Google Cloud','VMware and VirtualBox','Windows and macOS'],c:0,
+ e:'The chapter names Napster, Gnutella, and Skype (Voice over IP) as P2P examples.'},
+
+{t:'mcq',d:'easy',topic:'Cloud Computing',q:'According to the chapter, cloud computing delivers computing, storage, and even apps as:',
+ o:['A service across a network','Physical hardware shipped to the user','A one-time downloadable file','A local-only offline resource'],c:0,
+ e:'The chapter states cloud computing delivers computing, storage, and even apps as a service across a network.'},
+
+{t:'mcq',d:'medium',topic:'Cloud Computing',q:'According to the chapter, cloud computing is described as a logical extension of:',
+ o:['Virtualization, because it uses virtualization as the base for its functionality','Peer-to-peer networking only','Batch processing systems','Real-time embedded systems'],c:0,
+ e:'The chapter states cloud computing is a logical extension of virtualization, using virtualization as its functional base.'},
+
+{t:'match',d:'medium',topic:'Cloud Computing',q:'Match each cloud computing type to its description.',
+ pairs:[['Public cloud','Available via the Internet to anyone willing to pay'],
+        ['Private cloud','Run by a company for the company\'s own use'],
+        ['Hybrid cloud','Includes both public and private cloud components']],
+ e:'The chapter defines public, private, and hybrid clouds as described.'},
+
+{t:'match',d:'hard',topic:'Cloud Computing',q:'Match each cloud service model to its description.',
+ pairs:[['Software as a Service (SaaS)','One or more applications available via the Internet (e.g., a word processor)'],
+        ['Platform as a Service (PaaS)','A software stack ready for application use via the Internet (e.g., a database server)'],
+        ['Infrastructure as a Service (IaaS)','Servers or storage available over the Internet (e.g., storage for backup use)']],
+ e:'The chapter defines SaaS, PaaS, and IaaS as described.'},
+
+{t:'select',d:'medium',topic:'Cloud Computing',q:'According to the chapter, cloud computing environments are composed of which elements? (select all that apply)',
+ o:['Traditional operating systems','VMMs (virtual machine managers)','Cloud management tools','Only bare-metal hardware with no software layer'],c:[0,1,2],
+ e:'The chapter states cloud computing environments are composed of traditional OSes, plus VMMs, plus cloud management tools.'},
+
+{t:'short',d:'medium',topic:'Cloud Computing',q:'What role do load balancers play in cloud computing environments, according to the chapter?',
+ a:'Load balancers spread traffic across multiple applications.',
+ e:'Stated on slide 66.'},
+
+{t:'mcq',d:'medium',topic:'Real-Time Embedded',q:'According to the chapter, which form of computer is described as the most prevalent?',
+ o:['Real-time embedded systems','Mainframe computers','Desktop workstations','Cloud servers'],c:0,
+ e:'The chapter states real-time embedded systems are the most prevalent form of computers.'},
+
+{t:'mcq',d:'medium',topic:'Real-Time Embedded',q:'What defines correct operation in a real-time OS, according to the chapter?',
+ o:['Processing must be done within a well-defined, fixed time constraint for correct operation','Processing can occur at any time with no constraints','The OS must always run in user mode','There must be no interrupts at all'],c:0,
+ e:'The chapter states a real-time OS has well-defined fixed time constraints, and correct operation only occurs if those constraints are met.'},
+
+{t:'tf',d:'easy',topic:'Real-Time Embedded',q:'True or False: According to the chapter, some special-purpose computing environments perform tasks without an operating system at all.',
+ o:['True','False'],c:0,
+ e:'The chapter states some devices have OSes, while some perform tasks without an OS.'},
+
+// ---------- Free and Open-Source OS (68-69) ----------
+{t:'mcq',d:'easy',topic:'Free/Open-Source OS',q:'According to the chapter, free and open-source operating systems are made available:',
+ o:['In source-code format rather than just binary, closed-source, and proprietary form','Only as compiled binaries with no source access','Exclusively through paid vendor licenses','Only on mainframe computers'],c:0,
+ e:'The chapter states free/open-source OSes are made available in source-code format, as opposed to just binary, closed-source, proprietary form.'},
+
+{t:'mcq',d:'medium',topic:'Free/Open-Source OS',q:'The chapter states the free/open-source movement counters which industry trend?',
+ o:['Copy protection and Digital Rights Management (DRM)','Multiprocessor system design','Cloud computing adoption','Interrupt-driven architecture'],c:0,
+ e:'The chapter states the open-source movement runs counter to the copy protection and DRM movement.'},
+
+{t:'mcq',d:'medium',topic:'Free/Open-Source OS',q:'Which organization and license does the chapter associate with starting the free software movement?',
+ o:['The Free Software Foundation (FSF) and its "copyleft" GNU Public License (GPL)','The IEEE and the 802.11 standard','ICANN and the DNS protocol','The W3C and HTML5'],c:0,
+ e:'The chapter states the movement was started by the Free Software Foundation (FSF), which has the "copyleft" GNU Public License (GPL).'},
+
+{t:'select',d:'medium',topic:'Free/Open-Source OS',q:'Which operating systems are given as examples of free/open-source OSes in the chapter? (select all that apply)',
+ o:['GNU/Linux','BSD UNIX (including the core of Mac OS X)','Solaris','Microsoft Office'],c:[0,1,2],
+ e:'The chapter names GNU/Linux, BSD UNIX (including the core of Mac OS X), and Solaris as examples available in source and binary format; Microsoft Office is not an operating system.'},
+
+{t:'mcq',d:'medium',topic:'Free/Open-Source OS',q:'Which VMM tools does the chapter mention as free and usable to run guest operating systems for exploration?',
+ o:['VMware Player and VirtualBox','Only paid enterprise hypervisors','Napster and Gnutella','AWS EC2 exclusively'],c:0,
+ e:'The chapter names VMware Player (free on Windows) and VirtualBox (open source and free on many platforms) for running guest OSes.'},
+
+{t:'short',d:'medium',topic:'Free/Open-Source OS',q:'According to the chapter, what does the availability of source code allow us to do that was previously only possible through documentation?',
+ a:'It allows studying operating systems from the inside out — answering questions about behavior by examining the actual code, rather than relying only on documentation.',
+ e:'Discussed in "The Study of Operating Systems" section.'},
+
+// ---------- Kernel Data Structures (70-73) ----------
+{t:'select',d:'easy',topic:'Kernel Data Structures',q:'Which linked-list variants are shown in the chapter as kernel data structures? (select all that apply)',
+ o:['Singly linked list','Doubly linked list','Circular linked list','Triply linked list'],c:[0,1,2],
+ e:'The chapter shows singly linked, doubly linked, and circular linked lists as kernel data structures. "Triply linked list" is not a real structure mentioned.'},
+
+{t:'mcq',d:'medium',topic:'Kernel Data Structures',q:'In a binary search tree as described in the chapter, what relationship holds?',
+ o:['Left <= right','Right always equals left','All nodes must be leaves','Nodes have no ordering relationship'],c:0,
+ e:'The chapter states the binary search tree property is left <= right.'},
+
+{t:'mcq',d:'medium',topic:'Kernel Data Structures',q:'According to the chapter, what is the search performance of an unbalanced binary search tree?',
+ o:['O(n)','O(1)','O(n^2)','O(log n) always, regardless of balance'],c:0,
+ e:'The chapter states search performance of a (potentially unbalanced) binary search tree is O(n).'},
+
+{t:'mcq',d:'medium',topic:'Kernel Data Structures',q:'According to the chapter, what is the search performance of a balanced binary search tree?',
+ o:['O(lg n)','O(n)','O(n^2)','O(n log n)'],c:0,
+ e:'The chapter states a balanced binary search tree achieves O(lg n) search performance, compared to O(n) for an unbalanced tree.'},
+
+{t:'mcq',d:'medium',topic:'Kernel Data Structures',q:'What can a hash function be used to create, according to the chapter?',
+ o:['A hash map','A bitmap only','A circular linked list','A binary search tree'],c:0,
+ e:'The chapter states a hash function can create a hash map.'},
+
+{t:'mcq',d:'medium',topic:'Kernel Data Structures',q:'According to the chapter, what is a bitmap?',
+ o:['A string of n binary digits representing the status of n items','A graphical image format used by the kernel','A type of interrupt vector','A hierarchical tree of file directories'],c:0,
+ e:'The chapter defines a bitmap as a string of n binary digits representing the status of n items.'},
+
+{t:'fill',d:'hard',topic:'Kernel Data Structures',q:'Fill in the blank: The chapter notes Linux data structures are defined in include files such as <linux/list.h>, <linux/kfifo.h>, and <linux/______.h>.',
+ a:['rbtree'],
+ e:'The chapter lists <linux/list.h>, <linux/kfifo.h>, and <linux/rbtree.h> as Linux kernel data-structure include files.'},
+
+{t:'compare',d:'hard',topic:'Kernel Data Structures',q:'Compare the search performance of an unbalanced binary search tree with a balanced binary search tree, according to the chapter.',
+ o:['Unbalanced: O(n); Balanced: O(lg n)','Unbalanced: O(lg n); Balanced: O(n)','Both are O(n) regardless of balance','Both are O(1) regardless of balance'],c:0,
+ e:'The chapter states unbalanced BST search is O(n), while a balanced BST improves this to O(lg n).'},
+
+// ---------- Compare/Contrast style questions across topics ----------
+{t:'compare',d:'hard',topic:'Compare Concepts',q:'Compare protection and security as defined in the chapter.',
+ o:['Protection controls access of processes/users to OS-defined resources; security defends the system against internal and external attacks','Protection and security are exactly the same concept','Protection only applies to hardware; security only applies to software','Security controls resource access; protection defends against attacks'],c:0,
+ e:'The chapter separately defines protection (controlling access to resources) and security (defense against attacks).'},
+
+{t:'compare',d:'medium',topic:'Compare Concepts',q:'Compare multiprogramming and multitasking (timesharing) as described in the chapter.',
+ o:['Multiprogramming keeps a job ready whenever the CPU is free; multitasking is an extension where the CPU switches jobs so fast that interactive use becomes possible','They are identical concepts with no difference','Multitasking predates multiprogramming in the chapter\'s account','Multiprogramming requires virtual memory while multitasking does not'],c:0,
+ e:'The chapter frames multitasking as a logical extension of batch (multiprogrammed) systems, adding fast switching for interactive computing.'},
+
+{t:'compare',d:'medium',topic:'Compare Concepts',q:'Compare Asymmetric and Symmetric clustering as described in the chapter.',
+ o:['Asymmetric has one machine in hot-standby; Symmetric has multiple nodes running applications and monitoring each other','Asymmetric has multiple active nodes; Symmetric has one standby node','Both types are identical in behavior','Symmetric clustering does not allow node monitoring'],c:0,
+ e:'This directly reflects the chapter\'s definitions of asymmetric vs. symmetric clustering.'},
+
+{t:'compare',d:'medium',topic:'Compare Concepts',q:'Compare a system program and an application program, as distinguished in the chapter.',
+ o:['A system program ships with the OS but is not part of the kernel; an application program is not associated with the operating system at all','Both terms refer to exactly the same thing','An application program is always part of the kernel','A system program can never be replaced or updated'],c:0,
+ e:'The chapter distinguishes these two categories of non-kernel software explicitly.'},
+
+{t:'compare',d:'hard',topic:'Compare Concepts',q:'Compare emulation and virtualization as described in the chapter.',
+ o:['Emulation is used when the source and target CPU types differ and is generally the slowest method; virtualization runs guest OSes natively compiled for the same CPU as the host','Emulation and virtualization are the same technique with different names','Virtualization is always slower than emulation','Emulation requires no CPU translation at all'],c:0,
+ e:'The chapter separates emulation (cross-CPU-type, slow) from virtualization (native compilation on both host and guest).'},
+
+// ---------- Additional TF / MCQ across the deck for depth ----------
+{t:'tf',d:'easy',topic:'System Organization',q:'True or False: According to the chapter, I/O devices and the CPU can execute concurrently.',
+ o:['True','False'],c:0,
+ e:'The chapter states "I/O devices and the CPU can execute concurrently."'},
+
+{t:'mcq',d:'medium',topic:'System Organization',q:'According to the chapter, how does the CPU move data to/from local buffers of device controllers?',
+ o:['The CPU moves data from/to main memory to/from local buffers','The CPU never interacts with local buffers directly','Data moves only via the bootstrap program','Data moves only through the interrupt vector'],c:0,
+ e:'The chapter states the CPU moves data from/to main memory to/from the local buffers of device controllers.'},
+
+{t:'mcq',d:'medium',topic:'OS Operations',q:'Besides hardware and software interrupts, what other process problems does the chapter mention?',
+ o:['Infinite loops and processes modifying each other or the operating system','Only network packet loss','Only insufficient disk space','Only incorrect file permissions'],c:0,
+ e:'The chapter mentions infinite loops and processes modifying each other or the OS as other process problems.'},
+
+{t:'mcq',d:'medium',topic:'Memory Layout',q:'What does the "Memory Layout for Multiprogrammed System" diagram in the chapter illustrate?',
+ o:['How multiple jobs are held in memory simultaneously so the CPU always has one to execute','How a single job occupies the entire memory space','How memory is erased between every job','How the bootstrap program replaces the kernel'],c:0,
+ e:'This diagram (slide 32) supports the multiprogramming discussion of keeping several jobs resident in memory.'},
+
+{t:'select',d:'medium',topic:'Computer Startup',q:'Which of the following are true about the bootstrap program per the chapter? (select all that apply)',
+ o:['It is loaded at power-up or reboot','It is typically stored in ROM or EPROM (firmware)','It initializes all aspects of the system','It permanently disables the kernel once loaded'],c:[0,1,2],
+ e:'The chapter states the bootstrap program is loaded at power-up/reboot, stored in ROM/EPROM as firmware, and initializes the system before loading the kernel.'},
+
+{t:'order',d:'hard',topic:'Computer Startup',q:'Arrange the following in the order described by the chapter for computer startup.',
+ steps:['Bootstrap program is loaded at power-up or reboot','Bootstrap program initializes all aspects of the system','Bootstrap program loads the operating system kernel','Kernel starts execution and starts system daemons'],
+ e:'The chapter describes this sequence: bootstrap loads → initializes the system → loads the kernel → kernel starts execution and starts daemons.'},
+
+{t:'order',d:'medium',topic:'Interrupts',q:'Arrange the interrupt-driven I/O cycle steps in the order implied by the chapter.',
+ steps:['I/O starts on a device','Device controller performs the operation using its local buffer','Device controller causes an interrupt when finished','CPU\'s interrupt architecture saves the interrupted instruction address and transfers control via the interrupt vector'],
+ e:'This reflects the chapter\'s description of the interrupt-driven I/O cycle across slides 13-17.'},
+
+{t:'order',d:'medium',topic:'Dual-mode Operation',q:'Arrange the following steps of a system call\'s effect on the mode bit, as described in the chapter.',
+ steps:['System runs in user mode executing user code','A system call is invoked','Mode bit changes to kernel','Kernel code executes with access to privileged instructions','Return from the system call resets the mode bit to user'],
+ e:'The chapter describes the transition from user to kernel mode being triggered by a system call, and reset upon return, as shown in the transition diagram.'},
+
+{t:'order',d:'hard',topic:'Storage Hierarchy',q:'Arrange the following storage types from the chapter\'s hierarchy, fastest/most expensive first to slowest/cheapest last.',
+ steps:['Registers','Main memory (DRAM)','Non-volatile memory / SSD-type devices','Hard disk drives (HDD)'],
+ e:'The chapter\'s storage-device hierarchy orders storage by speed, cost, and volatility, from registers at the top down to slower disk-based storage.'},
+
+{t:'mcq',d:'medium',topic:'Objectives',q:'Which of the following is listed as a stated learning objective of the chapter?',
+ o:['Illustrate the transition from user mode to kernel mode','Teach a specific programming language','Explain how to physically assemble a computer','Cover the history of the Internet'],c:0,
+ e:'The chapter objectives explicitly include illustrating the transition from user mode to kernel mode.'},
+
+{t:'select',d:'medium',topic:'Objectives',q:'Which of the following are listed as chapter objectives? (select all that apply)',
+ o:['Describe the general organization of a computer system and the role of interrupts','Describe the components in a modern, multiprocessor computer system','Discuss how operating systems are used in various computing environments','Teach students to write a full operating system kernel from scratch'],c:[0,1,2],
+ e:'The chapter objectives cover system organization/interrupts, multiprocessor components, and computing environments — not writing a full kernel.'},
+
+{t:'mcq',d:'easy',topic:'Objectives',q:'Which of the following is also listed as an objective of the chapter?',
+ o:['Provide examples of free and open-source operating systems','Provide a full history of Microsoft Windows versions','Teach assembly language programming','Explain how to configure a firewall'],c:0,
+ e:'One stated objective is to provide examples of free and open-source operating systems.'},
+
+{t:'mcq',d:'medium',topic:'Points of View',q:'According to the chapter, what must a shared computer such as a mainframe or minicomputer do, regarding its many users?',
+ o:['Keep all users happy despite differing demands','Ignore all but one user at a time','Shut down whenever more than one user logs in','Allow only administrators to use resources'],c:0,
+ e:'The chapter states a shared computer such as a mainframe or minicomputer must keep all users happy.'},
+
+{t:'mcq',d:'medium',topic:'Points of View',q:'From the operating system\'s own point of view, as described in the chapter, the OS acts as:',
+ o:['A resource allocator and control program making efficient use of hardware and managing execution of user programs','A passive log file with no active role','A device driver exclusively for printers','A network-only service with no hardware interaction'],c:0,
+ e:'The chapter states the OS is a resource allocator and control program that makes efficient use of hardware and manages execution of user programs.'},
+
+{t:'fill',d:'medium',topic:'System Architecture',q:'Fill in the blank: Multiprocessor systems are also known as parallel systems or ______-coupled systems, according to the chapter.',
+ a:['tightly'],
+ e:'The chapter states multiprocessor systems are also known as parallel systems or tightly-coupled systems.'},
+
+{t:'mcq',d:'medium',topic:'System Architecture',q:'Which diagram type does the chapter use to illustrate multiple CPU chips or cores sharing a chassis?',
+ o:['Dual-Core Design / multi-chip and multicore systems','Storage-Device Hierarchy diagram','Interrupt Timeline diagram','Von Neumann architecture diagram only'],c:0,
+ e:'The chapter includes a "Dual-Core Design" slide covering multi-chip and multicore systems and chassis containing multiple separate systems.'},
+
+{t:'short',d:'medium',topic:'System Architecture',q:'What does NUMA stand for and what does it describe in the chapter\'s context?',
+ a:'Non-Uniform Memory Access — a system architecture where memory access time depends on the memory location relative to the processor.',
+ e:'Referenced as "Non-Uniform Memory Access System" on slide 54.'},
+
+{t:'mcq',d:'medium',topic:'Distributed Systems',q:'What illusion does a network operating system\'s communication scheme create, according to the chapter?',
+ o:['The illusion of a single system','The illusion of infinite storage','The illusion of zero network latency','The illusion of a single CPU core'],c:0,
+ e:'The chapter states the communication scheme allows systems to exchange messages, creating the illusion of a single system.'},
+
+{t:'mcq',d:'easy',topic:'What OS Do',q:'The chapter opens its discussion of "What Operating Systems Do" by noting that the answer:',
+ o:['Depends on the point of view','Is fixed and identical for every type of user','Only applies to mainframes','Has nothing to do with resource utilization'],c:0,
+ e:'The chapter states that what operating systems do "depends on the point of view."'},
+
+{t:'tf',d:'medium',topic:'What OS Do',q:'True or False: According to the chapter, typical users of a PC generally care most about resource utilization rather than convenience.',
+ o:['True','False'],c:1,
+ e:'The chapter states users want convenience, ease of use, and good performance, and generally don\'t care about resource utilization.'},
+
+{t:'mcq',d:'medium',topic:'Storage Structure',q:'According to the chapter\'s "Characteristics of Various Types of Storage" discussion, movement between levels of the storage hierarchy can be:',
+ o:['Explicit or implicit','Only explicit, never implicit','Only implicit, never explicit','Impossible once data is written'],c:0,
+ e:'The chapter notes movement between storage hierarchy levels can be explicit or implicit.'},
+
+{t:'short',d:'hard',topic:'Storage Hierarchy',q:'According to the chapter, what additional complication arises in a multitasking environment regarding a piece of data stored at multiple hierarchy levels?',
+ a:'Multitasking environments must be careful to use the most recent value, no matter where it is stored in the storage hierarchy.',
+ e:'Stated on slide 43 in the context of data migration between disk and register.'},
+
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  page:'home',
+  setup:{count:30, timerMin:30, mode:'exam'},
+  examQuestions:[],
+  answers:{},        // qid -> user answer structure
+  graded:{},         // qid -> bool (correct) for auto-graded; short/compare self-graded too
+  flags:{},          // qid -> skipped flag
+  current:0,
+  startTime:null,
+  endTime:null,
+  timerId:null,
+  secondsLeft:0,
+  showFeedback:false,
+};
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function pickExamSet(n){
+  const easyN = Math.round(n*0.3);
+  const hardN = Math.round(n*0.3);
+  const medN = n - easyN - hardN;
+  const byDiff = {easy:[], medium:[], hard:[]};
+  BANK.forEach((q,i)=>byDiff[q.d].push({...q, id:'q'+i}));
+  const pick = (arr,k)=> shuffle(arr).slice(0, Math.min(k, arr.length));
+  let chosen = [
+    ...pick(byDiff.easy, easyN),
+    ...pick(byDiff.medium, medN),
+    ...pick(byDiff.hard, hardN),
+  ];
+  // top-up if a bucket ran short
+  if(chosen.length < n){
+    const usedIds = new Set(chosen.map(q=>q.id));
+    const rest = BANK.map((q,i)=>({...q,id:'q'+i})).filter(q=>!usedIds.has(q.id));
+    chosen = chosen.concat(shuffle(rest).slice(0, n-chosen.length));
+  }
+  chosen = shuffle(chosen).slice(0,n);
+  // shuffle option order for mcq/tf/select/compare, keep mapping correct
+  chosen = chosen.map(q=>{
+    const q2 = {...q};
+    if(['mcq','tf','select','compare'].includes(q.t)){
+      const idx = q.o.map((_,i)=>i);
+      const sh = shuffle(idx);
+      q2.o = sh.map(i=>q.o[i]);
+      if(Array.isArray(q.c)){
+        q2.c = q.c.map(orig=>sh.indexOf(orig)).sort((a,b)=>a-b);
+      } else {
+        q2.c = sh.indexOf(q.c);
+      }
+    }
+    if(q.t==='match'){
+      const rightItems = q.pairs.map(p=>p[1]);
+      q2.rightShuffled = shuffle(rightItems);
+    }
+    if(q.t==='order'){
+      const idx = q.steps.map((_,i)=>i);
+      q2.displaySteps = shuffle(idx).map(i=>q.steps[i]);
+      q2.displayOrigIndex = shuffle(idx); // not used directly, recompute below
+    }
+    return q2;
+  });
+  return chosen;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const app = document.getElementById('app');
+const navPill = document.getElementById('navPill');
+
+function setPage(p){
+  state.page = p;
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+navPill.addEventListener('click', (e)=>{
+  const p = e.target.getAttribute('data-p');
+  if(!p) return;
+  if(p==='exam' && state.examQuestions.length===0) return;
+  if(p==='results' && !state.endTime) return;
+  if(p==='review' && !state.endTime) return;
+  setPage(p);
+});
+
+function updateNav(){
+  [...navPill.children].forEach(c=>{
+    c.classList.toggle('active', c.getAttribute('data-p')===state.page);
+  });
+}
+
+function render(){
+  updateNav();
+  if(state.page==='home') return renderHome();
+  if(state.page==='setup') return renderSetup();
+  if(state.page==='exam') return renderExam();
+  if(state.page==='results') return renderResults();
+  if(state.page==='review') return renderReview();
+}
+
+function renderHome(){
+  const topics = [
+    'What OS Do','Computer-System Organization','Computer-System Architecture','Operating-System Operations',
+    'Resource Management','Security and Protection','Virtualization','Distributed Systems',
+    'Kernel Data Structures','Computing Environments','Free / Open-Source OS'
+  ];
+  app.innerHTML = `
+    <section class="hero">
+      <div class="eyebrow">Chapter 1 · Introduction</div>
+      <h1 class="title">Prove you actually<br><em>read the chapter.</em></h1>
+      <p class="lede">A randomized, auto-graded exam built entirely from your uploaded slide deck — nothing outside it. Every run pulls a fresh mix of question types and difficulty.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="setPage('setup')">Start Exam →</button>
+      </div>
+    </section>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n">${BANK.length}</div><div class="l">Questions in bank</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">Question types</div></div>
+      <div class="stat"><div class="n">11</div><div class="l">Topics covered</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Timer options</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Topics on the deck</h2>
+      <div class="hint">Every question is traceable back to one of these sections.</div>
+      <div class="chapter-map">
+        ${topics.map(t=>`<div class="node"><b>${t}</b>sourced from Ch.1 slides</div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderSetup(){
+  app.innerHTML = `
+    <div class="card">
+      <h2>Question count</h2>
+      <div class="hint">Randomly drawn each time — roughly 30% easy, 40% medium, 30% hard.</div>
+      <div class="opt-grid" id="countGrid">
+        ${[20,30,40,50].map(n=>`<div class="opt-btn ${state.setup.count===n?'sel':''}" data-count="${n}">${n} Qs</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Mode</h2>
+      <div class="hint">Practice gives instant feedback per question. Exam mode grades everything at the end.</div>
+      <div class="mode-row" id="modeRow">
+        <div class="mode-card ${state.setup.mode==='exam'?'sel':''}" data-mode="exam">
+          <b>Exam Mode</b>
+          <p>Timed, no feedback until you submit. Full results + review at the end.</p>
+        </div>
+        <div class="mode-card ${state.setup.mode==='practice'?'sel':''}" data-mode="practice">
+          <b>Practice Mode</b>
+          <p>Immediate correct/wrong + explanation after every answer. No timer pressure.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card ${state.setup.mode==='practice'?'hidden':''}" id="timerCard">
+      <h2>Timer</h2>
+      <div class="hint">Applies to Exam Mode only.</div>
+      <div class="opt-grid" id="timerGrid">
+        ${[20,30,45,60].map(n=>`<div class="opt-btn ${state.setup.timerMin===n?'sel':''}" data-timer="${n}">${n} min</div>`).join('')}
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;" onclick="beginExam()">Generate Exam →</button>
+  `;
+  document.getElementById('countGrid').addEventListener('click', e=>{
+    const el = e.target.closest('.opt-btn'); if(!el) return;
+    state.setup.count = parseInt(el.getAttribute('data-count'));
+    renderSetup();
+  });
+  document.getElementById('modeRow').addEventListener('click', e=>{
+    const el = e.target.closest('.mode-card'); if(!el) return;
+    state.setup.mode = el.getAttribute('data-mode');
+    renderSetup();
+  });
+  const timerGrid = document.getElementById('timerGrid');
+  if(timerGrid){
+    timerGrid.addEventListener('click', e=>{
+      const el = e.target.closest('.opt-btn'); if(!el) return;
+      state.setup.timerMin = parseInt(el.getAttribute('data-timer'));
+      renderSetup();
+    });
+  }
+}
+
+function beginExam(){
+  state.examQuestions = pickExamSet(state.setup.count);
+  state.answers = {};
+  state.graded = {};
+  state.flags = {};
+  state.current = 0;
+  state.startTime = Date.now();
+  state.endTime = null;
+  state.showFeedback = false;
+  state.secondsLeft = state.setup.mode==='exam' ? state.setup.timerMin*60 : null;
+  clearInterval(state.timerId);
+  if(state.setup.mode==='exam'){
+    state.timerId = setInterval(()=>{
+      state.secondsLeft--;
+      if(state.secondsLeft<=0){
+        clearInterval(state.timerId);
+        finishExam();
+        return;
+      }
+      updateTimerDisplay();
+    },1000);
+  }
+  setPage('exam');
+}
+
+function updateTimerDisplay(){
+  const el = document.getElementById('timerVal');
+  if(!el) return;
+  const m = Math.floor(state.secondsLeft/60);
+  const s = state.secondsLeft%60;
+  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  el.classList.toggle('low', state.secondsLeft<=60);
+}
+
+function fmtType(t){
+  return {mcq:'Multiple Choice',tf:'True / False',fill:'Fill in the Blank',select:'Select All That Apply',
+    match:'Match the Following',order:'Arrange in Order',short:'Short Answer',compare:'Compare & Choose'}[t] || t;
+}
+
+function renderExam(){
+  const qs = state.examQuestions;
+  const idx = state.current;
+  const q = qs[idx];
+  const answered = Object.keys(state.answers).length;
+  const pct = Math.round(((idx)/qs.length)*100);
+
+  app.innerHTML = `
+    <div class="exam-head">
+      <div class="progress-row">
+        <span>Question ${idx+1} / ${qs.length}</span>
+        ${state.setup.mode==='exam' ? `<span class="timer" id="timerVal">--:--</span>` : `<span style="color:var(--cyan);">Practice Mode</span>`}
+        <span>Answered: ${answered}/${qs.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="qtag">
+        <span class="badge ${q.d}">${q.d}</span>
+        <span class="badge topic">${q.topic}</span>
+        <span>${fmtType(q.t)}</span>
+      </div>
+      <p class="qtext">${q.q}</p>
+      <div id="qBody"></div>
+      <div id="feedbackSlot"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="prevBtn" ${idx===0?'disabled':''}>← Previous</button>
+      <span class="spacer"></span>
+      <button class="btn btn-ghost" id="skipBtn">Skip</button>
+      ${idx<qs.length-1 ? `<button class="btn btn-primary" id="nextBtn">Next →</button>` : `<button class="btn btn-primary" id="submitBtn">Submit Exam</button>`}
+    </div>
+  `;
+  renderQuestionBody(q);
+  if(state.setup.mode==='exam') updateTimerDisplay();
+
+  document.getElementById('prevBtn').onclick = ()=>{ state.current--; renderExam(); };
+  document.getElementById('skipBtn').onclick = ()=>{
+    delete state.answers[q.id];
+    if(state.current<qs.length-1){ state.current++; renderExam(); } else { finishExam(); }
+  };
+  const nextBtn = document.getElementById('nextBtn');
+  if(nextBtn) nextBtn.onclick = ()=>{ state.current++; state.showFeedback=false; renderExam(); };
+  const submitBtn = document.getElementById('submitBtn');
+  if(submitBtn) submitBtn.onclick = ()=> finishExam();
+}
+
+function renderQuestionBody(q){
+  const body = document.getElementById('qBody');
+  const existing = state.answers[q.id];
+
+  if(q.t==='mcq' || q.t==='tf' || q.t==='compare'){
+    body.innerHTML = `<div class="choices">${q.o.map((opt,i)=>`
+      <div class="choice radio" data-i="${i}">
+        <div class="mark">${existing===i?'✓':''}</div>
+        <div>${opt}</div>
+      </div>`).join('')}</div>`;
+    body.querySelectorAll('.choice').forEach(el=>{
+      if(parseInt(el.getAttribute('data-i'))===existing) el.classList.add('chosen');
+      el.onclick = ()=>{
+        state.answers[q.id] = parseInt(el.getAttribute('data-i'));
+        if(state.setup.mode==='practice'){ gradeAndShow(q); }
+        else { renderQuestionBody(q); }
+      };
+    });
+  }
+
+  else if(q.t==='select'){
+    const sel = existing || [];
+    body.innerHTML = `<div class="choices">${q.o.map((opt,i)=>`
+      <div class="choice" data-i="${i}">
+        <div class="mark">${sel.includes(i)?'✓':''}</div>
+        <div>${opt}</div>
+      </div>`).join('')}</div>
+      <div style="margin-top:14px;"><button class="btn btn-sm btn-ghost" id="checkSelect">Check Answer</button></div>`;
+    body.querySelectorAll('.choice').forEach(el=>{
+      const i = parseInt(el.getAttribute('data-i'));
+      if(sel.includes(i)) el.classList.add('chosen');
+      el.onclick = ()=>{
+        let cur = state.answers[q.id] || [];
+        if(cur.includes(i)) cur = cur.filter(x=>x!==i); else cur = [...cur,i];
+        state.answers[q.id] = cur.sort((a,b)=>a-b);
+        renderQuestionBody(q);
+      };
+    });
+    const btn = document.getElementById('checkSelect');
+    if(btn) btn.onclick = ()=>{ if(state.setup.mode==='practice') gradeAndShow(q); };
+  }
+
+  else if(q.t==='fill'){
+    body.innerHTML = `<input class="fillbox" type="text" placeholder="Type your answer..." value="${existing||''}">
+      <div style="margin-top:14px;"><button class="btn btn-sm btn-ghost" id="checkFill">Check Answer</button></div>`;
+    const input = body.querySelector('input');
+    input.oninput = ()=>{ state.answers[q.id] = input.value; };
+    document.getElementById('checkFill').onclick = ()=>{
+      if(state.setup.mode==='practice') gradeAndShow(q);
+    };
+  }
+
+  else if(q.t==='short'){
+    body.innerHTML = `<textarea class="fillbox" placeholder="Write your answer here (self-graded against the model answer)...">${existing&&existing.text||''}</textarea>
+      <div style="margin-top:14px;"><button class="btn btn-sm btn-ghost" id="revealShort">Reveal Model Answer</button></div>
+      <div id="shortReveal"></div>`;
+    const ta = body.querySelector('textarea');
+    ta.oninput = ()=>{ state.answers[q.id] = {...(state.answers[q.id]||{}), text: ta.value}; };
+    document.getElementById('revealShort').onclick = ()=>{
+      document.getElementById('shortReveal').innerHTML = `
+        <div class="feedback-box ok" style="margin-top:14px;">
+          <b>Model answer</b>${q.a}
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="btn btn-sm btn-ghost" id="markRight">I got this right</button>
+          <button class="btn btn-sm btn-ghost" id="markWrong">I got this wrong</button>
+        </div>`;
+      document.getElementById('markRight').onclick = ()=>{
+        state.answers[q.id] = {...(state.answers[q.id]||{}), self:true};
+        state.graded[q.id] = true;
+        if(state.setup.mode==='practice') renderExam();
+      };
+      document.getElementById('markWrong').onclick = ()=>{
+        state.answers[q.id] = {...(state.answers[q.id]||{}), self:false};
+        state.graded[q.id] = false;
+        if(state.setup.mode==='practice') renderExam();
+      };
+    };
+  }
+
+  else if(q.t==='match'){
+    const ans = existing || {};
+    body.innerHTML = q.pairs.map((p,i)=>`
+      <div class="match-row">
+        <div class="match-left">${p[0]}</div>
+        <select class="mselect" data-i="${i}">
+          <option value="">— choose —</option>
+          ${q.rightShuffled.map((r,ri)=>`<option value="${ri}" ${ans[i]===ri?'selected':''}>${r}</option>`).join('')}
+        </select>
+      </div>`).join('') + `<div style="margin-top:14px;"><button class="btn btn-sm btn-ghost" id="checkMatch">Check Answer</button></div>`;
+    body.querySelectorAll('select').forEach(sel=>{
+      sel.onchange = ()=>{
+        const i = parseInt(sel.getAttribute('data-i'));
+        const cur = state.answers[q.id] || {};
+        cur[i] = parseInt(sel.value);
+        state.answers[q.id] = cur;
+      };
+    });
+    document.getElementById('checkMatch').onclick = ()=>{
+      if(state.setup.mode==='practice') gradeAndShow(q);
+    };
+  }
+
+  else if(q.t==='order'){
+    const ans = existing || {};
+    body.innerHTML = q.displaySteps.map((s,i)=>`
+      <div class="order-row">
+        <select class="mselect" data-i="${i}">
+          <option value="">#</option>
+          ${q.displaySteps.map((_,n)=>`<option value="${n+1}" ${ans[i]===n+1?'selected':''}>${n+1}</option>`).join('')}
+        </select>
+        <div class="match-left">${s}</div>
+      </div>`).join('') + `<div style="margin-top:14px;"><button class="btn btn-sm btn-ghost" id="checkOrder">Check Answer</button></div>`;
+    body.querySelectorAll('select').forEach(sel=>{
+      sel.onchange = ()=>{
+        const i = parseInt(sel.getAttribute('data-i'));
+        const cur = state.answers[q.id] || {};
+        cur[i] = parseInt(sel.value);
+        state.answers[q.id] = cur;
+      };
+    });
+    document.getElementById('checkOrder').onclick = ()=>{
+      if(state.setup.mode==='practice') gradeAndShow(q);
+    };
+  }
+}
+
+function isCorrect(q, ans){
+  if(ans===undefined || ans===null) return false;
+  if(q.t==='mcq' || q.t==='tf' || q.t==='compare') return ans===q.c;
+  if(q.t==='select'){
+    if(!Array.isArray(ans)) return false;
+    const a = [...ans].sort((x,y)=>x-y), c = [...q.c].sort((x,y)=>x-y);
+    return a.length===c.length && a.every((v,i)=>v===c[i]);
+  }
+  if(q.t==='fill'){
+    if(typeof ans!=='string') return false;
+    const norm = s=>s.trim().toLowerCase().replace(/[^a-z0-9. ]/g,'');
+    return q.a.some(acc=>norm(acc)===norm(ans));
+  }
+  if(q.t==='match'){
+    if(!ans) return false;
+    return q.pairs.every((p,i)=> q.rightShuffled[ans[i]] === p[1]);
+  }
+  if(q.t==='order'){
+    if(!ans) return false;
+    // correct means displaySteps sorted by ans number equals q.steps original order
+    const n = q.displaySteps.length;
+    for(let i=0;i<n;i++){ if(!ans[i]) return false; }
+    const arranged = [...Array(n).keys()].sort((a,b)=>ans[a]-ans[b]).map(i=>q.displaySteps[i]);
+    return arranged.every((s,i)=>s===q.steps[i]);
+  }
+  if(q.t==='short'){
+    return ans && ans.self===true;
+  }
+  return false;
+}
+
+function gradeAndShow(q){
+  const ans = state.answers[q.id];
+  const correct = isCorrect(q, ans);
+  state.graded[q.id] = correct;
+  renderQuestionBody(q);
+  // highlight
+  if(q.t==='mcq'||q.t==='tf'||q.t==='compare'||q.t==='select'){
+    document.querySelectorAll('.choice').forEach(el=>{
+      const i = parseInt(el.getAttribute('data-i'));
+      const isC = Array.isArray(q.c) ? q.c.includes(i) : q.c===i;
+      if(isC) el.classList.add('correct');
+      else if(Array.isArray(ans)? ans.includes(i) : ans===i) el.classList.add('incorrect');
+    });
+  }
+  const slot = document.getElementById('feedbackSlot');
+  let correctText = '';
+  if(q.t==='fill') correctText = `Correct answer: <b>${q.a[0]}</b>`;
+  if(q.t==='match') correctText = q.pairs.map(p=>`${p[0]} → ${p[1]}`).join(' · ');
+  if(q.t==='order') correctText = q.steps.map((s,i)=>`${i+1}. ${s}`).join('<br>');
+  slot.innerHTML = `<div class="feedback-box ${correct?'ok':'bad'}">
+    <b>${correct?'Correct':'Not quite'}</b>
+    ${correctText?correctText+'<br><br>':''}${q.e}
+  </div>`;
+}
+
+function finishExam(){
+  clearInterval(state.timerId);
+  state.endTime = Date.now();
+  // grade any auto-gradable unanswered/answered items not yet graded
+  state.examQuestions.forEach(q=>{
+    if(q.t==='short') return; // self-graded already, or ungraded = wrong
+    const ans = state.answers[q.id];
+    state.graded[q.id] = isCorrect(q, ans);
+  });
+  setPage('results');
+}
+
+function renderResults(){
+  const qs = state.examQuestions;
+  let correct=0, wrong=0, skipped=0;
+  qs.forEach(q=>{
+    const has = state.answers[q.id]!==undefined && !(q.t==='short' && !state.answers[q.id]?.text && state.answers[q.id]?.self===undefined);
+    if(!has){ skipped++; return; }
+    if(state.graded[q.id]) correct++; else wrong++;
+  });
+  const total = qs.length;
+  const pct = Math.round((correct/total)*100);
+  const pass = pct>=60;
+  const elapsedSec = Math.round(((state.endTime||Date.now())-state.startTime)/1000);
+  const mm = Math.floor(elapsedSec/60), ss = elapsedSec%60;
+
+  app.innerHTML = `
+    <div class="card score-hero">
+      <div class="score-ring" style="--pct:${pct}"><div class="num">${pct}%</div><div class="lbl">SCORE</div></div>
+      <div class="pass-tag ${pass?'pass':'fail'}">${pass?'PASS':'FAIL'}</div>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="v cyan">${correct}/${total}</div><div class="k">Score</div></div>
+      <div class="metric"><div class="v ok">${correct}</div><div class="k">Correct</div></div>
+      <div class="metric"><div class="v bad">${wrong}</div><div class="k">Wrong</div></div>
+      <div class="metric"><div class="v warn">${skipped}</div><div class="k">Skipped</div></div>
+      <div class="metric"><div class="v">${mm}:${ss.toString().padStart(2,'0')}</div><div class="k">Time Taken</div></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:26px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="setPage('review')">Review Answers →</button>
+      <button class="btn btn-ghost" onclick="setPage('setup')">Take Another Exam</button>
+      <button class="btn btn-ghost" onclick="setPage('home')">Back Home</button>
+    </div>
+  `;
+}
+
+function renderReview(){
+  const qs = state.examQuestions;
+  app.innerHTML = `<h2 style="font-family:var(--serif);color:#f2f9ff;margin-bottom:4px;">Review</h2>
+    <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:22px;">Every question, your answer, the correct answer, and why — sourced only from the chapter.</p>
+    <div id="revList"></div>
+    <div style="display:flex;gap:12px;margin-top:10px;">
+      <button class="btn btn-ghost" onclick="setPage('results')">← Back to Results</button>
+      <button class="btn btn-primary" onclick="setPage('setup')">Take Another Exam</button>
+    </div>`;
+  const list = document.getElementById('revList');
+  list.innerHTML = qs.map(q=>{
+    const ans = state.answers[q.id];
+    const has = ans!==undefined && !(q.t==='short' && !ans?.text && ans?.self===undefined);
+    const correct = has ? state.graded[q.id] : false;
+    const status = !has ? 'skip' : (correct ? 'right':'wrong');
+    const statusLabel = !has ? 'Skipped' : (correct?'Correct':'Wrong');
+
+    let yourAnsText='—', correctAnsText='';
+    if(q.t==='mcq'||q.t==='tf'||q.t==='compare'){
+      yourAnsText = has? q.o[ans] : '—';
+      correctAnsText = q.o[q.c];
+    } else if(q.t==='select'){
+      yourAnsText = has? ans.map(i=>q.o[i]).join('; ') : '—';
+      correctAnsText = q.c.map(i=>q.o[i]).join('; ');
+    } else if(q.t==='fill'){
+      yourAnsText = has? ans : '—';
+      correctAnsText = q.a[0];
+    } else if(q.t==='match'){
+      yourAnsText = has? q.pairs.map((p,i)=> ans[i]!==undefined ? `${p[0]} → ${q.rightShuffled[ans[i]]}` : `${p[0]} → ?`).join('<br>') : '—';
+      correctAnsText = q.pairs.map(p=>`${p[0]} → ${p[1]}`).join('<br>');
+    } else if(q.t==='order'){
+      if(has){
+        const n = q.displaySteps.length;
+        const arranged = [...Array(n).keys()].sort((a,b)=>(ans[a]||99)-(ans[b]||99)).map(i=>q.displaySteps[i]);
+        yourAnsText = arranged.map((s,i)=>`${i+1}. ${s}`).join('<br>');
+      } else yourAnsText='—';
+      correctAnsText = q.steps.map((s,i)=>`${i+1}. ${s}`).join('<br>');
+    } else if(q.t==='short'){
+      yourAnsText = has? (ans.text || (ans.self? '(marked correct)':'(marked wrong)')) : '—';
+      correctAnsText = q.a;
+    }
+
+    return `<div class="rev-item">
+      <span class="status ${status}">${statusLabel}</span>
+      <span class="badge topic" style="margin-left:8px;">${q.topic}</span>
+      <div class="rev-q">${q.q}</div>
+      <div class="rev-block"><b>Your answer:</b><span class="rev-ans">${yourAnsText}</span></div>
+      <div class="rev-block"><b>Correct answer:</b><span class="rev-ans">${correctAnsText}</span></div>
+      <div class="rev-explain">${q.e}</div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>

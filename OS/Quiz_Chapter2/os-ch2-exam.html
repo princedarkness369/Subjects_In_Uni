@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Midterm · Chapter 2: Operating-System Services</title>
+<style>
+/* ============================================================
+   Chapter 2 — Operating System Services · Exam Stylesheet
+   Theme: "Kernel Console" — academic terminal aesthetic
+   ============================================================ */
+
+:root{
+  --bg: #F3F1EB;
+  --bg-alt: #EAE7DE;
+  --surface: #FFFFFF;
+  --surface-2: #F7F5EF;
+  --border: #DCD7C9;
+  --text: #1C2321;
+  --text-dim: #5B6560;
+  --text-faint: #8B9490;
+
+  --ink-navy: #16261F;
+  --accent: #1E7A5C;        /* terminal green, deep */
+  --accent-bright: #2CA37A;
+  --accent-soft: #DCEFE6;
+  --amber: #B4762B;
+  --amber-soft: #F3E3CC;
+  --red: #B84B3E;
+  --red-soft: #F5E1DC;
+
+  --easy: #2C8A5B;
+  --medium: #B4762B;
+  --hard: #B84B3E;
+
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 30px -12px rgba(24,32,28,0.18);
+  --shadow-sm: 0 2px 10px -4px rgba(24,32,28,0.12);
+
+  --mono: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  color-scheme: light;
+}
+
+html.dark{
+  --bg: #12181A;
+  --bg-alt: #0E1315;
+  --surface: #1A2225;
+  --surface-2: #1F2A2D;
+  --border: #2C393C;
+  --text: #ECEFEC;
+  --text-dim: #A9B4B0;
+  --text-faint: #6E7A76;
+
+  --ink-navy: #E7F3EC;
+  --accent: #3FCB94;
+  --accent-bright: #56E0AA;
+  --accent-soft: #17332A;
+  --amber: #E0A75E;
+  --amber-soft: #33291A;
+  --red: #E0796A;
+  --red-soft: #33201D;
+
+  --easy: #3FCB94;
+  --medium: #E0A75E;
+  --hard: #E0796A;
+
+  --shadow: 0 20px 45px -18px rgba(0,0,0,0.55);
+  --shadow-sm: 0 4px 16px -6px rgba(0,0,0,0.4);
+  color-scheme: dark;
+}
+
+*, *::before, *::after{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.5;
+  transition: background .35s ease, color .35s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.grid-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: .35;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 85%);
+}
+html.dark .grid-backdrop{ opacity: .18; }
+
+#app{ position: relative; z-index: 1; }
+
+/* ---------------- Theme toggle ---------------- */
+.theme-toggle{
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.toggle-track{
+  display:flex; align-items:center;
+  width: 54px; height: 30px;
+  border-radius: 999px;
+  background: var(--bg-alt);
+  position: relative;
+  transition: background .3s;
+}
+.toggle-thumb{
+  position:absolute;
+  top: 3px; left: 3px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s;
+}
+html.dark .toggle-thumb{ transform: translateX(24px); }
+.toggle-thumb svg{ width:15px; height:15px; stroke:#fff; stroke-width:2; position:absolute; transition:opacity .2s; }
+.icon-moon{ opacity:0; fill:#fff; }
+.icon-sun{ opacity:1; fill:none; }
+html.dark .icon-moon{ opacity:1; }
+html.dark .icon-sun{ opacity:0; }
+
+/* ---------------- Screens ---------------- */
+.screen{ display:none; min-height:100vh; padding: 60px 20px; }
+.screen.active{ display:flex; flex-direction:column; align-items:center; }
+
+/* ---------------- Cover screen ---------------- */
+.cover-card{
+  max-width: 640px;
+  width:100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 48px 44px;
+  margin-top: 4vh;
+}
+.cover-kicker{
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--accent);
+  display:flex; align-items:center; gap:8px;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+.cover-kicker .dot{
+  width:7px;height:7px;border-radius:50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.cover-title{
+  font-family: var(--serif);
+  font-size: 56px;
+  margin: 0;
+  line-height: 1;
+  color: var(--ink-navy);
+}
+.cover-title-accent{
+  color: var(--accent);
+  font-family: var(--mono);
+  animation: blink 1.1s step-end infinite;
+}
+@keyframes blink{ 50%{ opacity:0; } }
+.cover-subtitle{
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--text-dim);
+  margin: 6px 0 22px;
+}
+.cover-desc{
+  color: var(--text-dim);
+  font-size: 15.5px;
+  margin-bottom: 28px;
+  max-width: 52ch;
+}
+.cover-meta{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.meta-chip{
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align:center;
+}
+.meta-num{
+  display:block;
+  font-family: var(--mono);
+  font-weight:700;
+  font-size: 20px;
+  color: var(--ink-navy);
+}
+.meta-label{
+  display:block;
+  font-size: 10.5px;
+  color: var(--text-faint);
+  margin-top:3px;
+  letter-spacing:.02em;
+}
+.cover-diff{ display:flex; gap:8px; margin-bottom: 30px; flex-wrap:wrap; }
+.diff-pill{
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight:700;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+.diff-pill.easy{ background: var(--accent-soft); color: var(--easy); }
+.diff-pill.medium{ background: var(--amber-soft); color: var(--medium); }
+.diff-pill.hard{ background: var(--red-soft); color: var(--hard); }
+
+.cover-footnote{
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+/* ---------------- Buttons ---------------- */
+.btn{
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 12px 26px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s, color .2s, border-color .2s;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn:active{ transform: scale(.97); }
+.btn-primary{
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 20px -8px var(--accent);
+}
+.btn-primary:hover{ background: var(--accent-bright); }
+.btn-secondary{
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-secondary:hover{ border-color: var(--accent); color: var(--accent); }
+.btn-ghost{
+  background: transparent;
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+.btn-ghost:hover{ color: var(--text); border-color: var(--text-dim); }
+.btn-ghost:disabled{ opacity:.4; cursor:not-allowed; }
+.btn-lg{ padding: 15px 32px; font-size: 16px; }
+.btn-block{ width:100%; justify-content:center; margin-top: 30px; }
+.arrow{ transition: transform .2s; }
+.btn:hover .arrow{ transform: translateX(3px); }
+
+/* ---------------- Quiz screen ---------------- */
+.quiz-shell{ max-width: 720px; width:100%; margin-top: 1vh; }
+
+.quiz-header-top{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom: 12px;
+}
+.qcounter{
+  font-family: var(--mono);
+  font-weight:700;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.qcounter span{ color: var(--ink-navy); }
+html.dark .qcounter span{ color: var(--text); }
+
+.timer{
+  display:flex; align-items:center; gap:6px;
+  font-family: var(--mono);
+  font-weight:700;
+  font-size: 15px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.timer.low{ color: var(--red); border-color: var(--red); animation: pulse 1s infinite; }
+@keyframes pulse{ 50%{ opacity:.55; } }
+.timer-icon{ width:16px; height:16px; stroke: currentColor; stroke-width: 1.8; }
+
+.progress-track{
+  width:100%; height:8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow:hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 26px;
+}
+.progress-fill{
+  height:100%;
+  width: 5%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+  border-radius: 999px;
+  transition: width .35s ease;
+}
+
+.question-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 34px 34px 26px;
+  margin-bottom: 22px;
+  animation: cardIn .3s ease;
+}
+@keyframes cardIn{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
+
+.question-tags{ display:flex; gap:8px; margin-bottom: 16px; }
+.tag{
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight:700;
+  letter-spacing:.03em;
+  padding: 5px 11px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.topic-tag{ background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
+.diff-tag{ color:#fff; }
+.diff-tag.easy{ background: var(--easy); }
+.diff-tag.medium{ background: var(--medium); }
+.diff-tag.hard{ background: var(--hard); }
+
+.question-text{
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height:1.4;
+  font-weight: 400;
+  color: var(--ink-navy);
+  margin: 0 0 26px;
+}
+html.dark .question-text{ color: var(--text); }
+
+.choices{ display:flex; flex-direction:column; gap: 12px; }
+.choice{
+  display:flex; align-items:flex-start; gap: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor:pointer;
+  background: var(--surface-2);
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.choice:hover{ border-color: var(--accent); }
+.choice:active{ transform: scale(.995); }
+.choice.selected{
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.choice-letter{
+  font-family: var(--mono);
+  font-weight:700;
+  font-size: 13px;
+  width: 26px; height:26px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text-dim);
+  flex-shrink:0;
+  transition: all .15s;
+}
+.choice.selected .choice-letter{
+  background: var(--accent);
+  border-color: var(--accent);
+  color:#fff;
+}
+.choice-text{ font-size: 15px; color: var(--text); padding-top:2px; }
+
+/* review-mode choice states */
+.choice.correct-answer{ border-color: var(--easy); background: var(--accent-soft); }
+.choice.correct-answer .choice-letter{ background: var(--easy); border-color: var(--easy); color:#fff; }
+.choice.wrong-answer{ border-color: var(--hard); background: var(--red-soft); }
+.choice.wrong-answer .choice-letter{ background: var(--hard); border-color: var(--hard); color:#fff; }
+.choice.disabled{ cursor:default; }
+
+.quiz-nav{ display:flex; align-items:center; gap:12px; margin-bottom: 20px; }
+.quiz-nav-spacer{ flex:1; }
+
+.jumpgrid{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+  padding-bottom: 20px;
+}
+.jump-dot{
+  width: 30px; height:30px;
+  border-radius:50%;
+  border:1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition: all .15s;
+}
+.jump-dot:hover{ border-color: var(--accent); }
+.jump-dot.current{ border-color: var(--accent); color: var(--accent); }
+.jump-dot.answered{ background: var(--accent); border-color: var(--accent); color:#fff; }
+.jump-dot.answered.current{ box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* ---------------- Results screen ---------------- */
+.results-shell{ max-width: 780px; width:100%; margin-top: 1vh; }
+
+.results-summary-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px;
+  display:flex; align-items:center; gap: 40px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.grade-ring{ position:relative; width:140px; height:140px; flex-shrink:0; }
+.ring-svg{ width:100%; height:100%; transform: rotate(-90deg); }
+.ring-bg{ fill:none; stroke: var(--border); stroke-width:10; }
+.ring-fg{
+  fill:none; stroke: var(--accent); stroke-width:10; stroke-linecap:round;
+  stroke-dasharray: 389.6; stroke-dashoffset: 389.6;
+  transition: stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1), stroke .3s;
+}
+.ring-center{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.ring-grade{ font-family: var(--serif); font-size: 40px; font-weight:700; color: var(--ink-navy); line-height:1; }
+html.dark .ring-grade{ color: var(--text); }
+.ring-pct{ font-family: var(--mono); font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+.results-text h2{ font-family: var(--serif); font-size: 28px; margin: 0 0 8px; color: var(--ink-navy); }
+html.dark .results-text h2{ color: var(--text); }
+.score-line{ font-family: var(--mono); font-size: 18px; font-weight:700; color: var(--accent); margin: 0 0 6px; }
+.score-sub{ color: var(--text-dim); margin: 0 0 18px; font-size: 14.5px; }
+.results-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+.stats-row{
+  display:grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+  margin-bottom: 34px;
+}
+.stat-box{
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 16px; text-align:center; box-shadow: var(--shadow-sm);
+}
+.stat-num{ display:block; font-family: var(--mono); font-weight:700; font-size:20px; color: var(--ink-navy); }
+html.dark .stat-num{ color: var(--text); }
+.stat-label{ display:block; font-size:11.5px; color: var(--text-faint); margin-top:4px; letter-spacing:.03em; text-transform:uppercase; }
+
+.review-heading{
+  font-family: var(--serif); font-size: 24px; color: var(--ink-navy); margin: 0 0 16px;
+}
+html.dark .review-heading{ color: var(--text); }
+
+.review-list{ display:flex; flex-direction:column; gap: 16px; }
+.review-item{
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius);
+  padding: 24px 26px; box-shadow: var(--shadow-sm);
+}
+.review-item-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+.review-num{ font-family: var(--mono); font-size:12px; color: var(--text-faint); font-weight:700; }
+.review-status{
+  font-family: var(--mono); font-size:11px; font-weight:700; text-transform:uppercase;
+  padding: 4px 10px; border-radius:999px; letter-spacing:.03em;
+}
+.review-status.correct{ background: var(--accent-soft); color: var(--easy); }
+.review-status.incorrect{ background: var(--red-soft); color: var(--hard); }
+.review-q{ font-family: var(--serif); font-size:17px; color: var(--ink-navy); margin: 0 0 14px; line-height:1.45; }
+html.dark .review-q{ color: var(--text); }
+
+.review-choices{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.review-choices .choice{ padding: 10px 14px; cursor:default; }
+.review-choices .choice:hover{ border-color: var(--border); }
+.review-choices .choice.correct-answer:hover{ border-color: var(--easy); }
+.review-choices .choice.wrong-answer:hover{ border-color: var(--hard); }
+
+.review-explain{
+  background: var(--surface-2); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 16px; font-size: 14px; color: var(--text-dim); margin-bottom: 10px;
+}
+.review-explain b{ color: var(--text); }
+.review-topic{
+  font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
+}
+.review-topic b{ color: var(--accent); font-weight:700; }
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 640px){
+  .screen{ padding: 30px 14px; }
+  .cover-card{ padding: 32px 24px; }
+  .cover-title{ font-size: 42px; }
+  .cover-meta{ grid-template-columns: repeat(2,1fr); }
+  .question-card{ padding: 24px 20px; }
+  .question-text{ font-size: 19px; }
+  .results-summary-card{ flex-direction:column; text-align:center; padding: 28px 20px; }
+  .results-actions{ justify-content:center; }
+  .stats-row{ grid-template-columns: repeat(2,1fr); }
+  .quiz-nav{ flex-wrap:wrap; }
+  .btn{ font-size:14px; padding: 11px 20px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- Ambient backdrop grid -->
+<div class="grid-backdrop" aria-hidden="true"></div>
+
+<!-- Theme toggle -->
+<button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark / light mode">
+  <span class="toggle-track">
+    <span class="toggle-thumb">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2"/><g stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="4.6"/><line x1="12" y1="19.4" x2="12" y2="22"/><line x1="2" y1="12" x2="4.6" y2="12"/><line x1="19.4" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.1" y2="4.9"/></g></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    </span>
+  </span>
+</button>
+
+<main id="app">
+
+  <!-- ============ SCREEN 1 : COVER / START ============ -->
+  <section id="screen-start" class="screen active">
+    <div class="cover-card">
+      <div class="cover-kicker">
+        <span class="dot"></span> CS · OPERATING SYSTEMS · MIDTERM MODULE
+      </div>
+      <h1 class="cover-title">Chapter 2<span class="cover-title-accent">_</span></h1>
+      <h2 class="cover-subtitle">Operating&#8209;System Services</h2>
+      <p class="cover-desc">
+        A 20-question timed assessment covering OS/user interfaces, system calls,
+        parameter passing, system services, linkers &amp; loaders, and the
+        Arduino / FreeBSD case studies from your chapter deck.
+      </p>
+
+      <div class="cover-meta">
+        <div class="meta-chip">
+          <span class="meta-num">20</span>
+          <span class="meta-label">Questions</span>
+        </div>
+        <div class="meta-chip">
+          <span class="meta-num">20:00</span>
+          <span class="meta-label">Minutes</span>
+        </div>
+        <div class="meta-chip">
+          <span class="meta-num">4</span>
+          <span class="meta-label">Choices Each</span>
+        </div>
+        <div class="meta-chip">
+          <span class="meta-num">1</span>
+          <span class="meta-label">Attempt Order (Randomized)</span>
+        </div>
+      </div>
+
+      <div class="cover-diff">
+        <span class="diff-pill easy">7 Easy</span>
+        <span class="diff-pill medium">8 Medium</span>
+        <span class="diff-pill hard">5 Hard</span>
+      </div>
+
+      <button id="startBtn" class="btn btn-primary btn-lg">
+        Begin Exam <span class="arrow">&rarr;</span>
+      </button>
+      <p class="cover-footnote">Questions and answer order reshuffle every attempt · No backend, runs fully offline</p>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2 : QUIZ ============ -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz-shell">
+
+      <header class="quiz-header">
+        <div class="quiz-header-top">
+          <div class="qcounter">
+            Question <span id="qCurrent">1</span> / <span id="qTotal">20</span>
+          </div>
+          <div class="timer" id="timer">
+            <svg viewBox="0 0 24 24" fill="none" class="timer-icon"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="timeLeft">20:00</span>
+          </div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </header>
+
+      <article class="question-card">
+        <div class="question-tags">
+          <span class="tag topic-tag" id="qTopic">Topic</span>
+          <span class="tag diff-tag" id="qDiff">Medium</span>
+        </div>
+        <h2 class="question-text" id="qText">Loading question…</h2>
+
+        <div class="choices" id="choicesList" role="radiogroup" aria-label="Answer choices"></div>
+      </article>
+
+      <footer class="quiz-nav">
+        <button id="prevBtn" class="btn btn-ghost">&larr; Previous</button>
+        <div class="quiz-nav-spacer"></div>
+        <button id="nextBtn" class="btn btn-secondary">Next &rarr;</button>
+        <button id="finishBtn" class="btn btn-primary" style="display:none;">Finish Exam</button>
+      </footer>
+
+      <div class="jumpgrid" id="jumpgrid" aria-label="Question navigator"></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3 : RESULTS ============ -->
+  <section id="screen-results" class="screen">
+    <div class="results-shell">
+      <div class="results-summary-card">
+        <div class="grade-ring" id="gradeRing">
+          <svg viewBox="0 0 140 140" class="ring-svg">
+            <circle cx="70" cy="70" r="62" class="ring-bg"/>
+            <circle cx="70" cy="70" r="62" class="ring-fg" id="ringFg"/>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-grade" id="gradeLetter">A</span>
+            <span class="ring-pct" id="gradePct">0%</span>
+          </div>
+        </div>
+        <div class="results-text">
+          <h2>Exam Complete</h2>
+          <p class="score-line"><span id="scoreCorrect">0</span> / <span id="scoreTotal">20</span> correct</p>
+          <p class="score-sub" id="resultsMsg">Great effort — let's review the details.</p>
+          <div class="results-actions">
+            <button id="reviewBtn" class="btn btn-secondary">Review Answers &darr;</button>
+            <button id="restartBtn" class="btn btn-primary">Restart Exam</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-num" id="statEasy">0/0</span>
+          <span class="stat-label">Easy</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statMedium">0/0</span>
+          <span class="stat-label">Medium</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statHard">0/0</span>
+          <span class="stat-label">Hard</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statTime">00:00</span>
+          <span class="stat-label">Time Used</span>
+        </div>
+      </div>
+
+      <h3 class="review-heading">Full Review</h3>
+      <div id="reviewList" class="review-list"></div>
+
+      <button id="restartBtn2" class="btn btn-primary btn-lg btn-block">Restart Exam</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   Chapter 2 — Operating System Services · Exam Engine
+   Content sourced strictly from the uploaded Chapter 2 slide deck.
+   ============================================================ */
+
+// ---------------------------------------------------------------
+// 1. QUESTION BANK  (20 MCQs — 7 Easy / 8 Medium / 5 Hard)
+// ---------------------------------------------------------------
+const QUESTION_BANK = [
+  {
+    id: 1,
+    difficulty: "easy",
+    topic: "OS Services — User vs. System Goals",
+    question: "The chapter splits operating-system services into two groups: functions helpful to the user, and functions that keep the system itself running efficiently. Which of the following belongs to the second group?",
+    options: [
+      "Program execution",
+      "Resource allocation",
+      "I/O operations",
+      "File-system manipulation"
+    ],
+    correct: "Resource allocation",
+    explanation: "Resource allocation, logging, and protection/security exist to keep the system running efficiently for everyone, unlike UI, program execution, I/O, and file manipulation, which directly serve the individual user.",
+    referenceTopic: "Operating System Services"
+  },
+  {
+    id: 2,
+    difficulty: "easy",
+    topic: "User Interfaces",
+    question: "Which of the following is explicitly listed in the chapter as one of the ways a user interface can vary?",
+    options: [
+      "Batch",
+      "Holographic",
+      "Neural-link",
+      "Retina scan"
+    ],
+    correct: "Batch",
+    explanation: "The chapter states the user interface varies between Command-Line (CLI), Graphical (GUI), touch-screen, and Batch — the other options never appear in the material.",
+    referenceTopic: "User and Operating-System Interface"
+  },
+  {
+    id: 3,
+    difficulty: "easy",
+    topic: "Shell / CLI",
+    question: "Which statement about the command-line interpreter (shell) is TRUE according to the chapter?",
+    options: [
+      "It is always built directly into the kernel and can never vary between systems",
+      "It may be implemented in the kernel or as a systems program, and several shell flavors can exist on one system",
+      "It can only run built-in commands and never launches external programs",
+      "Adding a new command always requires rewriting the shell itself"
+    ],
+    correct: "It may be implemented in the kernel or as a systems program, and several shell flavors can exist on one system",
+    explanation: "The chapter notes the CLI is 'sometimes implemented in kernel, sometimes by systems program' and that multiple shell flavors exist; if commands are just program names, adding features doesn't require modifying the shell.",
+    referenceTopic: "Command-Line Interpreter"
+  },
+  {
+    id: 4,
+    difficulty: "easy",
+    topic: "GUI Origins",
+    question: "Where was the desktop-metaphor graphical user interface, later adopted by systems like Mac OS X and Windows, originally invented?",
+    options: [
+      "Xerox PARC",
+      "Bell Labs",
+      "MIT Media Lab",
+      "IBM Research"
+    ],
+    correct: "Xerox PARC",
+    explanation: "The chapter states the user-friendly desktop metaphor GUI, using icons and mouse actions, was invented at Xerox PARC.",
+    referenceTopic: "User Operating-System Interface — GUI"
+  },
+  {
+    id: 5,
+    difficulty: "medium",
+    topic: "Touchscreen Interfaces",
+    question: "A tablet manufacturer wants to design an interface for a device with no physical mouse or keyboard. Based on the chapter's description of touchscreen interfaces, which combination of features should it support?",
+    options: [
+      "Physical mouse emulation as the primary input method",
+      "Gesture-based actions and selection, a virtual keyboard for text entry, and voice commands",
+      "Batch-only command submission with no direct interaction",
+      "A command-line shell as the sole means of input"
+    ],
+    correct: "Gesture-based actions and selection, a virtual keyboard for text entry, and voice commands",
+    explanation: "Since a mouse is not possible or desired on touch devices, the chapter describes gestures for actions/selection, a virtual keyboard for text, and voice commands as the interface's core features.",
+    referenceTopic: "Touchscreen Interfaces"
+  },
+  {
+    id: 6,
+    difficulty: "medium",
+    topic: "System Call vs. API",
+    question: "A C program calls a library function which, in turn, invokes a system call to perform the actual OS operation. Which statement best describes this relationship, per the chapter?",
+    options: [
+      "The API function and the system call are simply two names for the exact same thing",
+      "Programs mostly access OS services through a high-level API rather than invoking system calls directly, and the underlying system call carries out the real operation",
+      "System calls are only used in assembly language programs and cannot be reached through an API",
+      "Using an API removes the need for an operating-system kernel to be involved"
+    ],
+    correct: "Programs mostly access OS services through a high-level API rather than invoking system calls directly, and the underlying system call carries out the real operation",
+    explanation: "The chapter states system calls are typically accessed via a high-level API rather than direct system-call use, hiding most implementation detail from the programmer.",
+    referenceTopic: "System Calls / API"
+  },
+  {
+    id: 7,
+    difficulty: "easy",
+    topic: "Standard APIs",
+    question: "According to the chapter, which pairing of an API with the systems that use it is correct?",
+    options: [
+      "Win32 API for Windows, POSIX API for UNIX/Linux/Mac OS X, Java API for the JVM",
+      "POSIX API for Windows, Win32 API for Linux, Java API only for Arduino",
+      "Win32 API is used identically across all UNIX variants",
+      "Java API is used exclusively for kernel-level system calls on FreeBSD"
+    ],
+    correct: "Win32 API for Windows, POSIX API for UNIX/Linux/Mac OS X, Java API for the JVM",
+    explanation: "The three most common APIs named in the chapter are Win32 (Windows), POSIX (UNIX, Linux, Mac OS X), and the Java API (Java virtual machine).",
+    referenceTopic: "System Calls — Application Programming Interface"
+  },
+  {
+    id: 8,
+    difficulty: "medium",
+    topic: "System Call Parameter Passing",
+    question: "A system call needs to pass more parameters than the CPU has available registers. Which two parameter-passing methods described in the chapter avoid limiting the number or length of parameters, unlike passing them directly in registers?",
+    options: [
+      "Passing via cache and passing via interrupt vector",
+      "The block/table-in-memory method and the stack method",
+      "Passing via network packet and passing via registers",
+      "Passing via BIOS call and passing via GRUB"
+    ],
+    correct: "The block/table-in-memory method and the stack method",
+    explanation: "The chapter explains that storing parameters in a memory block/table (with its address passed in a register) or pushing them onto a stack does not limit the number or length of parameters, unlike using registers alone.",
+    referenceTopic: "System Call Parameter Passing"
+  },
+  {
+    id: 9,
+    difficulty: "medium",
+    topic: "Parameter Passing via Memory Table",
+    question: "Which operating systems does the chapter specifically name as using the approach of storing parameters in a block/table in memory, with the block's address passed in a register?",
+    options: [
+      "Windows and Mac OS X",
+      "Linux and Solaris",
+      "Arduino and FreeBSD",
+      "iOS and Android"
+    ],
+    correct: "Linux and Solaris",
+    explanation: "The chapter states that parameters stored in a block or table in memory, with the block's address passed as a register parameter, is the approach taken by Linux and Solaris.",
+    referenceTopic: "System Call Parameter Passing"
+  },
+  {
+    id: 10,
+    difficulty: "easy",
+    topic: "Types of System Calls — File Management",
+    question: "A program invokes system calls to open a file, close it, and get or set its attributes. Which category of system call do these operations belong to?",
+    options: [
+      "Device management",
+      "File management",
+      "Information maintenance",
+      "Process control"
+    ],
+    correct: "File management",
+    explanation: "Create/delete file, open/close, read/write/reposition, and get/set file attributes are all listed under the file management category of system calls.",
+    referenceTopic: "Types of System Calls — File Management"
+  },
+  {
+    id: 11,
+    difficulty: "medium",
+    topic: "Types of System Calls — Device Management",
+    question: "Which system-call category covers operations such as 'request device, release device' and 'logically attach or detach devices'?",
+    options: [
+      "File management",
+      "Device management",
+      "Communications",
+      "Protection"
+    ],
+    correct: "Device management",
+    explanation: "Requesting/releasing a device, reading/writing/repositioning, getting/setting device attributes, and logically attaching or detaching devices are all listed under device management.",
+    referenceTopic: "Types of System Calls — Device Management"
+  },
+  {
+    id: 12,
+    difficulty: "hard",
+    topic: "Types of System Calls — Categorization",
+    question: "One system call retrieves the current system date and updates a process's attributes. A separate system call creates a communication connection so a client can send messages to a server. Which two system-call categories are being used, respectively?",
+    options: [
+      "Protection; File management",
+      "Information maintenance; Communications",
+      "Device management; Process control",
+      "Communications; Information maintenance"
+    ],
+    correct: "Information maintenance; Communications",
+    explanation: "Getting/setting time, date, or system/process data falls under information maintenance, while creating a connection and sending messages between a client and server falls under communications.",
+    referenceTopic: "Types of System Calls — Information Maintenance & Communications"
+  },
+  {
+    id: 13,
+    difficulty: "hard",
+    topic: "Types of System Calls — Process Control",
+    question: "Which of the following operations would NOT be classified under 'process control' system calls in the chapter?",
+    options: [
+      "Create process, terminate process",
+      "Allocate and free memory",
+      "Get device attributes, set device attributes",
+      "Wait for time; wait event, signal event"
+    ],
+    correct: "Get device attributes, set device attributes",
+    explanation: "Getting and setting device attributes is a device management operation. Process control instead covers creating/terminating processes, memory allocation, waiting on events/time, locks, and debugging.",
+    referenceTopic: "Types of System Calls — Process Control"
+  },
+  {
+    id: 14,
+    difficulty: "easy",
+    topic: "Example: Arduino",
+    question: "According to the chapter's Arduino example, how does the platform typically operate?",
+    options: [
+      "Multitasking with a full UNIX-based kernel managing processes",
+      "Single-tasking with no operating system; the program (sketch) is loaded via USB into flash memory within a single memory space",
+      "It relies on fork() and exec() to manage multiple concurrent processes",
+      "It boots using GRUB and the Unified Extensible Firmware Interface (UEFI)"
+    ],
+    correct: "Single-tasking with no operating system; the program (sketch) is loaded via USB into flash memory within a single memory space",
+    explanation: "The chapter describes Arduino as single-tasking with no operating system: a boot loader loads the program (sketch) from flash memory into a single memory space, and the shell reloads when the program exits.",
+    referenceTopic: "Example: Arduino"
+  },
+  {
+    id: 15,
+    difficulty: "medium",
+    topic: "Example: FreeBSD",
+    question: "In the chapter's FreeBSD example, what is the correct sequence a shell follows after a user logs in and enters a command?",
+    options: [
+      "exec() duplicates the shell process, then fork() overlays the requested program",
+      "fork() creates a new process, then exec() loads the desired program into that new process",
+      "A single system call, spawn(), handles both process creation and program loading",
+      "The shell directly modifies the kernel's memory table without creating a new process"
+    ],
+    correct: "fork() creates a new process, then exec() loads the desired program into that new process",
+    explanation: "The chapter states the FreeBSD shell executes fork() to create a process, then executes exec() to load the program into that process, afterward waiting for it to terminate or continuing with more commands.",
+    referenceTopic: "Example: FreeBSD"
+  },
+  {
+    id: 16,
+    difficulty: "hard",
+    topic: "fork() and exec()",
+    question: "In the FreeBSD example, immediately after the shell calls fork() but before exec() has been called, what is true of the newly created child process?",
+    options: [
+      "It is already executing the new program the user requested",
+      "It is essentially a duplicate of the parent shell and has not yet begun running the requested program",
+      "It has been terminated because exec() has not yet executed",
+      "It shares no code or memory image with the parent process at all"
+    ],
+    correct: "It is essentially a duplicate of the parent shell and has not yet begun running the requested program",
+    explanation: "fork() creates a new process that starts as a copy of the calling process; only the subsequent exec() call replaces that process's memory image with the new program.",
+    referenceTopic: "Example: FreeBSD — fork() and exec()"
+  },
+  {
+    id: 17,
+    difficulty: "medium",
+    topic: "Linkers and Loaders",
+    question: "What distinguishes the role of a linker from the role of a loader, as described in the chapter?",
+    options: [
+      "The linker brings the executable into memory to run; the loader combines object files into an executable",
+      "The linker combines relocatable object files (and needed libraries) into a single executable file; the loader brings that executable into memory for execution",
+      "Both perform exactly the same function of assigning final memory addresses",
+      "The linker only operates during the system-boot process, never during compilation"
+    ],
+    correct: "The linker combines relocatable object files (and needed libraries) into a single executable file; the loader brings that executable into memory for execution",
+    explanation: "The chapter states the linker combines relocatable object files and libraries into a single binary executable, while the loader brings that executable, stored on secondary storage, into memory to be executed.",
+    referenceTopic: "Linkers and Loaders"
+  },
+  {
+    id: 18,
+    difficulty: "hard",
+    topic: "Dynamic Libraries / DLLs",
+    question: "Why do modern general-purpose systems typically load dynamically linked libraries (DLLs on Windows) at run time instead of linking every library directly into each executable?",
+    options: [
+      "Because a DLL must be fully recompiled each time any application using it runs",
+      "Because a shared library can be loaded once and used by every application requiring that same version, rather than embedding a separate copy inside every executable",
+      "Because dynamic linking removes the need for a loader entirely",
+      "Because DLLs automatically make an executable able to run on any operating system"
+    ],
+    correct: "Because a shared library can be loaded once and used by every application requiring that same version, rather than embedding a separate copy inside every executable",
+    explanation: "The chapter notes that dynamically linked libraries are loaded as needed and shared by all programs using the same version of that library, which is loaded into memory only once.",
+    referenceTopic: "Linkers and Loaders — Dynamically Linked Libraries"
+  },
+  {
+    id: 19,
+    difficulty: "medium",
+    topic: "System Services — Background Services",
+    question: "Which description best matches 'background services' as covered in the chapter's System Services section?",
+    options: [
+      "Programs launched by the user via a mouse click, considered ordinary application programs",
+      "Processes launched at boot time that run in user context (not kernel context), providing facilities like disk checking, process scheduling, and error logging — also known as services, subsystems, or daemons",
+      "Compilers and assemblers that provide programming-language support",
+      "System calls used exclusively for protection and security enforcement"
+    ],
+    correct: "Processes launched at boot time that run in user context (not kernel context), providing facilities like disk checking, process scheduling, and error logging — also known as services, subsystems, or daemons",
+    explanation: "The chapter describes background services as launching at boot time, running in user (not kernel) context, providing facilities such as disk checking, scheduling, and error logging, and being known as services, subsystems, or daemons.",
+    referenceTopic: "System Services — Background Services"
+  },
+  {
+    id: 20,
+    difficulty: "hard",
+    topic: "System Services — Categorization",
+    question: "A student needs a tool that translates C source code into an executable program, and also wants a facility that keeps logging system errors continuously in the background after boot. Which two system-service categories correspond to these two needs, respectively?",
+    options: [
+      "Programming-language support (compilers); Background services",
+      "File manipulation; Communications",
+      "Program loading and execution; Status information",
+      "Background services; Programming-language support"
+    ],
+    correct: "Programming-language support (compilers); Background services",
+    explanation: "Compilers, assemblers, debuggers, and interpreters fall under programming-language support, while continuous error logging after boot, running in user context, matches the chapter's definition of background services.",
+    referenceTopic: "System Services"
+  }
+];
+
+// ---------------------------------------------------------------
+// 2. STATE
+// ---------------------------------------------------------------
+const TOTAL_TIME_SECONDS = 20 * 60;
+
+let sessionQuestions = [];   // shuffled question objects, each with shuffled options
+let currentIndex = 0;
+let userAnswers = {};        // { questionId: selectedOptionText }
+let timerInterval = null;
+let secondsRemaining = TOTAL_TIME_SECONDS;
+let examFinished = false;
+
+// ---------------------------------------------------------------
+// 3. UTIL
+// ---------------------------------------------------------------
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function formatTime(totalSeconds){
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function letterFor(i){ return String.fromCharCode(65 + i); } // A, B, C, D
+
+// ---------------------------------------------------------------
+// 4. THEME TOGGLE
+// ---------------------------------------------------------------
+const themeToggle = document.getElementById('themeToggle');
+function applyStoredTheme(){
+  // No localStorage per artifact rules for browser storage-restricted contexts,
+  // but this is a standalone site (not a Claude artifact), so we default to
+  // system preference each load rather than persisting across sessions.
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(prefersDark) document.documentElement.classList.add('dark');
+}
+themeToggle.addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+});
+applyStoredTheme();
+
+// ---------------------------------------------------------------
+// 5. SCREEN MANAGEMENT
+// ---------------------------------------------------------------
+const screens = {
+  start: document.getElementById('screen-start'),
+  quiz: document.getElementById('screen-quiz'),
+  results: document.getElementById('screen-results')
+};
+function showScreen(name){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+}
+
+// ---------------------------------------------------------------
+// 6. EXAM SETUP
+// ---------------------------------------------------------------
+function buildSession(){
+  const shuffledQuestions = shuffle(QUESTION_BANK);
+  sessionQuestions = shuffledQuestions.map(q => {
+    const options = shuffle(q.options);
+    return { ...q, options };
+  });
+  currentIndex = 0;
+  userAnswers = {};
+  secondsRemaining = TOTAL_TIME_SECONDS;
+  examFinished = false;
+}
+
+function startExam(){
+  buildSession();
+  renderJumpGrid();
+  renderQuestion();
+  startTimer();
+  showScreen('quiz');
+}
+
+// ---------------------------------------------------------------
+// 7. TIMER
+// ---------------------------------------------------------------
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    secondsRemaining--;
+    updateTimerDisplay();
+    if(secondsRemaining <= 0){
+      clearInterval(timerInterval);
+      finishExam(true);
+    }
+  }, 1000);
+}
+function updateTimerDisplay(){
+  const el = document.getElementById('timeLeft');
+  el.textContent = formatTime(Math.max(secondsRemaining,0));
+  const wrap = document.getElementById('timer');
+  wrap.classList.toggle('low', secondsRemaining <= 60);
+}
+
+// ---------------------------------------------------------------
+// 8. RENDER QUESTION
+// ---------------------------------------------------------------
+function renderQuestion(){
+  const q = sessionQuestions[currentIndex];
+
+  document.getElementById('qCurrent').textContent = currentIndex + 1;
+  document.getElementById('qTotal').textContent = sessionQuestions.length;
+  document.getElementById('qTopic').textContent = q.topic;
+  const diffEl = document.getElementById('qDiff');
+  diffEl.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+  diffEl.className = 'tag diff-tag ' + q.difficulty;
+  document.getElementById('qText').textContent = q.question;
+
+  const progressPct = ((currentIndex + 1) / sessionQuestions.length) * 100;
+  document.getElementById('progressFill').style.width = progressPct + '%';
+
+  const list = document.getElementById('choicesList');
+  list.innerHTML = '';
+  q.options.forEach((optText, i) => {
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.setAttribute('role', 'radio');
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('aria-checked', String(userAnswers[q.id] === optText));
+    if(userAnswers[q.id] === optText) div.classList.add('selected');
+
+    div.innerHTML = `<span class="choice-letter">${letterFor(i)}</span><span class="choice-text"></span>`;
+    div.querySelector('.choice-text').textContent = optText;
+
+    div.addEventListener('click', () => selectAnswer(q.id, optText));
+    div.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        selectAnswer(q.id, optText);
+      }
+    });
+    list.appendChild(div);
+  });
+
+  // nav buttons
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  const isLast = currentIndex === sessionQuestions.length - 1;
+  document.getElementById('nextBtn').style.display = isLast ? 'none' : 'inline-flex';
+  document.getElementById('finishBtn').style.display = isLast ? 'inline-flex' : 'none';
+
+  updateJumpGrid();
+}
+
+function selectAnswer(qId, optText){
+  userAnswers[qId] = optText;
+  renderQuestion();
+}
+
+// ---------------------------------------------------------------
+// 9. QUESTION JUMP GRID
+// ---------------------------------------------------------------
+function renderJumpGrid(){
+  const grid = document.getElementById('jumpgrid');
+  grid.innerHTML = '';
+  sessionQuestions.forEach((q, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'jump-dot';
+    dot.textContent = i + 1;
+    dot.setAttribute('aria-label', `Go to question ${i+1}`);
+    dot.addEventListener('click', () => { currentIndex = i; renderQuestion(); });
+    grid.appendChild(dot);
+  });
+}
+function updateJumpGrid(){
+  const dots = document.querySelectorAll('.jump-dot');
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('current', i === currentIndex);
+    dot.classList.toggle('answered', userAnswers[sessionQuestions[i].id] !== undefined);
+  });
+}
+
+// ---------------------------------------------------------------
+// 10. NAVIGATION
+// ---------------------------------------------------------------
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if(currentIndex > 0){ currentIndex--; renderQuestion(); }
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if(currentIndex < sessionQuestions.length - 1){ currentIndex++; renderQuestion(); }
+});
+document.getElementById('finishBtn').addEventListener('click', () => {
+  const unanswered = sessionQuestions.length - Object.keys(userAnswers).length;
+  if(unanswered > 0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Finish the exam anyway?`);
+    if(!proceed) return;
+  }
+  finishExam(false);
+});
+document.getElementById('startBtn').addEventListener('click', startExam);
+document.getElementById('restartBtn').addEventListener('click', startExam);
+document.getElementById('restartBtn2').addEventListener('click', startExam);
+document.getElementById('reviewBtn').addEventListener('click', () => {
+  document.querySelector('.review-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ---------------------------------------------------------------
+// 11. FINISH + SCORING
+// ---------------------------------------------------------------
+function finishExam(timeExpired){
+  if(examFinished) return;
+  examFinished = true;
+  clearInterval(timerInterval);
+
+  const timeUsed = TOTAL_TIME_SECONDS - Math.max(secondsRemaining, 0);
+
+  let correctCount = 0;
+  const byDifficulty = {
+    easy: { correct: 0, total: 0 },
+    medium: { correct: 0, total: 0 },
+    hard: { correct: 0, total: 0 }
+  };
+
+  sessionQuestions.forEach(q => {
+    byDifficulty[q.difficulty].total++;
+    const isCorrect = userAnswers[q.id] === q.correct;
+    if(isCorrect){
+      correctCount++;
+      byDifficulty[q.difficulty].correct++;
+    }
+  });
+
+  const total = sessionQuestions.length;
+  const pct = Math.round((correctCount / total) * 100);
+  const grade = gradeFor(pct);
+
+  renderResults({ correctCount, total, pct, grade, byDifficulty, timeUsed, timeExpired });
+  showScreen('results');
+}
+
+function gradeFor(pct){
+  if(pct >= 90) return 'A';
+  if(pct >= 80) return 'B';
+  if(pct >= 70) return 'C';
+  if(pct >= 60) return 'D';
+  return 'F';
+}
+
+function messageFor(grade, timeExpired){
+  if(timeExpired) return "Time's up! Here's how you did — review the explanations below to sharpen any weak spots.";
+  const messages = {
+    A: "Outstanding work — you've mastered Chapter 2.",
+    B: "Solid performance — just a few concepts to tighten up.",
+    C: "Decent grasp of the material — review the misses below.",
+    D: "You're getting there — a focused re-read of the chapter will help.",
+    F: "Let's go over the fundamentals again — review every explanation below."
+  };
+  return messages[grade] || "Let's review your results.";
+}
+
+// ---------------------------------------------------------------
+// 12. RENDER RESULTS
+// ---------------------------------------------------------------
+function renderResults({ correctCount, total, pct, grade, byDifficulty, timeUsed, timeExpired }){
+  document.getElementById('scoreCorrect').textContent = correctCount;
+  document.getElementById('scoreTotal').textContent = total;
+  document.getElementById('gradeLetter').textContent = grade;
+  document.getElementById('gradePct').textContent = pct + '%';
+  document.getElementById('resultsMsg').textContent = messageFor(grade, timeExpired);
+  document.getElementById('statTime').textContent = formatTime(timeUsed);
+
+  document.getElementById('statEasy').textContent = `${byDifficulty.easy.correct}/${byDifficulty.easy.total}`;
+  document.getElementById('statMedium').textContent = `${byDifficulty.medium.correct}/${byDifficulty.medium.total}`;
+  document.getElementById('statHard').textContent = `${byDifficulty.hard.correct}/${byDifficulty.hard.total}`;
+
+  // ring animation
+  const circumference = 2 * Math.PI * 62;
+  const ringFg = document.getElementById('ringFg');
+  ringFg.style.strokeDasharray = circumference;
+  ringFg.style.strokeDashoffset = circumference;
+  const gradeColor = { A: 'var(--easy)', B: 'var(--easy)', C: 'var(--medium)', D: 'var(--medium)', F: 'var(--hard)' }[grade];
+  ringFg.style.stroke = gradeColor;
+  requestAnimationFrame(() => {
+    const offset = circumference * (1 - pct / 100);
+    ringFg.style.strokeDashoffset = offset;
+  });
+
+  // review list
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = '';
+
+  sessionQuestions.forEach((q, i) => {
+    const userAnswer = userAnswers[q.id];
+    const isCorrect = userAnswer === q.correct;
+
+    const item = document.createElement('div');
+    item.className = 'review-item';
+
+    const head = document.createElement('div');
+    head.className = 'review-item-head';
+    head.innerHTML = `
+      <span class="review-num">QUESTION ${i + 1} · ${q.difficulty.toUpperCase()}</span>
+      <span class="review-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '✓ Correct' : '✕ Incorrect'}</span>
+    `;
+    item.appendChild(head);
+
+    const qEl = document.createElement('p');
+    qEl.className = 'review-q';
+    qEl.textContent = q.question;
+    item.appendChild(qEl);
+
+    const choicesWrap = document.createElement('div');
+    choicesWrap.className = 'review-choices';
+    q.options.forEach((optText, idx) => {
+      const row = document.createElement('div');
+      row.className = 'choice disabled';
+      if(optText === q.correct) row.classList.add('correct-answer');
+      else if(optText === userAnswer && !isCorrect) row.classList.add('wrong-answer');
+
+      row.innerHTML = `<span class="choice-letter">${letterFor(idx)}</span><span class="choice-text"></span>`;
+      row.querySelector('.choice-text').textContent = optText +
+        (optText === userAnswer ? '  (your answer)' : (optText === q.correct ? '  (correct answer)' : ''));
+      choicesWrap.appendChild(row);
+    });
+    item.appendChild(choicesWrap);
+
+    if(userAnswer === undefined){
+      const skipped = document.createElement('p');
+      skipped.className = 'review-explain';
+      skipped.innerHTML = `<b>No answer was submitted</b> for this question.`;
+      item.appendChild(skipped);
+    }
+
+    const explain = document.createElement('p');
+    explain.className = 'review-explain';
+    explain.innerHTML = `<b>Explanation:</b> ${q.explanation}`;
+    item.appendChild(explain);
+
+    const topic = document.createElement('p');
+    topic.className = 'review-topic';
+    topic.innerHTML = `<b>Reference topic:</b> ${q.referenceTopic}`;
+    item.appendChild(topic);
+
+    reviewList.appendChild(item);
+  });
+}
+
+</script>
+</body>
+</html>

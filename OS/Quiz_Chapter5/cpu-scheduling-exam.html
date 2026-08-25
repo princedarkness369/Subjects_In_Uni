@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPU Scheduling — Chapter Exam</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --navy-950:#0b1730;
+  --navy-900:#122145;
+  --navy-800:#182c58;
+  --navy-700:#22397a;
+  --blue-600:#2f5fd6;
+  --blue-500:#3b6ff0;
+  --blue-100:#e7edfc;
+  --blue-50:#f4f7fd;
+  --paper:#f6f8fc;
+  --card:#ffffff;
+  --ink:#16233f;
+  --ink-soft:#4d5c7a;
+  --line:#dbe3f2;
+  --green-700:#166a48;
+  --green-500:#1f9d63;
+  --green-100:#e3f6ec;
+  --red-700:#a4283a;
+  --red-500:#d64550;
+  --red-100:#fbe7e8;
+  --amber-500:#c98a1c;
+  --amber-100:#fbf1de;
+  --radius-lg:16px;
+  --radius-md:12px;
+  --radius-sm:8px;
+  --shadow-sm:0 1px 2px rgba(11,23,48,0.06), 0 1px 1px rgba(11,23,48,0.04);
+  --shadow-md:0 8px 24px rgba(15,30,66,0.10), 0 2px 6px rgba(15,30,66,0.06);
+  --shadow-lg:0 20px 50px rgba(11,23,48,0.18);
+  --serif: "Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;
+  --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--sans);
+  background:
+    radial-gradient(1200px 600px at 100% -10%, var(--blue-100) 0%, rgba(244,247,253,0) 55%),
+    var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--blue-100);}
+
+.app{
+  max-width:1180px;
+  margin:0 auto;
+  padding:24px 20px 64px;
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  padding:18px 24px;
+  background:linear-gradient(135deg,var(--navy-950),var(--navy-800) 60%, var(--navy-700));
+  border-radius:var(--radius-lg);
+  color:#fff;
+  box-shadow:var(--shadow-md);
+  position:relative;
+  overflow:hidden;
+}
+.topbar::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 42px);
+  pointer-events:none;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  z-index:1;
+}
+.brand-mark{
+  width:44px;height:44px;border-radius:11px;
+  background:linear-gradient(155deg,var(--blue-500),var(--blue-600));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);
+  font-weight:700;
+  font-size:19px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18);
+  flex-shrink:0;
+}
+.brand h1{
+  margin:0;
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:19px;
+  letter-spacing:0.2px;
+}
+.brand p{
+  margin:2px 0 0;
+  font-size:12.5px;
+  color:#aebbe0;
+  letter-spacing:0.3px;
+}
+.top-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  z-index:1;
+}
+.timer-pill{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.16);
+  padding:9px 16px;
+  border-radius:999px;
+  font-variant-numeric:tabular-nums;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:0.4px;
+}
+.timer-pill.low{
+  background:rgba(214,69,80,0.22);
+  border-color:rgba(214,69,80,0.5);
+  animation:pulse-red 1.1s infinite;
+}
+@keyframes pulse-red{
+  0%,100%{box-shadow:0 0 0 0 rgba(214,69,80,0.35);}
+  50%{box-shadow:0 0 0 7px rgba(214,69,80,0);}
+}
+.qcount-pill{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.16);
+  padding:9px 16px;
+  border-radius:999px;
+  font-size:13.5px;
+  font-weight:600;
+  color:#dbe4fb;
+}
+
+/* progress bar */
+.progress-wrap{
+  margin:16px 2px 0;
+}
+.progress-track{
+  height:7px;
+  border-radius:999px;
+  background:#e2e9f7;
+  overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(11,23,48,0.08);
+}
+.progress-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--blue-600),var(--blue-500));
+  width:5%;
+  transition:width .35s ease;
+}
+.progress-label{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-top:6px;
+  letter-spacing:0.2px;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.layout{
+  display:grid;
+  grid-template-columns:230px 1fr;
+  gap:22px;
+  margin-top:22px;
+  align-items:start;
+}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr;}
+}
+
+/* Navigator */
+.navigator{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:18px;
+  box-shadow:var(--shadow-sm);
+  position:sticky;
+  top:20px;
+}
+.navigator h3{
+  margin:0 0 4px;
+  font-size:12.5px;
+  text-transform:uppercase;
+  letter-spacing:0.9px;
+  color:var(--ink-soft);
+  font-weight:700;
+}
+.nav-legend{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin:10px 0 14px;
+  font-size:11.5px;
+  color:var(--ink-soft);
+}
+.nav-legend span{display:flex;align-items:center;gap:7px;}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.dot.answered{background:var(--blue-500);}
+.dot.current{background:var(--amber-500);}
+.dot.unanswered{background:#cfd9ee;}
+.nav-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:7px;
+}
+.nav-btn{
+  aspect-ratio:1;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--blue-50);
+  color:var(--ink);
+  font-size:12.5px;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.nav-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.nav-btn.answered{background:var(--blue-600);color:#fff;border-color:var(--blue-600);}
+.nav-btn.current{outline:2px solid var(--amber-500);outline-offset:2px;}
+.submit-side-btn{
+  width:100%;
+  margin-top:16px;
+  padding:11px 14px;
+  border-radius:var(--radius-sm);
+  border:none;
+  background:var(--navy-900);
+  color:#fff;
+  font-weight:600;
+  font-size:13.5px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .15s ease;
+}
+.submit-side-btn:hover{background:var(--navy-800);}
+
+/* ============================================================
+   QUESTION CARD
+   ============================================================ */
+.qcard{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-md);
+  padding:32px 34px 28px;
+  animation:fade-in .3s ease;
+}
+@keyframes fade-in{
+  from{opacity:0; transform:translateY(6px);}
+  to{opacity:1; transform:translateY(0);}
+}
+@media (max-width:600px){
+  .qcard{padding:22px 18px 20px;}
+}
+.qcard-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+.qnum{
+  font-family:var(--serif);
+  font-size:13.5px;
+  color:var(--blue-600);
+  font-weight:700;
+  letter-spacing:0.3px;
+}
+.tag-row{display:flex;gap:8px;flex-wrap:wrap;}
+.tag{
+  font-size:10.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  padding:4px 9px;
+  border-radius:999px;
+}
+.tag.diff-easy{background:var(--green-100);color:var(--green-700);}
+.tag.diff-medium{background:var(--amber-100);color:var(--amber-500);}
+.tag.diff-hard{background:var(--red-100);color:var(--red-700);}
+.tag.cat{background:var(--blue-100);color:var(--blue-600);}
+
+.qtext{
+  font-family:var(--serif);
+  font-size:21px;
+  line-height:1.5;
+  color:var(--ink);
+  margin:6px 0 22px;
+}
+.qtext .mono-block{
+  display:block;
+  margin-top:12px;
+  font-family:var(--mono);
+  font-size:14px;
+  background:var(--blue-50);
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  padding:12px 14px;
+  color:var(--navy-800);
+  white-space:pre;
+  overflow-x:auto;
+}
+
+.options{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+}
+.option{
+  display:flex;
+  align-items:flex-start;
+  gap:13px;
+  padding:14px 16px;
+  border:1.5px solid var(--line);
+  border-radius:var(--radius-md);
+  cursor:pointer;
+  transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  background:#fff;
+}
+.option:hover{border-color:var(--blue-500); background:var(--blue-50);}
+.option.selected{
+  border-color:var(--blue-600);
+  background:var(--blue-100);
+}
+.option input{display:none;}
+.radio-circle{
+  width:19px;height:19px;
+  border-radius:50%;
+  border:2px solid #b7c3dd;
+  flex-shrink:0;
+  margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s ease;
+}
+.option.selected .radio-circle{border-color:var(--blue-600);}
+.radio-circle::after{
+  content:"";
+  width:10px;height:10px;
+  border-radius:50%;
+  background:var(--blue-600);
+  transform:scale(0);
+  transition:transform .12s ease;
+}
+.option.selected .radio-circle::after{transform:scale(1);}
+.option-label{
+  font-size:15.5px;
+  line-height:1.5;
+  color:var(--ink);
+  padding-top:0.5px;
+}
+.option-letter{
+  font-weight:700;
+  color:var(--blue-600);
+  margin-right:6px;
+}
+
+/* review-mode coloring */
+.option.correct-answer{border-color:var(--green-500); background:var(--green-100);}
+.option.correct-answer .radio-circle{border-color:var(--green-500);}
+.option.correct-answer .radio-circle::after{background:var(--green-500); transform:scale(1);}
+.option.wrong-answer{border-color:var(--red-500); background:var(--red-100);}
+.option.wrong-answer .radio-circle{border-color:var(--red-500);}
+.option.wrong-answer .radio-circle::after{background:var(--red-500); transform:scale(1);}
+.option.review-disabled{cursor:default;}
+
+.warning-msg{
+  margin-top:14px;
+  font-size:13.5px;
+  color:var(--red-700);
+  background:var(--red-100);
+  border:1px solid rgba(214,69,80,0.35);
+  padding:9px 13px;
+  border-radius:var(--radius-sm);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  animation:shake .35s ease;
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px);}
+  75%{transform:translateX(4px);}
+}
+.hidden{display:none !important;}
+
+/* nav buttons (prev/next) */
+.qcard-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:26px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  gap:12px;
+}
+.btn{
+  padding:11px 20px;
+  border-radius:var(--radius-sm);
+  border:1.5px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition:all .15s ease;
+}
+.btn:hover{border-color:var(--blue-500); color:var(--blue-600);}
+.btn:disabled{opacity:0.4; cursor:not-allowed;}
+.btn-primary{
+  background:linear-gradient(135deg,var(--blue-600),var(--blue-500));
+  border-color:transparent;
+  color:#fff;
+}
+.btn-primary:hover{filter:brightness(1.06); color:#fff;}
+.btn-dark{
+  background:var(--navy-900);
+  border-color:var(--navy-900);
+  color:#fff;
+}
+.btn-dark:hover{background:var(--navy-800); color:#fff;}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(11,17,35,0.55);
+  backdrop-filter:blur(2px);
+  display:flex; align-items:center; justify-content:center;
+  z-index:100;
+  padding:20px;
+  animation:fade-in .2s ease;
+}
+.modal{
+  background:#fff;
+  border-radius:var(--radius-lg);
+  padding:28px 28px 24px;
+  max-width:420px;
+  width:100%;
+  box-shadow:var(--shadow-lg);
+}
+.modal h3{
+  margin:0 0 10px;
+  font-family:var(--serif);
+  font-size:20px;
+  color:var(--navy-900);
+}
+.modal p{
+  margin:0 0 22px;
+  font-size:14.5px;
+  color:var(--ink-soft);
+  line-height:1.55;
+}
+.modal-actions{display:flex; gap:10px; justify-content:flex-end;}
+
+/* ============================================================
+   RESULTS
+   ============================================================ */
+.results-hero{
+  background:linear-gradient(135deg,var(--navy-950),var(--navy-800) 65%,var(--navy-700));
+  border-radius:var(--radius-lg);
+  padding:38px 34px;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:34px;
+  flex-wrap:wrap;
+  box-shadow:var(--shadow-md);
+}
+.score-ring{
+  width:132px;height:132px;
+  border-radius:50%;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.score-ring svg{position:absolute; inset:0; transform:rotate(-90deg);}
+.score-ring .val{
+  font-family:var(--serif);
+  font-size:30px;
+  font-weight:700;
+  z-index:1;
+}
+.results-hero-text{flex:1; min-width:220px;}
+.results-hero-text .status{
+  font-family:var(--serif);
+  font-size:26px;
+  margin:0 0 6px;
+}
+.results-hero-text .status.pass{color:#7fe3ae;}
+.results-hero-text .status.fail{color:#ff9aa4;}
+.results-hero-text p{margin:0; color:#c3cdea; font-size:14.5px; line-height:1.6;}
+.stat-row{
+  display:flex;
+  gap:22px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+.stat-chip{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.16);
+  border-radius:var(--radius-sm);
+  padding:9px 14px;
+  font-size:13px;
+}
+.stat-chip b{display:block; font-size:17px; font-family:var(--serif);}
+
+.results-actions{
+  display:flex;
+  gap:12px;
+  margin:22px 2px;
+  flex-wrap:wrap;
+}
+
+.review-list{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.review-item{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:24px 26px;
+  box-shadow:var(--shadow-sm);
+}
+.review-item-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:10px;
+}
+.result-badge{
+  font-size:11px;
+  font-weight:700;
+  padding:5px 11px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+}
+.result-badge.correct{background:var(--green-100); color:var(--green-700);}
+.result-badge.wrong{background:var(--red-100); color:var(--red-700);}
+.review-item .qtext{font-size:17px; margin:0 0 16px;}
+.explain-box{
+  margin-top:14px;
+  background:var(--blue-50);
+  border-left:3px solid var(--blue-500);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:12px 16px;
+  font-size:13.8px;
+  line-height:1.6;
+  color:var(--navy-800);
+}
+.explain-box b{color:var(--navy-900);}
+
+footer.credits{
+  text-align:center;
+  color:var(--ink-soft);
+  font-size:12px;
+  margin-top:40px;
+  letter-spacing:0.2px;
+}
+
+@media (max-width:600px){
+  .results-hero{padding:26px 20px;}
+  .score-ring{width:104px;height:104px;}
+  .score-ring .val{font-size:24px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">OS</div>
+      <div>
+        <h1>CPU Scheduling — Chapter Exam</h1>
+        <p>Operating Systems · Chapter 5 · Midterm-Style Assessment</p>
+      </div>
+    </div>
+    <div class="top-meta">
+      <div class="qcount-pill" id="qcountPill">Question 1 of 20</div>
+      <div class="timer-pill" id="timerPill"><i class="fa-regular fa-clock"></i><span id="timerText">30:00</span></div>
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label">
+      <span id="progressLabelLeft">1 of 20 answered</span>
+      <span id="progressLabelRight">Pass mark: 50%</span>
+    </div>
+  </div>
+
+  <!-- ============ EXAM VIEW ============ -->
+  <div class="layout" id="examLayout">
+    <aside class="navigator">
+      <h3>Question Navigator</h3>
+      <div class="nav-legend">
+        <span><i class="dot answered"></i>Answered</span>
+        <span><i class="dot current"></i>Current</span>
+        <span><i class="dot unanswered"></i>Unanswered</span>
+      </div>
+      <div class="nav-grid" id="navGrid"></div>
+      <button class="submit-side-btn" id="sideSubmitBtn"><i class="fa-solid fa-paper-plane"></i> Submit Exam</button>
+    </aside>
+
+    <main>
+      <div class="qcard" id="qcard">
+        <!-- injected by JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- ============ RESULTS VIEW ============ -->
+  <div id="resultsView" class="hidden">
+    <div class="results-hero">
+      <div class="score-ring" id="scoreRing">
+        <svg viewBox="0 0 120 120" width="132" height="132">
+          <circle cx="60" cy="60" r="52" stroke="rgba(255,255,255,0.18)" stroke-width="10" fill="none"/>
+          <circle id="scoreArc" cx="60" cy="60" r="52" stroke="#3b6ff0" stroke-width="10" fill="none"
+            stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        </svg>
+        <div class="val" id="scoreValText">0%</div>
+      </div>
+      <div class="results-hero-text">
+        <div class="status" id="passFailText">—</div>
+        <p id="resultsSummary">You answered 0 of 20 questions correctly.</p>
+        <div class="stat-row">
+          <div class="stat-chip"><b id="statCorrect">0</b>Correct</div>
+          <div class="stat-chip"><b id="statWrong">0</b>Incorrect</div>
+          <div class="stat-chip"><b id="statUnanswered">0</b>Unanswered</div>
+          <div class="stat-chip"><b id="statTime">00:00</b>Time Used</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary" id="restartBtn"><i class="fa-solid fa-rotate-right"></i> Restart Exam</button>
+      <button class="btn" id="reviewJumpBtn"><i class="fa-solid fa-arrow-down"></i> Jump to Detailed Review</button>
+    </div>
+
+    <div class="review-list" id="reviewList"></div>
+  </div>
+
+  <footer class="credits">Built for offline study · Based solely on the uploaded "CPU Scheduling" chapter</footer>
+</div>
+
+<!-- ============ CONFIRM SUBMIT MODAL ============ -->
+<div class="modal-overlay hidden" id="confirmOverlay">
+  <div class="modal">
+    <h3>Submit exam?</h3>
+    <p id="confirmText">You have answered 0 of 20 questions. Once submitted, you cannot change your answers.</p>
+    <div class="modal-actions">
+      <button class="btn" id="cancelSubmitBtn">Keep Reviewing</button>
+      <button class="btn btn-dark" id="confirmSubmitBtn">Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================================================================
+   QUESTION BANK — 20 questions, sourced strictly from the uploaded
+   "CPU Scheduling" chapter (Chapter 5). Each option array's first
+   entry [0] is always the CORRECT answer prior to shuffling.
+   ================================================================ */
+const QUESTION_BANK = [
+  {
+    category:"Basic Concepts", difficulty:"easy",
+    question:"According to the chapter, maximum CPU utilization is obtained through which of the following?",
+    options:[
+      "Multiprogramming",
+      "Running a single process at a time",
+      "Increasing the size of the ready queue only",
+      "Reducing the number of I/O devices"
+    ],
+    explanation:"The chapter states directly under Basic Concepts: \u201cMaximum CPU utilization obtained with multiprogramming.\u201d"
+  },
+  {
+    category:"CPU–I/O Burst Cycle", difficulty:"medium",
+    question:"Process execution, as described in the chapter, consists of a cycle alternating between which two phases?",
+    options:[
+      "A CPU burst and an I/O burst",
+      "A dispatch phase and an interrupt phase",
+      "A ready state and a terminated state only",
+      "A context switch and a swap"
+    ],
+    explanation:"The chapter defines the CPU–I/O Burst Cycle as: \u201cProcess execution consists of a cycle of CPU execution and I/O wait... CPU burst followed by I/O burst.\u201d"
+  },
+  {
+    category:"Preemptive/Nonpreemptive", difficulty:"medium",
+    question:"Under nonpreemptive scheduling, when does a process release the CPU, according to the chapter?",
+    options:[
+      "Only when it terminates or switches to the waiting state",
+      "Whenever a higher-priority process arrives",
+      "After a fixed time quantum expires",
+      "Only when the dispatcher forces a context switch"
+    ],
+    explanation:"The chapter states: \u201cUnder Nonpreemptive scheduling, once the CPU has been allocated to a process, the process keeps the CPU until it releases it either by terminating or by switching to the waiting state.\u201d"
+  },
+  {
+    category:"Preemptive Scheduling", difficulty:"medium",
+    question:"Two processes share data. One process is preempted mid-update so a second process can run, then reads the data while it is in an inconsistent state. What does the chapter say this illustrates?",
+    options:[
+      "A race condition",
+      "Starvation",
+      "The convoy effect",
+      "Dispatch latency"
+    ],
+    explanation:"The chapter's slide on \u201cPreemptive Scheduling and Race Conditions\u201d describes exactly this scenario: preemption during a shared-data update can leave data in an inconsistent state — a race condition."
+  },
+  {
+    category:"Dispatcher", difficulty:"medium",
+    question:"According to the chapter, what is dispatch latency?",
+    options:[
+      "The time it takes for the dispatcher to stop one process and start another running",
+      "The time between two consecutive I/O bursts",
+      "The time a process waits in the ready queue before being scheduled",
+      "The time from process creation until termination"
+    ],
+    explanation:"The chapter defines it directly: \u201cDispatch latency – time it takes for the dispatcher to stop one process and start another running.\u201d"
+  },
+  {
+    category:"Scheduling Criteria", difficulty:"medium",
+    question:"Which scheduling criterion does the chapter define as \u201cthe amount of time it takes from when a request was submitted until the first response is produced\u201d?",
+    options:[
+      "Response time",
+      "Turnaround time",
+      "Waiting time",
+      "Throughput"
+    ],
+    explanation:"Under Scheduling Criteria, the chapter defines response time exactly this way, distinguishing it from turnaround time, waiting time, and throughput."
+  },
+  {
+    category:"FCFS Scheduling", difficulty:"hard",
+    question:"Three processes P1, P2, P3 with burst times 24, 3, and 3 ms arrive in that order (P1, P2, P3) and are scheduled FCFS. What is the average waiting time?",
+    options:[
+      "17 ms",
+      "3 ms",
+      "9 ms",
+      "27 ms"
+    ],
+    explanation:"Waiting times: P1 = 0, P2 = 24, P3 = 27. Average = (0 + 24 + 27) / 3 = 17 ms — matching the chapter's FCFS example exactly.",
+    gantt:"| P1 (24) | P2 (3) | P3 (3) |\n0        24      27      30"
+  },
+  {
+    category:"FCFS Scheduling", difficulty:"hard",
+    question:"If the same three processes (P1=24, P2=3, P3=3) instead arrive in the order P2, P3, P1, what is the new average waiting time under FCFS?",
+    options:[
+      "3 ms",
+      "17 ms",
+      "10 ms",
+      "24 ms"
+    ],
+    explanation:"Waiting times: P2 = 0, P3 = 3, P1 = 6. Average = (6 + 0 + 3) / 3 = 3 ms. The chapter notes this is \u201cmuch better than previous case,\u201d illustrating how avoiding the convoy effect (a short process stuck behind a long one) reduces waiting time.",
+    gantt:"| P2 (3) | P3 (3) | P1 (24) |\n0       3       6        30"
+  },
+  {
+    category:"SJF Scheduling", difficulty:"hard",
+    question:"Four processes P1, P2, P3, P4 have burst times 6, 8, 7, and 3 ms respectively and all arrive together. Under non-preemptive SJF scheduling, what is the execution order?",
+    options:[
+      "P4, P1, P3, P2",
+      "P1, P2, P3, P4",
+      "P4, P3, P1, P2",
+      "P2, P3, P1, P4"
+    ],
+    explanation:"SJF schedules the process with the shortest next CPU burst first. Ordering burst times 3, 6, 7, 8 gives the sequence P4 (3), P1 (6), P3 (7), P2 (8), as in the chapter's SJF example."
+  },
+  {
+    category:"SJF Scheduling", difficulty:"hard",
+    question:"Using the chapter's SJF example (P1=6, P2=8, P3=7, P4=3, all arriving at time 0), what is the waiting time for process P3?",
+    options:[
+      "9 ms",
+      "3 ms",
+      "16 ms",
+      "0 ms"
+    ],
+    explanation:"Execution order is P4(0-3), P1(3-9), P3(9-16), P2(16-24). So P3 waits 9 ms before starting. This is consistent with the chapter's stated average waiting time of (3+16+9+0)/4 = 7.",
+    gantt:"| P4 (3) | P1 (6) | P3 (7) | P2 (8) |\n0       3       9       16      24"
+  },
+  {
+    category:"SRTF Scheduling", difficulty:"medium",
+    question:"In the chapter's shortest-remaining-time-first example, P1 (arrival 0, burst 8) begins running. At time 1, P2 arrives with burst 4. What happens under SRTF?",
+    options:[
+      "P1 is preempted and P2 starts running, since P2's burst is shorter than P1's remaining time",
+      "P1 continues running until it finishes, since it started first",
+      "P2 waits in the ready queue until P1 completes",
+      "Both processes share the CPU simultaneously"
+    ],
+    explanation:"SRTF is the preemptive version of SJF: \u201cWhenever a new process arrives in the ready queue, the decision on which process to schedule next is redone.\u201d Since P1's remaining time (7) exceeds P2's burst (4), P2 preempts P1."
+  },
+  {
+    category:"Round Robin", difficulty:"medium",
+    question:"Which statement about Round Robin scheduling, as described in the chapter, is TRUE?",
+    options:[
+      "If there are n processes in the ready queue and the time quantum is q, no process waits more than (n-1)q time units",
+      "Round Robin always produces a lower average turnaround time than SJF",
+      "Round Robin is a nonpreemptive scheduling algorithm",
+      "The time quantum must be smaller than the context-switch time for good performance"
+    ],
+    explanation:"The chapter states this exactly: \u201cNo process waits more than (n-1)q time units.\u201d It also notes RR typically has higher average turnaround than SJF, and that q must be large relative to context-switch time, not small."
+  },
+  {
+    category:"Round Robin", difficulty:"medium",
+    question:"According to the chapter, what happens to Round Robin's behavior as the time quantum q becomes very large?",
+    options:[
+      "It behaves like FCFS",
+      "It behaves like SJF",
+      "It becomes a priority scheduling algorithm",
+      "Context-switch overhead disappears entirely"
+    ],
+    explanation:"The chapter's Performance notes state: \u201cq large \u21d2 FIFO (FCFS)\u201d and \u201cq small \u21d2 RR.\u201d"
+  },
+  {
+    category:"Priority Scheduling", difficulty:"hard",
+    question:"Using the chapter's priority-scheduling example (P1: burst 10, priority 3; P2: burst 1, priority 1; P3: burst 2, priority 4; P4: burst 1, priority 5; P5: burst 5, priority 2; smaller number = higher priority), what is the waiting time for P4?",
+    options:[
+      "18 ms",
+      "6 ms",
+      "16 ms",
+      "1 ms"
+    ],
+    explanation:"Running in priority order P2(1) \u2192 P5(2) \u2192 P1(3) \u2192 P3(4) \u2192 P4(5): P2 runs 0-1, P5 runs 1-6, P1 runs 6-16, P3 runs 16-18, P4 runs 18-19. So P4 waits 18 ms. This is consistent with the chapter's stated average waiting time of 8.2 ms: (0+1+6+16+18)/5 = 8.2.",
+    gantt:"| P2(1) | P5(5) | P1(10) | P3(2) | P4(1) |\n0      1      6       16      18     19"
+  },
+  {
+    category:"Starvation & Aging", difficulty:"easy",
+    question:"What technique does the chapter describe as the solution to starvation in priority scheduling?",
+    options:[
+      "Aging — gradually increasing the priority of processes that wait a long time",
+      "Assigning all processes the same priority",
+      "Switching permanently to FCFS scheduling",
+      "Reducing the time quantum to zero"
+    ],
+    explanation:"The chapter states: \u201cProblem \u2192 Starvation – low priority processes may never execute. Solution \u2192 Aging – as time progresses increase the priority of the process.\u201d"
+  },
+  {
+    category:"Multilevel Queue", difficulty:"medium",
+    question:"Which of the following is NOT listed in the chapter as a parameter defining a multilevel queue scheduler?",
+    options:[
+      "A single global time quantum shared by all queues",
+      "The number of queues",
+      "The scheduling algorithm used for each queue",
+      "The method used to determine which queue a process enters"
+    ],
+    explanation:"The chapter lists: number of queues, scheduling algorithms for each queue, the method to determine which queue a process enters, and scheduling among the queues. A single shared global time quantum is not mentioned as a parameter."
+  },
+  {
+    category:"Multilevel Feedback Queue", difficulty:"medium",
+    question:"In the chapter's multilevel feedback queue example (Q0: RR quantum 8 ms, Q1: RR quantum 16 ms, Q2: FCFS), what happens to a process that does not finish within its 8 ms in Q0?",
+    options:[
+      "It is moved to Q1, where it is served RR and receives 16 additional milliseconds",
+      "It is terminated immediately",
+      "It restarts at the back of Q0 with a fresh 8 ms quantum",
+      "It is moved directly to Q2 and scheduled FCFS"
+    ],
+    explanation:"The chapter states: \u201cIf it does not finish in 8 milliseconds, the process is moved to queue Q1. At Q1 job is again served in RR and receives 16 additional milliseconds. If it still does not complete, it is preempted and moved to queue Q2.\u201d"
+  },
+  {
+    category:"Real-Time Scheduling", difficulty:"easy",
+    question:"According to the chapter, what distinguishes a hard real-time system from a soft real-time system?",
+    options:[
+      "In a hard real-time system, a task must be serviced by its deadline; soft real-time only gives critical tasks the highest priority, with no guarantee of timing",
+      "Hard real-time systems have no scheduling deadlines at all",
+      "Soft real-time systems always use FCFS scheduling",
+      "Hard real-time systems never use preemptive scheduling"
+    ],
+    explanation:"The chapter states: \u201cSoft real-time systems – Critical real-time tasks have the highest priority, but no guarantee as to when tasks will be scheduled. Hard real-time systems – task must be serviced by its deadline.\u201d"
+  },
+  {
+    category:"Real-Time Scheduling", difficulty:"hard",
+    question:"How do Rate Monotonic scheduling and Earliest Deadline First (EDF) scheduling differ in assigning priority, according to the chapter?",
+    options:[
+      "Rate Monotonic assigns higher priority to processes with shorter periods, while EDF assigns higher priority to processes with earlier deadlines",
+      "Rate Monotonic assigns priority based on deadlines, while EDF assigns priority based on periods",
+      "Both assign priority based on burst time length",
+      "Rate Monotonic and EDF both use fixed priorities that never change while the process runs"
+    ],
+    explanation:"The chapter states Rate Monotonic assigns priority \u201cbased on the inverse of its period... Shorter periods = higher priority,\u201d while under EDF \u201cthe earlier the deadline, the higher the priority.\u201d Unlike Rate Monotonic's static priority, EDF priorities can change as deadlines change."
+  },
+  {
+    category:"Little's Formula", difficulty:"hard",
+    question:"Using Little's Formula (n = \u03bb \u00d7 W) as defined in the chapter, if processes arrive at an average rate of 10 per second and the average number of processes in the queue is 25, what is the average waiting time per process?",
+    options:[
+      "2.5 seconds",
+      "10 seconds",
+      "0.4 seconds",
+      "25 seconds"
+    ],
+    explanation:"Little's law: n = \u03bb \u00d7 W, so W = n / \u03bb = 25 / 10 = 2.5 seconds. This mirrors the chapter's own worked example: \u201cif on average 7 processes arrive per second, and normally 14 processes in queue, then average wait time per process = 2 seconds\u201d (14/7 = 2)."
+  }
+];
+
+const EXAM_DURATION_SECONDS = 30 * 60;
+const PASS_MARK_PERCENT = 50;
+const TOTAL_QUESTIONS = QUESTION_BANK.length;
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let examQuestions = [];   // shuffled, with shuffled options, correctIndex tracked
+let userAnswers = [];     // index of chosen option per question, or null
+let currentIndex = 0;
+let timeRemaining = EXAM_DURATION_SECONDS;
+let timerHandle = null;
+let submitted = false;
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildExam(){
+  const shuffledQuestions = shuffle(QUESTION_BANK);
+  examQuestions = shuffledQuestions.map(q => {
+    const optionObjs = q.options.map((text, idx) => ({ text, isCorrect: idx === 0 }));
+    const shuffledOpts = shuffle(optionObjs);
+    const correctIndex = shuffledOpts.findIndex(o => o.isCorrect);
+    return {
+      category:q.category,
+      difficulty:q.difficulty,
+      question:q.question,
+      gantt:q.gantt || null,
+      explanation:q.explanation,
+      options: shuffledOpts.map(o => o.text),
+      correctIndex
+    };
+  });
+  userAnswers = new Array(TOTAL_QUESTIONS).fill(null);
+  currentIndex = 0;
+  timeRemaining = EXAM_DURATION_SECONDS;
+  submitted = false;
+}
+
+function fmtTime(sec){
+  const m = Math.floor(sec / 60).toString().padStart(2,'0');
+  const s = Math.floor(sec % 60).toString().padStart(2,'0');
+  return m + ":" + s;
+}
+
+function difficultyLabel(d){
+  return d.charAt(0).toUpperCase() + d.slice(1);
+}
+
+/* ================================================================
+   RENDER: QUESTION CARD
+   ================================================================ */
+const qcard = document.getElementById('qcard');
+const qcountPill = document.getElementById('qcountPill');
+const progressFill = document.getElementById('progressFill');
+const progressLabelLeft = document.getElementById('progressLabelLeft');
+
+function renderQuestion(){
+  const q = examQuestions[currentIndex];
+  const answered = userAnswers[currentIndex];
+
+  qcountPill.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+
+  let optionsHtml = q.options.map((opt, idx) => {
+    const selected = answered === idx ? 'selected' : '';
+    const letter = String.fromCharCode(65 + idx);
+    return `
+      <label class="option ${selected}" data-idx="${idx}">
+        <input type="radio" name="opt" ${answered===idx ? 'checked' : ''}>
+        <span class="radio-circle"></span>
+        <span class="option-label"><span class="option-letter">${letter}.</span>${opt}</span>
+      </label>`;
+  }).join('');
+
+  const ganttHtml = q.gantt ? `<span class="mono-block">${q.gantt.replace(/</g,'&lt;')}</span>` : '';
+
+  qcard.innerHTML = `
+    <div class="qcard-head">
+      <div class="qnum">Question ${currentIndex + 1}</div>
+      <div class="tag-row">
+        <span class="tag cat">${q.category}</span>
+        <span class="tag diff-${q.difficulty}">${difficultyLabel(q.difficulty)}</span>
+      </div>
+    </div>
+    <div class="qtext">${q.question}${ganttHtml}</div>
+    <div class="options" id="optionsWrap">${optionsHtml}</div>
+    <div class="warning-msg hidden" id="warningMsg"><i class="fa-solid fa-triangle-exclamation"></i> Please select an answer before continuing.</div>
+    <div class="qcard-footer">
+      <button class="btn" id="prevBtn" ${currentIndex === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-left"></i> Previous</button>
+      ${currentIndex === TOTAL_QUESTIONS - 1
+        ? `<button class="btn btn-primary" id="nextBtn"><i class="fa-solid fa-paper-plane"></i> Submit Exam</button>`
+        : `<button class="btn btn-primary" id="nextBtn">Next <i class="fa-solid fa-arrow-right"></i></button>`}
+    </div>
+  `;
+
+  document.querySelectorAll('.option').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.getAttribute('data-idx'), 10);
+      userAnswers[currentIndex] = idx;
+      document.getElementById('warningMsg').classList.add('hidden');
+      renderQuestion();
+      renderNavigator();
+      updateProgress();
+    });
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    if(currentIndex > 0){ currentIndex--; renderQuestion(); renderNavigator(); }
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if(userAnswers[currentIndex] === null){
+      document.getElementById('warningMsg').classList.remove('hidden');
+      return;
+    }
+    if(currentIndex === TOTAL_QUESTIONS - 1){
+      openConfirmModal();
+    } else {
+      currentIndex++;
+      renderQuestion();
+      renderNavigator();
+    }
+  });
+}
+
+/* ================================================================
+   RENDER: NAVIGATOR
+   ================================================================ */
+const navGrid = document.getElementById('navGrid');
+function renderNavigator(){
+  navGrid.innerHTML = examQuestions.map((_, i) => {
+    let cls = 'nav-btn';
+    if(userAnswers[i] !== null) cls += ' answered';
+    if(i === currentIndex) cls += ' current';
+    return `<button class="${cls}" data-i="${i}">${i+1}</button>`;
+  }).join('');
+  navGrid.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentIndex = parseInt(btn.getAttribute('data-i'), 10);
+      renderQuestion();
+      renderNavigator();
+    });
+  });
+}
+
+/* ================================================================
+   PROGRESS BAR
+   ================================================================ */
+function updateProgress(){
+  const answeredCount = userAnswers.filter(a => a !== null).length;
+  const pct = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
+  progressFill.style.width = pct + '%';
+  progressLabelLeft.textContent = `${answeredCount} of ${TOTAL_QUESTIONS} answered`;
+}
+
+/* ================================================================
+   TIMER
+   ================================================================ */
+const timerText = document.getElementById('timerText');
+const timerPill = document.getElementById('timerPill');
+function startTimer(){
+  clearInterval(timerHandle);
+  timerHandle = setInterval(() => {
+    timeRemaining--;
+    if(timeRemaining <= 0){
+      timeRemaining = 0;
+      timerText.textContent = fmtTime(timeRemaining);
+      clearInterval(timerHandle);
+      submitExam(true);
+      return;
+    }
+    timerText.textContent = fmtTime(timeRemaining);
+    if(timeRemaining <= 60){
+      timerPill.classList.add('low');
+    }
+  }, 1000);
+}
+
+/* ================================================================
+   CONFIRM SUBMIT MODAL
+   ================================================================ */
+const confirmOverlay = document.getElementById('confirmOverlay');
+const confirmText = document.getElementById('confirmText');
+document.getElementById('sideSubmitBtn').addEventListener('click', openConfirmModal);
+document.getElementById('cancelSubmitBtn').addEventListener('click', () => confirmOverlay.classList.add('hidden'));
+document.getElementById('confirmSubmitBtn').addEventListener('click', () => {
+  confirmOverlay.classList.add('hidden');
+  submitExam(false);
+});
+
+function openConfirmModal(){
+  const answeredCount = userAnswers.filter(a => a !== null).length;
+  confirmText.textContent = `You have answered ${answeredCount} of ${TOTAL_QUESTIONS} questions. Once submitted, you cannot change your answers.`;
+  confirmOverlay.classList.remove('hidden');
+}
+
+/* ================================================================
+   SUBMIT / SCORING / RESULTS
+   ================================================================ */
+const examLayout = document.getElementById('examLayout');
+const progressWrap = document.getElementById('progressWrap');
+const resultsView = document.getElementById('resultsView');
+
+function submitExam(autoSubmitted){
+  if(submitted) return;
+  submitted = true;
+  clearInterval(timerHandle);
+
+  let correctCount = 0, wrongCount = 0, unansweredCount = 0;
+  examQuestions.forEach((q, i) => {
+    if(userAnswers[i] === null) unansweredCount++;
+    else if(userAnswers[i] === q.correctIndex) correctCount++;
+    else wrongCount++;
+  });
+
+  const pct = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
+  const passed = pct >= PASS_MARK_PERCENT;
+  const timeUsed = EXAM_DURATION_SECONDS - timeRemaining;
+
+  // Hero
+  const circumference = 2 * Math.PI * 52;
+  const arc = document.getElementById('scoreArc');
+  arc.setAttribute('stroke-dasharray', circumference.toFixed(1));
+  arc.setAttribute('stroke-dashoffset', (circumference * (1 - pct/100)).toFixed(1));
+  arc.setAttribute('stroke', passed ? '#1f9d63' : '#d64550');
+  document.getElementById('scoreValText').textContent = pct + '%';
+
+  const passFailText = document.getElementById('passFailText');
+  passFailText.textContent = passed ? 'Pass' : 'Fail';
+  passFailText.className = 'status ' + (passed ? 'pass' : 'fail');
+
+  document.getElementById('resultsSummary').textContent =
+    (autoSubmitted ? 'Time expired. ' : '') +
+    `You answered ${correctCount} of ${TOTAL_QUESTIONS} questions correctly (pass mark is ${PASS_MARK_PERCENT}%).`;
+
+  document.getElementById('statCorrect').textContent = correctCount;
+  document.getElementById('statWrong').textContent = wrongCount;
+  document.getElementById('statUnanswered').textContent = unansweredCount;
+  document.getElementById('statTime').textContent = fmtTime(timeUsed);
+
+  // Detailed review
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = examQuestions.map((q, i) => {
+    const userIdx = userAnswers[i];
+    const isCorrect = userIdx === q.correctIndex;
+    const badge = userIdx === null
+      ? `<span class="result-badge wrong"><i class="fa-solid fa-circle-minus"></i> Unanswered</span>`
+      : isCorrect
+        ? `<span class="result-badge correct"><i class="fa-solid fa-check"></i> Correct</span>`
+        : `<span class="result-badge wrong"><i class="fa-solid fa-xmark"></i> Incorrect</span>`;
+
+    const optionsHtml = q.options.map((opt, idx) => {
+      let cls = 'option review-disabled';
+      if(idx === q.correctIndex) cls += ' correct-answer';
+      else if(idx === userIdx && !isCorrect) cls += ' wrong-answer';
+      const letter = String.fromCharCode(65 + idx);
+      return `
+        <div class="${cls}">
+          <span class="radio-circle"></span>
+          <span class="option-label"><span class="option-letter">${letter}.</span>${opt}</span>
+        </div>`;
+    }).join('');
+
+    const ganttHtml = q.gantt ? `<span class="mono-block">${q.gantt.replace(/</g,'&lt;')}</span>` : '';
+
+    return `
+      <div class="review-item">
+        <div class="review-item-head">
+          <div class="tag-row">
+            <span class="tag cat">${q.category}</span>
+            <span class="tag diff-${q.difficulty}">${difficultyLabel(q.difficulty)}</span>
+          </div>
+          ${badge}
+        </div>
+        <div class="qtext">Q${i+1}. ${q.question}${ganttHtml}</div>
+        <div class="options">${optionsHtml}</div>
+        <div class="explain-box"><b>Explanation:</b> ${q.explanation}</div>
+      </div>`;
+  }).join('');
+
+  examLayout.classList.add('hidden');
+  progressWrap.classList.add('hidden');
+  resultsView.classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('reviewJumpBtn').addEventListener('click', () => {
+  document.getElementById('reviewList').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  initExam();
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+function initExam(){
+  buildExam();
+  examLayout.classList.remove('hidden');
+  progressWrap.classList.remove('hidden');
+  resultsView.classList.add('hidden');
+  timerPill.classList.remove('low');
+  timerText.textContent = fmtTime(timeRemaining);
+  renderQuestion();
+  renderNavigator();
+  updateProgress();
+  startTimer();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+initExam();
+
+})();
+</script>
+</body>
+</html>

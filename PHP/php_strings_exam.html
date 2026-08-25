@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP Strings — Exam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --blue-900:#0b2e6b;
+    --blue-700:#1450c9;
+    --blue-600:#2563eb;
+    --blue-400:#5b8def;
+    --blue-100:#e8f0ff;
+    --blue-50:#f3f7ff;
+    --white:#ffffff;
+    --ink:#0e1b33;
+    --muted:#5b6b8c;
+    --line:#dbe6fb;
+    --good:#0f9d63;
+    --bad:#d64545;
+    --radius:14px;
+    --shadow: 0 10px 30px -12px rgba(20,80,201,0.25);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: linear-gradient(180deg, var(--blue-50) 0%, var(--white) 340px);
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 0;}
+
+  /* ===== Header / Masthead ===== */
+  .masthead{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:18px;border-bottom:1px solid var(--line);
+    margin-bottom:26px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .tag{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(145deg, var(--blue-600), var(--blue-900));
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;
+    box-shadow: var(--shadow);
+  }
+  .brand h1{
+    font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0;color:var(--blue-900);letter-spacing:-0.01em;
+  }
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted);}
+  .timer{
+    font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;
+    color:var(--blue-700);background:var(--blue-100);
+    padding:9px 16px;border-radius:10px;border:1px solid var(--line);
+    min-width:96px;text-align:center;
+  }
+  .timer.low{color:var(--bad);background:#fdeaea;border-color:#f5c6c6;}
+
+  /* ===== Intro screen ===== */
+  .card{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow: var(--shadow); padding:32px;
+  }
+  .intro h2{font-family:'Space Grotesk',sans-serif;font-size:26px;margin:0 0 8px;color:var(--blue-900);}
+  .intro p.lead{color:var(--muted);font-size:15px;line-height:1.6;margin:0 0 22px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px;}
+  .stat{
+    background:var(--blue-50);border:1px solid var(--line);border-radius:10px;
+    padding:14px 10px;text-align:center;
+  }
+  .stat .n{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--blue-700);}
+  .stat .l{font-size:11.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.04em;}
+  .topics{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:28px;}
+  .chip{
+    font-size:12px;background:var(--blue-100);color:var(--blue-700);
+    padding:5px 11px;border-radius:999px;border:1px solid var(--line);font-weight:500;
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--blue-600);color:#fff;border:none;border-radius:10px;
+    padding:14px 26px;font-size:15px;font-weight:600;cursor:pointer;
+    font-family:'Inter',sans-serif; transition:transform .15s ease, background .15s ease;
+    box-shadow: var(--shadow);
+  }
+  .btn:hover{background:var(--blue-700);transform:translateY(-1px);}
+  .btn.secondary{background:var(--white);color:var(--blue-700);border:1.5px solid var(--blue-400);box-shadow:none;}
+  .btn.secondary:hover{background:var(--blue-50);}
+  .btn-row{display:flex;gap:12px;}
+
+  /* ===== Progress dots ===== */
+  .progress-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .progress-track{flex:1;height:6px;background:var(--blue-100);border-radius:99px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue-400),var(--blue-700));border-radius:99px;transition:width .3s ease;}
+  .qcount{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);white-space:nowrap;}
+
+  /* ===== Question card ===== */
+  .qtype{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--blue-700);background:var(--blue-100);padding:4px 10px;border-radius:6px;margin-bottom:14px;
+  }
+  .qtext{font-size:18px;font-weight:600;line-height:1.5;margin:0 0 16px;color:var(--ink);}
+  pre.code{
+    background:#0e1b33;color:#dce8ff;border-radius:10px;padding:18px 20px;
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.65;
+    overflow-x:auto;margin:0 0 20px;border:1px solid #1a2c52;
+  }
+  pre.code .kw{color:#7cb0ff;}
+  pre.code .str{color:#9fe6a0;}
+  pre.code .fn{color:#ffd479;}
+  pre.code .cm{color:#7d8bab;font-style:italic;}
+  pre.code .var{color:#ffb4d0;}
+
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:26px;}
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;
+    border:1.5px solid var(--line);border-radius:10px;padding:13px 16px;
+    cursor:pointer;font-size:14.5px;line-height:1.5;transition:all .12s ease;background:var(--white);
+  }
+  .opt:hover{border-color:var(--blue-400);background:var(--blue-50);}
+  .opt.selected{border-color:var(--blue-600);background:var(--blue-100);}
+  .opt .bullet{
+    flex:0 0 22px;height:22px;border-radius:6px;border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;
+    font-size:12px;font-weight:600;color:var(--muted);background:var(--white);
+  }
+  .opt.selected .bullet{background:var(--blue-600);border-color:var(--blue-600);color:#fff;}
+  .opt code{font-family:'JetBrains Mono',monospace;background:rgba(20,80,201,0.06);padding:1px 5px;border-radius:4px;}
+
+  .nav-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .flag-note{font-size:12.5px;color:var(--muted);}
+
+  /* ===== Results ===== */
+  .score-hero{text-align:center;padding:10px 0 22px;}
+  .score-num{font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;color:var(--blue-700);line-height:1;}
+  .score-sub{color:var(--muted);font-size:14px;margin-top:6px;}
+  .score-bar-track{height:10px;background:var(--blue-100);border-radius:99px;overflow:hidden;margin:18px 0 4px;}
+  .score-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue-400),var(--blue-700));}
+  .grade-badge{
+    display:inline-block;margin-top:14px;font-weight:700;font-size:13px;letter-spacing:.03em;
+    padding:6px 16px;border-radius:999px;
+  }
+
+  .review-item{border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+  .review-item.correct{border-left:4px solid var(--good);}
+  .review-item.incorrect{border-left:4px solid var(--bad);}
+  .review-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .review-head .num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+  .badge{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;}
+  .badge.correct{background:#e5f7ee;color:var(--good);}
+  .badge.incorrect{background:#fdeaea;color:var(--bad);}
+  .review-q{font-size:15px;font-weight:600;margin:0 0 10px;}
+  .answer-line{font-size:13.5px;margin:4px 0;}
+  .answer-line b{font-weight:600;}
+  .answer-line.your-wrong{color:var(--bad);}
+  .answer-line.correct-answer{color:var(--good);}
+  .explain{
+    font-size:13px;color:var(--muted);background:var(--blue-50);border-radius:8px;
+    padding:10px 13px;margin-top:10px;line-height:1.55;
+  }
+
+  .hidden{display:none !important;}
+
+  @media (max-width:640px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .card{padding:22px 18px;}
+    .score-num{font-size:44px;}
+    .masthead{flex-wrap:wrap;gap:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="brand">
+      <div class="tag">&lt;?php</div>
+      <div>
+        <h1>PHP Strings Exam</h1>
+        <p>20 questions · Medium–Hard · University style</p>
+      </div>
+    </div>
+    <div class="timer" id="timerDisplay">30:00</div>
+  </div>
+
+  <!-- INTRO SCREEN -->
+  <div id="introScreen" class="card intro">
+    <h2>String Functions — Midterm Assessment</h2>
+    <p class="lead">This exam covers PHP string handling exclusively: quoting rules, escape sequences, and the core string-function library. Expect edge cases — empty strings, negative offsets, case sensitivity, and functions that look alike but behave differently.</p>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="n">20</div><div class="l">Questions</div></div>
+      <div class="stat"><div class="n">30:00</div><div class="l">Time limit</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Correct answer each</div></div>
+      <div class="stat"><div class="n">Shuffled</div><div class="l">Every attempt</div></div>
+    </div>
+
+    <div class="topics" id="topicChips"></div>
+
+    <button class="btn" onclick="startExam()">Start Exam →</button>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div id="examScreen" class="hidden">
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="qcount" id="qCount">Q1 / 20</div>
+    </div>
+
+    <div class="card">
+      <span class="qtype" id="qType">Output Prediction</span>
+      <p class="qtext" id="qText"></p>
+      <pre class="code hidden" id="qCode"></pre>
+      <div class="options" id="qOptions"></div>
+
+      <div class="nav-row">
+        <span class="flag-note" id="navHint">Select an answer to continue</span>
+        <div class="btn-row">
+          <button class="btn secondary hidden" id="prevBtn" onclick="prevQuestion()">← Back</button>
+          <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="resultsScreen" class="hidden">
+    <div class="card score-hero">
+      <div class="score-num" id="scoreNum">0 / 20</div>
+      <div class="score-sub" id="scoreSub">You scored 0%</div>
+      <div class="score-bar-track"><div class="score-bar-fill" id="scoreBarFill" style="width:0%"></div></div>
+      <span class="grade-badge" id="gradeBadge"></span>
+      <div class="btn-row" style="justify-content:center;margin-top:24px;">
+        <button class="btn secondary" onclick="restartExam()">↻ Restart Exam</button>
+      </div>
+    </div>
+
+    <h2 style="font-family:'Space Grotesk',sans-serif;color:var(--blue-900);font-size:19px;margin:28px 0 14px;">Answer Review</h2>
+    <div id="reviewList"></div>
+
+    <div class="btn-row" style="justify-content:center;margin:10px 0 30px;">
+      <button class="btn secondary" onclick="restartExam()">↻ Restart Exam</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   QUESTION BANK — 20 questions, PHP Strings only
+   type: output | error | fillblank | concept | codecompletion
+   options: array of strings, correctIndex refers to ORIGINAL order
+   ========================================================= */
+const QUESTION_BANK = [
+
+  // ---------- 8 OUTPUT PREDICTION ----------
+  {
+    type: "Output Prediction",
+    text: "What will the following code output?",
+    code: `<span class="var">$x</span> = <span class="str">"PHP"</span>;
+<span class="fn">echo</span> <span class="str">"I love $x!\\n"</span>;
+<span class="fn">echo</span> <span class="str">'I love $x!'</span>;`,
+    options: [
+      "I love PHP!\nI love PHP!",
+      "I love PHP!\nI love $x!",
+      "I love $x!\nI love $x!",
+      "Parse error: syntax error"
+    ],
+    correct: 1,
+    explanation: "Double-quoted strings interpolate variables, so \"$x\" becomes \"PHP\". Single-quoted strings do not interpolate variables (except \\\\ and \\'), so $x is printed literally."
+  },
+  {
+    type: "Output Prediction",
+    text: "What does this code output?",
+    code: `<span class="var">$str</span> = <span class="str">"Hello\\tWorld"</span>;
+<span class="fn">echo</span> strlen(<span class="var">$str</span>);`,
+    options: ["10", "11", "12", "13"],
+    correct: 1,
+    explanation: "In a double-quoted string, \\t is a single tab character. So the string is H-e-l-l-o (5) + tab (1) + W-o-r-l-d (5) = 11 characters."
+  },
+  {
+    type: "Output Prediction",
+    text: "What is the output of this code?",
+    code: `<span class="var">$str</span> = <span class="str">"PHP is fun-tastic!"</span>;
+<span class="fn">echo</span> str_word_count(<span class="var">$str</span>);`,
+    options: ["3", "4", "5", "6"],
+    correct: 1,
+    explanation: "By default, str_word_count() only treats plain alphabetic characters as part of a word — hyphens and punctuation are NOT included unless you pass a charlist. So \"fun-tastic\" splits into \"fun\" and \"tastic\", giving 4 words total: PHP, is, fun, tastic."
+  },
+  {
+    type: "Output Prediction",
+    text: "What will this code print?",
+    code: `<span class="var">$str</span> = <span class="str">" PHP "</span>;
+<span class="fn">echo</span> strrev(<span class="var">$str</span>);`,
+    options: [
+      "\" PHP\" (no trailing space)",
+      "\"PHP \" (no leading space)",
+      "\" PHP \" (identical to the original)",
+      "\"PHP\" (spaces removed)"
+    ],
+    correct: 2,
+    explanation: "strrev() reverses every character, including spaces. The string \" PHP \" is symmetric (space, P, H, P, space), so reversing it produces the exact same string."
+  },
+  {
+    type: "Output Prediction",
+    text: "What does the following code output?",
+    code: `<span class="var">$str</span> = <span class="str">"The quick Brown Fox"</span>;
+<span class="var">$pos</span> = strpos(<span class="var">$str</span>, <span class="str">"brown"</span>);
+<span class="kw">if</span> (<span class="var">$pos</span> === <span class="kw">false</span>) {
+    <span class="fn">echo</span> <span class="str">"Not found"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">echo</span> <span class="var">$pos</span>;
+}`,
+    options: ["10", "Not found", "0", "false"],
+    correct: 1,
+    explanation: "strpos() is case-sensitive. The string contains \"Brown\" (capital B), not lowercase \"brown\", so strpos() returns false, and the code prints \"Not found\"."
+  },
+  {
+    type: "Output Prediction",
+    text: "What is the output of this code?",
+    code: `<span class="var">$str</span> = <span class="str">"Hello World"</span>;
+<span class="fn">echo</span> substr(<span class="var">$str</span>, -5, 3);`,
+    options: ["\"Wor\"", "\"orl\"", "\"Wo\"", "\"rld\""],
+    correct: 0,
+    explanation: "A negative start counts from the end of the string. -5 lands on 'W' (index 6 of 11). Taking 3 characters from there gives \"Wor\"."
+  },
+  {
+    type: "Output Prediction",
+    text: "What is printed by this script?",
+    code: `<span class="var">$str</span> = <span class="str">"cat bat cat mat"</span>;
+<span class="var">$count</span> = 0;
+<span class="fn">echo</span> str_replace(<span class="str">"cat"</span>, <span class="str">"dog"</span>, <span class="var">$str</span>, <span class="var">$count</span>);
+<span class="fn">echo</span> <span class="str">" | "</span> . <span class="var">$count</span>;`,
+    options: [
+      "dog bat dog mat | 2",
+      "dog bat cat mat | 1",
+      "dog bat dog mat | 1",
+      "cat bat cat mat | 0"
+    ],
+    correct: 0,
+    explanation: "str_replace() replaces ALL matches, so both occurrences of \"cat\" become \"dog\". When passed by reference, the optional 4th argument $count is set to the number of replacements made — here, 2."
+  },
+  {
+    type: "Output Prediction",
+    text: "What will this code output?",
+    code: `<span class="var">$result</span> = strcmp(<span class="str">"Apple"</span>, <span class="str">"apple"</span>);
+<span class="kw">if</span> (<span class="var">$result</span> < 0) {
+    <span class="fn">echo</span> <span class="str">"Less"</span>;
+} <span class="kw">elseif</span> (<span class="var">$result</span> > 0) {
+    <span class="fn">echo</span> <span class="str">"Greater"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">echo</span> <span class="str">"Equal"</span>;
+}`,
+    options: ["Equal", "Greater", "Less", "0"],
+    correct: 2,
+    explanation: "strcmp() is case-sensitive and compares byte values. 'A' (65) is less than 'a' (97), so \"Apple\" is considered less than \"apple\", and strcmp() returns a negative number → \"Less\" is printed."
+  },
+
+  // ---------- 4 ERROR DETECTION ----------
+  {
+    type: "Error Detection",
+    text: "What happens when this code runs?",
+    code: `<span class="var">$str</span> = <span class="str">"Hello"</span>;
+<span class="fn">echo</span> <span class="var">$str</span>[10];`,
+    options: [
+      "Outputs \"o\"",
+      "Fatal error, script execution stops immediately",
+      "Warning: Uninitialized string offset 10 — outputs an empty string",
+      "Outputs \"Hello10\""
+    ],
+    correct: 2,
+    explanation: "Accessing a string offset beyond its length doesn't crash the script. PHP raises a warning (\"Uninitialized string offset\") and the expression evaluates to an empty string, so nothing visible is printed."
+  },
+  {
+    type: "Error Detection",
+    text: "What happens when this code is executed?",
+    code: `<span class="var">$str</span> = <span class="str">'It's a test'</span>;
+<span class="fn">echo</span> <span class="var">$str</span>;`,
+    options: [
+      "Outputs: It's a test",
+      "Outputs: Its a test",
+      "Parse error: syntax error, unexpected token — the script fails to run",
+      "Outputs nothing, no error shown"
+    ],
+    correct: 2,
+    explanation: "Inside single quotes, an apostrophe must be escaped (\\'). Here the string literal ends right after 'It', leaving \"s a test'\" as invalid PHP code, which causes a parse error before the script even executes."
+  },
+  {
+    type: "Error Detection",
+    text: "What is the result of running this code (PHP 8)?",
+    code: `<span class="var">$a</span> = <span class="str">"Hello"</span>;
+<span class="var">$b</span> = <span class="str">"World"</span>;
+<span class="fn">echo</span> <span class="var">$a</span> + <span class="var">$b</span>;`,
+    options: [
+      "0",
+      "HelloWorld",
+      "Fatal error: Uncaught TypeError — unsupported operand types: string + string",
+      "Warning only, then outputs an empty string"
+    ],
+    correct: 2,
+    explanation: "The + operator performs arithmetic, not concatenation. In PHP 8, adding two non-numeric strings throws a TypeError (\"Unsupported operand types: string + string\"), which is a fatal, uncaught error."
+  },
+  {
+    type: "Error Detection",
+    text: "What happens when this code runs?",
+    code: `<span class="fn">echo</span> substr_replace(<span class="str">"Hello"</span>, <span class="str">"Hi"</span>, 10, 2);`,
+    options: [
+      "Warning: substr_replace(): offset out of range",
+      "Valid output, no error: \"HelloHi\"",
+      "Fatal error: invalid start position",
+      "Outputs \"Hi\" only"
+    ],
+    correct: 1,
+    explanation: "If the start position is greater than the string length, substr_replace() simply treats it as the end of the string and appends the replacement — no warning or error occurs. Result: \"HelloHi\"."
+  },
+
+  // ---------- 3 FILL IN THE BLANK ----------
+  {
+    type: "Fill in the Blank",
+    text: "Which function performs a case-insensitive search and returns the position of the first occurrence of a substring?",
+    code: `<span class="var">$pos</span> = ______(<span class="str">"Hello World"</span>, <span class="str">"WORLD"</span>);
+<span class="cm">// returns 6</span>`,
+    options: ["strpos()", "stripos()", "strrpos()", "stristr()"],
+    correct: 1,
+    explanation: "stripos() works exactly like strpos() but ignores case, making it match \"WORLD\" against \"World\"."
+  },
+  {
+    type: "Fill in the Blank",
+    text: "Which function removes whitespace from both the beginning AND the end of a string?",
+    code: `<span class="var">$clean</span> = ______(<span class="str">"   Hello World   "</span>);
+<span class="cm">// $clean === "Hello World"</span>`,
+    options: ["ltrim()", "rtrim()", "trim()", "addslashes()"],
+    correct: 2,
+    explanation: "trim() strips whitespace (or specified characters) from both ends. ltrim() only strips from the left, and rtrim() only from the right."
+  },
+  {
+    type: "Fill in the Blank",
+    text: "Which function splits a string into an array based on a given delimiter?",
+    code: `<span class="var">$parts</span> = ______(<span class="str">","</span>, <span class="str">"php,mysql,html"</span>);
+<span class="cm">// $parts = ["php", "mysql", "html"]</span>`,
+    options: ["implode()", "join()", "explode()", "strtok()"],
+    correct: 2,
+    explanation: "explode() breaks a string into an array using a delimiter. implode() (and its alias join()) do the reverse — they combine an array into a string."
+  },
+
+  // ---------- 3 CONCEPT COMPARISON ----------
+  {
+    type: "Concept Comparison",
+    text: "What is the key difference between strpos() and stripos()?",
+    code: null,
+    options: [
+      "strpos() is case-insensitive, stripos() is case-sensitive",
+      "stripos() is case-insensitive, strpos() is case-sensitive",
+      "strpos() returns the matched substring, stripos() returns its position",
+      "They are aliases of each other with no functional difference"
+    ],
+    correct: 1,
+    explanation: "strpos() matches case-sensitively. stripos() performs the identical search but ignores letter case, so \"World\" and \"WORLD\" are treated the same."
+  },
+  {
+    type: "Concept Comparison",
+    text: "How does strnatcmp() differ from strcmp() when comparing strings like \"img12\" and \"img2\"?",
+    code: null,
+    options: [
+      "They always return identical results for any pair of strings",
+      "strnatcmp() compares byte-by-byte using ASCII values, exactly like strcmp()",
+      "strnatcmp() uses 'natural order' comparison, so \"img2\" is less than \"img12\"; strcmp() compares byte-by-byte, so \"img12\" is considered less than \"img2\"",
+      "strcmp() ignores digits entirely, while strnatcmp() ignores letters entirely"
+    ],
+    correct: 2,
+    explanation: "strcmp() compares character by character, so '1' (in img12) comes before '2' (in img2), making \"img12\" < \"img2\". strnatcmp() understands embedded numbers the way a human would, so it correctly ranks \"img2\" before \"img12\"."
+  },
+  {
+    type: "Concept Comparison",
+    text: "What is the fundamental difference between explode() and implode()?",
+    code: null,
+    options: [
+      "explode() joins array elements into a string; implode() splits a string into an array",
+      "explode() splits a string into an array; implode() joins array elements into a string",
+      "Both perform identical operations, but implode() is deprecated in modern PHP",
+      "explode() only works with a comma delimiter; implode() works with any delimiter"
+    ],
+    correct: 1,
+    explanation: "explode(delimiter, string) turns a string into an array of pieces. implode(delimiter, array) — also aliased as join() — does the reverse, gluing array elements back into one string."
+  },
+
+  // ---------- 2 CODE COMPLETION ----------
+  {
+    type: "Code Completion",
+    text: "Which function correctly completes this code so the output is exactly \"Web Development With Php\"?",
+    code: `<span class="var">$str</span> = <span class="str">"web development with php"</span>;
+<span class="fn">echo</span> ______(<span class="var">$str</span>);`,
+    options: ["ucfirst($str)", "strtoupper($str)", "ucwords($str)", "lcfirst($str)"],
+    correct: 2,
+    explanation: "ucwords() capitalizes the first letter of every word in the string. ucfirst() would only capitalize the very first character of the whole string."
+  },
+  {
+    type: "Code Completion",
+    text: "Complete the code so it prints \"PHP Strings \" (the first two tokens, space-separated):",
+    code: `<span class="var">$str</span> = <span class="str">"PHP,Strings,Functions"</span>;
+<span class="var">$token</span> = strtok(<span class="var">$str</span>, <span class="str">","</span>);
+<span class="fn">echo</span> <span class="var">$token</span> . <span class="str">" "</span>;
+<span class="fn">echo</span> ______ . <span class="str">" "</span>;`,
+    options: [
+      "strtok($str, \",\")",
+      "strtok(\",\")",
+      "strtok($token, \",\")",
+      "strtok($str)"
+    ],
+    correct: 1,
+    explanation: "After the first strtok() call initializes tokenizing on $str, every SUBSEQUENT call must pass only the delimiter — strtok(\",\") — to continue from where it left off. Passing $str again would restart tokenizing from the beginning."
+  }
+];
+
+const TOPICS = ["echo/print","quotes","escape chars","strlen","str_word_count","strrev","strpos","stripos","strrpos",
+  "str_replace","str_ireplace","substr_replace","substr","strcmp","strcasecmp","strnatcmp","ucfirst","ucwords",
+  "strtolower/upper","trim/ltrim/rtrim","addslashes/stripslashes","explode/implode/join","strtok","strstr/strchr/strrchr","stristr"];
+
+document.getElementById("topicChips").innerHTML =
+  TOPICS.map(t => `<span class="chip">${t}</span>`).join("");
+
+/* =========================================================
+   STATE
+   ========================================================= */
+let examQuestions = [];   // shuffled questions with shuffled options for this attempt
+let currentIndex = 0;
+let userAnswers = [];     // stores selected option index (post-shuffle) per question, or null
+let timerInterval = null;
+let secondsLeft = 30 * 60;
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildExam(){
+  const shuffledQ = shuffleArray(QUESTION_BANK);
+  examQuestions = shuffledQ.map(q => {
+    const optionOrder = shuffleArray(q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.correct })));
+    return {
+      type: q.type,
+      text: q.text,
+      code: q.code,
+      options: optionOrder,               // array of {text, isCorrect}
+      correctOptionIndex: optionOrder.findIndex(o => o.isCorrect),
+      explanation: q.explanation
+    };
+  });
+  userAnswers = new Array(examQuestions.length).fill(null);
+  currentIndex = 0;
+}
+
+/* =========================================================
+   NAVIGATION / RENDERING
+   ========================================================= */
+function startExam(){
+  buildExam();
+  document.getElementById("introScreen").classList.add("hidden");
+  document.getElementById("resultsScreen").classList.add("hidden");
+  document.getElementById("examScreen").classList.remove("hidden");
+  secondsLeft = 30 * 60;
+  startTimer();
+  renderQuestion();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    updateTimerDisplay();
+    if(secondsLeft <= 0){
+      clearInterval(timerInterval);
+      finishExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay(){
+  const m = Math.floor(secondsLeft / 60).toString().padStart(2,"0");
+  const s = (secondsLeft % 60).toString().padStart(2,"0");
+  const el = document.getElementById("timerDisplay");
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle("low", secondsLeft <= 60);
+}
+
+function renderQuestion(){
+  const q = examQuestions[currentIndex];
+  document.getElementById("qType").textContent = q.type;
+  document.getElementById("qText").textContent = q.text;
+
+  const codeEl = document.getElementById("qCode");
+  if(q.code){
+    codeEl.innerHTML = q.code;
+    codeEl.classList.remove("hidden");
+  } else {
+    codeEl.classList.add("hidden");
+  }
+
+  const optWrap = document.getElementById("qOptions");
+  optWrap.innerHTML = "";
+  const letters = ["A","B","C","D"];
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement("div");
+    div.className = "opt" + (userAnswers[currentIndex] === idx ? " selected" : "");
+    div.innerHTML = `<span class="bullet">${letters[idx]}</span><span>${formatOptionText(opt.text)}</span>`;
+    div.onclick = () => selectOption(idx);
+    optWrap.appendChild(div);
+  });
+
+  document.getElementById("qCount").textContent = `Q${currentIndex+1} / ${examQuestions.length}`;
+  document.getElementById("progressFill").style.width = `${((currentIndex+1)/examQuestions.length)*100}%`;
+  document.getElementById("prevBtn").classList.toggle("hidden", currentIndex === 0);
+  document.getElementById("nextBtn").textContent = currentIndex === examQuestions.length - 1 ? "Finish Exam ✓" : "Next →";
+  document.getElementById("nextBtn").disabled = userAnswers[currentIndex] === null;
+  document.getElementById("navHint").textContent = userAnswers[currentIndex] === null ? "Select an answer to continue" : "Answer recorded";
+}
+
+function formatOptionText(text){
+  // wrap function-call-looking text in <code> for readability
+  if(/\(\)|\$/.test(text) && text.length < 40){
+    return `<code>${text}</code>`;
+  }
+  return text;
+}
+
+function selectOption(idx){
+  userAnswers[currentIndex] = idx;
+  renderQuestion();
+}
+
+function nextQuestion(){
+  if(currentIndex < examQuestions.length - 1){
+    currentIndex++;
+    renderQuestion();
+  } else {
+    finishExam();
+  }
+}
+
+function prevQuestion(){
+  if(currentIndex > 0){
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+function finishExam(){
+  clearInterval(timerInterval);
+  document.getElementById("examScreen").classList.add("hidden");
+  document.getElementById("resultsScreen").classList.remove("hidden");
+
+  let score = 0;
+  examQuestions.forEach((q, i) => { if(userAnswers[i] === q.correctOptionIndex) score++; });
+
+  const total = examQuestions.length;
+  const pct = Math.round((score/total)*100);
+
+  document.getElementById("scoreNum").textContent = `${score} / ${total}`;
+  document.getElementById("scoreSub").textContent = `You scored ${pct}%`;
+  document.getElementById("scoreBarFill").style.width = `${pct}%`;
+
+  const badge = document.getElementById("gradeBadge");
+  let grade, gradeColor, gradeBg;
+  if(pct >= 90){ grade="Excellent"; gradeColor="#0f9d63"; gradeBg="#e5f7ee"; }
+  else if(pct >= 75){ grade="Very Good"; gradeColor="#1450c9"; gradeBg="#e8f0ff"; }
+  else if(pct >= 60){ grade="Pass"; gradeColor="#a8710f"; gradeBg="#fdf3e0"; }
+  else { grade="Needs Review"; gradeColor="#d64545"; gradeBg="#fdeaea"; }
+  badge.textContent = grade;
+  badge.style.color = gradeColor;
+  badge.style.background = gradeBg;
+
+  renderReview();
+}
+
+function renderReview(){
+  const wrap = document.getElementById("reviewList");
+  wrap.innerHTML = "";
+  const letters = ["A","B","C","D"];
+
+  examQuestions.forEach((q, i) => {
+    const isCorrect = userAnswers[i] === q.correctOptionIndex;
+    const item = document.createElement("div");
+    item.className = "review-item " + (isCorrect ? "correct" : "incorrect");
+
+    let codeHtml = q.code ? `<pre class="code">${q.code}</pre>` : "";
+    let yourAnswerHtml = "";
+    if(userAnswers[i] === null){
+      yourAnswerHtml = `<div class="answer-line your-wrong"><b>Your answer:</b> No answer selected</div>`;
+    } else if(!isCorrect){
+      yourAnswerHtml = `<div class="answer-line your-wrong"><b>Your answer:</b> ${letters[userAnswers[i]]}. ${q.options[userAnswers[i]].text}</div>`;
+    }
+    const correctHtml = `<div class="answer-line correct-answer"><b>Correct answer:</b> ${letters[q.correctOptionIndex]}. ${q.options[q.correctOptionIndex].text}</div>`;
+
+    item.innerHTML = `
+      <div class="review-head">
+        <span class="num">Question ${i+1} · ${q.type}</span>
+        <span class="badge ${isCorrect ? "correct" : "incorrect"}">${isCorrect ? "Correct" : "Incorrect"}</span>
+      </div>
+      <p class="review-q">${q.text}</p>
+      ${codeHtml}
+      ${yourAnswerHtml}
+      ${correctHtml}
+      <div class="explain">${q.explanation}</div>
+    `;
+    wrap.appendChild(item);
+  });
+}
+
+function restartExam(){
+  document.getElementById("resultsScreen").classList.add("hidden");
+  document.getElementById("introScreen").classList.remove("hidden");
+  secondsLeft = 30*60;
+  updateTimerDisplay();
+}
+
+updateTimerDisplay();
+</script>
+</body>
+</html>
