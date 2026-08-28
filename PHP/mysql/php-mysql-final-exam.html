@@ -1,963 +1,1723 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PHP &amp; MySQL Final Exam — Chapters 8–11</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#1B2430;
-    --ink-soft:#2C3646;
-    --paper:#F7F5EF;
-    --paper-dim:#EFEBE1;
-    --card:#FFFDF8;
-    --line:#D8D2C2;
-    --line-soft:#E7E2D4;
-    --teal:#2E7D6B;
-    --teal-dim:#E4EFEA;
-    --amber:#C4622D;
-    --amber-dim:#F6E5D9;
-    --red:#B54B3A;
-    --red-dim:#F5E2DD;
-    --muted:#8B8578;
-    --radius:10px;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'IBM Plex Sans', sans-serif;
-    -webkit-font-smoothing:antialiased;
-    min-height:100vh;
-  }
-  .mono{font-family:'IBM Plex Mono', monospace;}
-  h1,h2,h3{font-family:'Fraunces', serif; margin:0; letter-spacing:-0.01em;}
-  ::selection{background:var(--teal); color:#fff;}
-  a{color:inherit;}
-  button{font-family:inherit; cursor:pointer;}
-  button:focus-visible, [tabindex]:focus-visible, input:focus-visible{
-    outline:2px solid var(--teal); outline-offset:2px;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHP &amp; MySQL Final Exam — Chapters 8–11</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1B2430;
+      --ink-soft: #2C3646;
+      --paper: #F7F5EF;
+      --paper-dim: #EFEBE1;
+      --card: #FFFDF8;
+      --line: #D8D2C2;
+      --line-soft: #E7E2D4;
+      --teal: #2E7D6B;
+      --teal-dim: #E4EFEA;
+      --amber: #C4622D;
+      --amber-dim: #F6E5D9;
+      --red: #B54B3A;
+      --red-dim: #F5E2DD;
+      --muted: #8B8578;
+      --radius: 10px;
+    }
 
-  /* ===== Screen scaffolding ===== */
-  .screen{display:none; min-height:100vh; width:100%;}
-  .screen.active{display:flex; flex-direction:column;}
+    * {
+      box-sizing: border-box;
+    }
 
-  /* ===== START SCREEN ===== */
-  #start-screen{
-    align-items:center; justify-content:center; padding:40px 20px;
-  }
-  .start-wrap{max-width:640px; width:100%;}
-  .eyebrow{
-    font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--teal);
-    background:var(--teal-dim); display:inline-block; padding:5px 10px;
-    border-radius:5px; letter-spacing:0.02em; margin-bottom:22px;
-  }
-  .start-card{
-    background:var(--card); border:1px solid var(--line); border-radius:16px;
-    padding:44px 40px; box-shadow:0 1px 2px rgba(27,36,48,0.04);
-  }
-  .start-card h1{font-size:38px; font-weight:600; line-height:1.15; color:var(--ink);}
-  .start-card .subtitle{
-    font-family:'IBM Plex Mono', monospace; font-size:14px; color:var(--muted);
-    margin-top:10px; letter-spacing:0.01em;
-  }
-  .start-desc{margin-top:20px; font-size:15px; line-height:1.6; color:var(--ink-soft);}
-  .stat-row{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
-    margin-top:30px; border:1px solid var(--line); border-radius:10px; overflow:hidden;
-    background:var(--line);
-  }
-  .stat-cell{background:var(--card); padding:16px 10px; text-align:center;}
-  .stat-cell .num{font-family:'Fraunces', serif; font-size:22px; font-weight:600; color:var(--ink);}
-  .stat-cell .lab{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-top:4px;}
-  .chapter-list{margin-top:24px; display:flex; flex-wrap:wrap; gap:8px;}
-  .chapter-chip{
-    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);
-    background:var(--paper-dim); border:1px solid var(--line-soft); border-radius:20px;
-    padding:6px 12px;
-  }
-  .btn{
-    border:none; border-radius:9px; font-weight:600; font-size:15px;
-    padding:14px 26px; transition:transform .12s ease, box-shadow .12s ease;
-  }
-  .btn-primary{background:var(--ink); color:var(--paper);}
-  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(27,36,48,.18);}
-  .btn-amber{background:var(--amber); color:#fff;}
-  .btn-amber:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(196,98,45,.28);}
-  .btn-ghost{background:transparent; color:var(--ink); border:1px solid var(--line);}
-  .btn-ghost:hover{background:var(--paper-dim);}
-  .btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none;}
-  .start-actions{margin-top:32px; display:flex; align-items:center; gap:16px;}
-  .start-note{font-size:12.5px; color:var(--muted);}
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
 
-  /* ===== EXAM SCREEN ===== */
-  #exam-screen{padding:0;}
-  .exam-header{
-    background:var(--ink); color:var(--paper); padding:16px 24px;
-    display:flex; align-items:center; justify-content:space-between; gap:16px;
-    position:sticky; top:0; z-index:5; flex-wrap:wrap;
-  }
-  .exam-header .title-block{display:flex; align-items:baseline; gap:10px;}
-  .exam-header .app-title{font-family:'Fraunces', serif; font-size:17px; font-weight:600;}
-  .exam-header .qcount{font-family:'IBM Plex Mono', monospace; font-size:13px; color:#B9C4CE;}
-  .timer{
-    font-family:'IBM Plex Mono', monospace; font-size:15px; font-weight:600;
-    background:rgba(255,255,255,0.08); padding:7px 14px; border-radius:7px;
-    display:flex; align-items:center; gap:8px; letter-spacing:0.02em;
-  }
-  .timer .dot{width:7px; height:7px; border-radius:50%; background:var(--teal);}
-  .timer.low{color:#F3D2C7;}
-  .timer.low .dot{background:var(--red); animation:pulse 1s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'IBM Plex Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
 
-  .progress-track{height:6px; background:var(--ink-soft);}
-  .progress-fill{height:100%; background:var(--teal); width:0%; transition:width .3s ease;}
+    .mono {
+      font-family: 'IBM Plex Mono', monospace;
+    }
 
-  .exam-body{
-    max-width:900px; margin:0 auto; width:100%; padding:32px 20px 140px;
-    flex:1;
-  }
-  .q-meta-row{display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
-  .q-badge{
-    font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
-    background:var(--paper-dim); border:1px solid var(--line-soft); color:var(--ink-soft);
-    padding:4px 10px; border-radius:20px;
-  }
-  .q-badge.chapter{background:var(--teal-dim); color:var(--teal); border-color:transparent;}
-  .q-badge.diff-Easy{background:#E4EFEA; color:#2E7D6B;}
-  .q-badge.diff-Medium{background:#F6E5D9; color:#C4622D;}
-  .q-badge.diff-Hard{background:#F5E2DD; color:#B54B3A;}
+    h1,
+    h2,
+    h3 {
+      font-family: 'Fraunces', serif;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
 
-  .question-card{
-    background:var(--card); border:1px solid var(--line); border-radius:14px;
-    padding:32px; box-shadow:0 1px 2px rgba(27,36,48,.04);
-  }
-  .question-text{font-size:19px; line-height:1.55; color:var(--ink); font-weight:500;}
-  .question-code{
-    margin-top:14px; background:var(--ink); color:#E6EAD9; font-family:'IBM Plex Mono', monospace;
-    font-size:13.5px; line-height:1.6; padding:16px 18px; border-radius:8px; overflow-x:auto;
-    white-space:pre;
-  }
-  .options{margin-top:24px; display:flex; flex-direction:column; gap:10px;}
-  .option-row{
-    display:flex; align-items:center; gap:14px; border:1px solid var(--line);
-    border-radius:10px; padding:14px 16px; cursor:pointer; transition:background .12s, border-color .12s;
-    background:var(--paper);
-  }
-  .option-row:hover{background:var(--teal-dim); border-color:#BFD6CD;}
-  .option-row.selected{background:var(--teal-dim); border-color:var(--teal);}
-  .option-letter{
-    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:13px;
-    width:26px; height:26px; border-radius:6px; border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
-    flex-shrink:0; background:var(--card);
-  }
-  .option-row.selected .option-letter{background:var(--teal); border-color:var(--teal); color:#fff;}
-  .option-radio{
-    width:17px; height:17px; border-radius:50%; border:2px solid var(--line); flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .option-row.selected .option-radio{border-color:var(--teal);}
-  .option-row.selected .option-radio::after{content:""; width:9px; height:9px; border-radius:50%; background:var(--teal);}
-  .option-text{font-size:15px; line-height:1.5; color:var(--ink);}
+    ::selection {
+      background: var(--teal);
+      color: #fff;
+    }
 
-  .nav-controls{
-    max-width:900px; margin:22px auto 0; padding:0 20px; display:flex;
-    align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  }
-  .nav-left, .nav-right{display:flex; gap:10px;}
+    a {
+      color: inherit;
+    }
 
-  /* Navigator grid */
-  .navigator{
-    max-width:900px; margin:28px auto 0; padding:0 20px 20px;
-  }
-  .navigator h3{
-    font-family:'IBM Plex Mono', monospace; font-size:12px; text-transform:uppercase;
-    letter-spacing:.05em; color:var(--muted); font-weight:600; margin-bottom:10px;
-  }
-  .nav-grid{
-    display:grid; grid-template-columns:repeat(10, 1fr); gap:6px;
-  }
-  .nav-cell{
-    aspect-ratio:1/1; border-radius:6px; border:1px solid var(--line); background:var(--card);
-    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-    transition:transform .08s ease;
-  }
-  .nav-cell:hover{transform:translateY(-1px);}
-  .nav-cell.answered{background:var(--teal); border-color:var(--teal); color:#fff;}
-  .nav-cell.current{outline:2px solid var(--amber); outline-offset:2px;}
-  .nav-legend{display:flex; gap:16px; margin-top:12px; flex-wrap:wrap;}
-  .legend-item{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted);}
-  .legend-swatch{width:12px; height:12px; border-radius:3px; border:1px solid var(--line);}
-  .legend-swatch.answered{background:var(--teal); border-color:var(--teal);}
-  .legend-swatch.current{outline:2px solid var(--amber); outline-offset:1px;}
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
 
-  .submit-bar{
-    max-width:900px; margin:26px auto 0; padding:0 20px 40px; display:flex; justify-content:flex-end;
-  }
+    button:focus-visible,
+    [tabindex]:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
 
-  /* ===== MODAL ===== */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(27,36,48,.55); display:none;
-    align-items:center; justify-content:center; z-index:50; padding:20px;
-  }
-  .modal-overlay.active{display:flex;}
-  .modal-box{
-    background:var(--card); border-radius:14px; max-width:420px; width:100%;
-    padding:30px; box-shadow:0 20px 50px rgba(0,0,0,.25);
-  }
-  .modal-box h3{font-size:20px; font-weight:600;}
-  .modal-stats{display:flex; gap:12px; margin:18px 0;}
-  .modal-stat{flex:1; background:var(--paper-dim); border-radius:10px; padding:14px; text-align:center;}
-  .modal-stat .n{font-family:'Fraunces', serif; font-size:24px; font-weight:600;}
-  .modal-stat .l{font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--muted); text-transform:uppercase; margin-top:2px;}
-  .modal-actions{display:flex; gap:10px; margin-top:20px;}
-  .modal-actions .btn{flex:1;}
+    /* ===== Screen scaffolding ===== */
+    .screen {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+    }
 
-  /* ===== RESULTS SCREEN ===== */
-  #results-screen{align-items:center; padding:50px 20px; }
-  .results-wrap{max-width:720px; width:100%; margin:0 auto;}
-  .results-header{text-align:center; margin-bottom:30px;}
-  .results-header .eyebrow{background:var(--teal-dim);}
-  .score-card{
-    background:var(--ink); color:var(--paper); border-radius:18px; padding:40px 32px;
-    text-align:center; position:relative; overflow:hidden;
-  }
-  .score-card .grade-band{
-    font-family:'IBM Plex Mono', monospace; font-size:12.5px; letter-spacing:.05em;
-    text-transform:uppercase; color:#B9C4CE; margin-bottom:10px;
-  }
-  .score-card .score-big{font-family:'Fraunces', serif; font-size:64px; font-weight:600; line-height:1;}
-  .score-card .score-pct{font-family:'IBM Plex Mono', monospace; font-size:16px; color:#CFE3DA; margin-top:8px;}
-  .grade-pill{
-    display:inline-block; margin-top:16px; padding:7px 18px; border-radius:30px;
-    font-weight:600; font-size:14px; background:var(--teal); color:#fff;
-  }
-  .breakdown-row{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:24px;
-    border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--line);
-  }
-  .breakdown-cell{background:var(--card); padding:18px 10px; text-align:center;}
-  .breakdown-cell .n{font-family:'Fraunces', serif; font-size:26px; font-weight:600;}
-  .breakdown-cell.correct .n{color:var(--teal);}
-  .breakdown-cell.incorrect .n{color:var(--red);}
-  .breakdown-cell.unanswered .n{color:var(--muted);}
-  .breakdown-cell .l{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--muted); text-transform:uppercase; margin-top:4px;}
-  .results-actions{display:flex; gap:12px; margin-top:30px; justify-content:center; flex-wrap:wrap;}
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
 
-  /* ===== REVIEW SCREEN ===== */
-  #review-screen{padding:0 0 60px;}
-  .review-header{
-    background:var(--ink); color:var(--paper); padding:22px 24px; position:sticky; top:0; z-index:5;
-  }
-  .review-header-inner{max-width:900px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;}
-  .review-body{max-width:900px; margin:0 auto; padding:28px 20px;}
-  .review-item{
-    background:var(--card); border:1px solid var(--line); border-radius:14px;
-    padding:26px; margin-bottom:16px;
-  }
-  .review-item-head{display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; margin-bottom:12px;}
-  .status-pill{
-    font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; padding:5px 12px;
-    border-radius:20px; display:flex; align-items:center; gap:6px;
-  }
-  .status-pill.correct{background:var(--teal-dim); color:var(--teal);}
-  .status-pill.incorrect{background:var(--red-dim); color:var(--red);}
-  .status-pill.unanswered{background:var(--paper-dim); color:var(--muted);}
-  .review-q-text{font-size:16.5px; font-weight:500; line-height:1.5;}
-  .review-options{margin-top:16px; display:flex; flex-direction:column; gap:8px;}
-  .review-option{
-    display:flex; gap:12px; align-items:center; padding:11px 14px; border-radius:9px;
-    border:1px solid var(--line-soft); font-size:14.5px;
-  }
-  .review-option .option-letter{width:22px; height:22px; font-size:12px;}
-  .review-option.is-correct{background:var(--teal-dim); border-color:#BFD6CD;}
-  .review-option.is-wrong{background:var(--red-dim); border-color:#E9C4BB;}
-  .review-explain{
-    margin-top:16px; background:var(--paper-dim); border-left:3px solid var(--teal);
-    padding:14px 16px; border-radius:6px; font-size:14px; line-height:1.6; color:var(--ink-soft);
-  }
-  .review-explain b{color:var(--ink);}
+    /* ===== START SCREEN ===== */
+    #start-screen {
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
 
-  @media (max-width:640px){
-    .start-card{padding:30px 22px;}
-    .start-card h1{font-size:29px;}
-    .stat-row{grid-template-columns:repeat(2,1fr);}
-    .question-card{padding:22px 18px;}
-    .question-text{font-size:17px;}
-    .nav-grid{grid-template-columns:repeat(6,1fr);}
-    .score-card{padding:30px 20px;}
-    .score-card .score-big{font-size:48px;}
-    .exam-header{padding:12px 16px;}
-    .breakdown-row{grid-template-columns:1fr;}
-  }
-</style>
+    .start-wrap {
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      color: var(--teal);
+      background: var(--teal-dim);
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 5px;
+      letter-spacing: 0.02em;
+      margin-bottom: 22px;
+    }
+
+    .start-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 44px 40px;
+      box-shadow: 0 1px 2px rgba(27, 36, 48, 0.04);
+    }
+
+    .start-card h1 {
+      font-size: 38px;
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .start-card .subtitle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.01em;
+    }
+
+    .start-desc {
+      margin-top: 20px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      margin-top: 30px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--line);
+    }
+
+    .stat-cell {
+      background: var(--card);
+      padding: 16px 10px;
+      text-align: center;
+    }
+
+    .stat-cell .num {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .stat-cell .lab {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    .chapter-list {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chapter-chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-soft);
+      background: var(--paper-dim);
+      border: 1px solid var(--line-soft);
+      border-radius: 20px;
+      padding: 6px 12px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 9px;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 26px;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(27, 36, 48, .18);
+    }
+
+    .btn-amber {
+      background: var(--amber);
+      color: #fff;
+    }
+
+    .btn-amber:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(196, 98, 45, .28);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn-ghost:hover {
+      background: var(--paper-dim);
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .start-actions {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .start-note {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    /* ===== EXAM SCREEN ===== */
+    #exam-screen {
+      padding: 0;
+    }
+
+    .exam-header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      flex-wrap: wrap;
+    }
+
+    .exam-header .title-block {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .exam-header .app-title {
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .exam-header .qcount {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: #B9C4CE;
+    }
+
+    .timer {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 7px 14px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .timer .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .timer.low {
+      color: #F3D2C7;
+    }
+
+    .timer.low .dot {
+      background: var(--red);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .3;
+      }
+    }
+
+    .progress-track {
+      height: 6px;
+      background: var(--ink-soft);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--teal);
+      width: 0%;
+      transition: width .3s ease;
+    }
+
+    .exam-body {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 32px 20px 140px;
+      flex: 1;
+    }
+
+    .q-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .q-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--paper-dim);
+      border: 1px solid var(--line-soft);
+      color: var(--ink-soft);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .q-badge.chapter {
+      background: var(--teal-dim);
+      color: var(--teal);
+      border-color: transparent;
+    }
+
+    .q-badge.diff-Easy {
+      background: #E4EFEA;
+      color: #2E7D6B;
+    }
+
+    .q-badge.diff-Medium {
+      background: #F6E5D9;
+      color: #C4622D;
+    }
+
+    .q-badge.diff-Hard {
+      background: #F5E2DD;
+      color: #B54B3A;
+    }
+
+    .question-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 32px;
+      box-shadow: 0 1px 2px rgba(27, 36, 48, .04);
+    }
+
+    .question-text {
+      font-size: 19px;
+      line-height: 1.55;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .question-code {
+      margin-top: 14px;
+      background: var(--ink);
+      color: #E6EAD9;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13.5px;
+      line-height: 1.6;
+      padding: 16px 18px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .options {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background .12s, border-color .12s;
+      background: var(--paper);
+    }
+
+    .option-row:hover {
+      background: var(--teal-dim);
+      border-color: #BFD6CD;
+    }
+
+    .option-row.selected {
+      background: var(--teal-dim);
+      border-color: var(--teal);
+    }
+
+    .option-letter {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      font-size: 13px;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-soft);
+      flex-shrink: 0;
+      background: var(--card);
+    }
+
+    .option-row.selected .option-letter {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .option-radio {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .option-row.selected .option-radio {
+      border-color: var(--teal);
+    }
+
+    .option-row.selected .option-radio::after {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .option-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .nav-controls {
+      max-width: 900px;
+      margin: 22px auto 0;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-left,
+    .nav-right {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Navigator grid */
+    .navigator {
+      max-width: 900px;
+      margin: 28px auto 0;
+      padding: 0 20px 20px;
+    }
+
+    .navigator h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+    }
+
+    .nav-cell {
+      aspect-ratio: 1/1;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .08s ease;
+    }
+
+    .nav-cell:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-cell.answered {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .nav-cell.current {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .nav-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+    }
+
+    .legend-swatch.answered {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+
+    .legend-swatch.current {
+      outline: 2px solid var(--amber);
+      outline-offset: 1px;
+    }
+
+    .submit-bar {
+      max-width: 900px;
+      margin: 26px auto 0;
+      padding: 0 20px 40px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(27, 36, 48, .55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card);
+      border-radius: 14px;
+      max-width: 420px;
+      width: 100%;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+    }
+
+    .modal-box h3 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .modal-stats {
+      display: flex;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .modal-stat {
+      flex: 1;
+      background: var(--paper-dim);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .modal-stat .n {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .modal-stat .l {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    /* ===== RESULTS SCREEN ===== */
+    #results-screen {
+      align-items: center;
+      padding: 50px 20px;
+    }
+
+    .results-wrap {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .results-header .eyebrow {
+      background: var(--teal-dim);
+    }
+
+    .score-card {
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 18px;
+      padding: 40px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-card .grade-band {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #B9C4CE;
+      margin-bottom: 10px;
+    }
+
+    .score-card .score-big {
+      font-family: 'Fraunces', serif;
+      font-size: 64px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .score-card .score-pct {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 16px;
+      color: #CFE3DA;
+      margin-top: 8px;
+    }
+
+    .grade-pill {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 7px 18px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 14px;
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .breakdown-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 24px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--line);
+    }
+
+    .breakdown-cell {
+      background: var(--card);
+      padding: 18px 10px;
+      text-align: center;
+    }
+
+    .breakdown-cell .n {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .breakdown-cell.correct .n {
+      color: var(--teal);
+    }
+
+    .breakdown-cell.incorrect .n {
+      color: var(--red);
+    }
+
+    .breakdown-cell.unanswered .n {
+      color: var(--muted);
+    }
+
+    .breakdown-cell .l {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ===== REVIEW SCREEN ===== */
+    #review-screen {
+      padding: 0 0 60px;
+    }
+
+    .review-header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 22px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .review-header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .review-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 28px 20px;
+    }
+
+    .review-item {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 26px;
+      margin-bottom: 16px;
+    }
+
+    .review-item-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .status-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-pill.correct {
+      background: var(--teal-dim);
+      color: var(--teal);
+    }
+
+    .status-pill.incorrect {
+      background: var(--red-dim);
+      color: var(--red);
+    }
+
+    .status-pill.unanswered {
+      background: var(--paper-dim);
+      color: var(--muted);
+    }
+
+    .review-q-text {
+      font-size: 16.5px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .review-options {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .review-option {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 11px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--line-soft);
+      font-size: 14.5px;
+    }
+
+    .review-option .option-letter {
+      width: 22px;
+      height: 22px;
+      font-size: 12px;
+    }
+
+    .review-option.is-correct {
+      background: var(--teal-dim);
+      border-color: #BFD6CD;
+    }
+
+    .review-option.is-wrong {
+      background: var(--red-dim);
+      border-color: #E9C4BB;
+    }
+
+    .review-explain {
+      margin-top: 16px;
+      background: var(--paper-dim);
+      border-left: 3px solid var(--teal);
+      padding: 14px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+
+    .review-explain b {
+      color: var(--ink);
+    }
+
+    @media (max-width:640px) {
+      .start-card {
+        padding: 30px 22px;
+      }
+
+      .start-card h1 {
+        font-size: 29px;
+      }
+
+      .stat-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .question-card {
+        padding: 22px 18px;
+      }
+
+      .question-text {
+        font-size: 17px;
+      }
+
+      .nav-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+
+      .score-card {
+        padding: 30px 20px;
+      }
+
+      .score-card .score-big {
+        font-size: 48px;
+      }
+
+      .exam-header {
+        padding: 12px 16px;
+      }
+
+      .breakdown-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ================= START SCREEN ================= -->
-<div class="screen active" id="start-screen">
-  <div class="start-wrap">
-    <span class="eyebrow mono">SELECT * FROM knowledge_base WHERE chapters IN (8,9,10,11);</span>
-    <div class="start-card">
-      <h1>PHP &amp; MySQL Final Exam</h1>
-      <div class="subtitle mono">Chapters 8–11 · Designing, Creating, Querying &amp; Connecting Your Web Database</div>
-      <p class="start-desc">This exam checks your understanding of relational database design, creating and securing a MySQL database, working with SQL, and accessing MySQL from PHP. Answer all questions to the best of your ability — you can move freely between questions before submitting.</p>
+  <!-- ================= START SCREEN ================= -->
+  <div class="screen active" id="start-screen">
+    <div class="start-wrap">
+      <span class="eyebrow mono">SELECT * FROM knowledge_base WHERE chapters IN (8,9,10,11);</span>
+      <div class="start-card">
+        <h1>PHP &amp; MySQL Final Exam</h1>
+        <div class="subtitle mono">Chapters 8–11 · Designing, Creating, Querying &amp; Connecting Your Web Database
+        </div>
+        <p class="start-desc">This exam checks your understanding of relational database design, creating and securing a
+          MySQL database, working with SQL, and accessing MySQL from PHP. Answer all questions to the best of your
+          ability — you can move freely between questions before submitting.</p>
 
-      <div class="stat-row">
-        <div class="stat-cell"><div class="num">30</div><div class="lab">Questions</div></div>
-        <div class="stat-cell"><div class="num">4</div><div class="lab">Choices Each</div></div>
-        <div class="stat-cell"><div class="num">45:00</div><div class="lab">Time Limit</div></div>
-        <div class="stat-cell"><div class="num">Mixed</div><div class="lab">Difficulty</div></div>
+        <div class="stat-row">
+          <div class="stat-cell">
+            <div class="num">30</div>
+            <div class="lab">Questions</div>
+          </div>
+          <div class="stat-cell">
+            <div class="num">4</div>
+            <div class="lab">Choices Each</div>
+          </div>
+          <div class="stat-cell">
+            <div class="num">45:00</div>
+            <div class="lab">Time Limit</div>
+          </div>
+          <div class="stat-cell">
+            <div class="num">Mixed</div>
+            <div class="lab">Difficulty</div>
+          </div>
+        </div>
+
+        <div class="chapter-list">
+          <span class="chapter-chip mono">Ch. 8 — Designing Your Web Database</span>
+          <span class="chapter-chip mono">Ch. 9 — Creating Your Web Database</span>
+          <span class="chapter-chip mono">Ch. 10 — Working with MySQL</span>
+          <span class="chapter-chip mono">Ch. 11 — Accessing MySQL from PHP</span>
+        </div>
+
+        <div class="start-actions">
+          <button class="btn btn-primary" id="start-btn">Start Exam</button>
+          <span class="start-note">Timer begins as soon as you start</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= EXAM SCREEN ================= -->
+  <div class="screen" id="exam-screen">
+    <div class="exam-header">
+      <div class="title-block">
+        <span class="app-title">EXAM.QUERY</span>
+        <span class="qcount mono" id="q-count">Question 1 / 30</span>
+      </div>
+      <div class="timer mono" id="timer"><span class="dot"></span><span id="timer-text">45:00</span></div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="exam-body">
+      <div class="q-meta-row">
+        <span class="q-badge chapter mono" id="q-chapter">Chapter 8</span>
+        <span class="q-badge mono" id="q-difficulty">Easy</span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text">Loading question…</div>
+        <pre class="question-code mono" id="question-code" style="display:none;"></pre>
+        <div class="options" id="options-list"></div>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <div class="nav-left">
+        <button class="btn btn-ghost" id="prev-btn">← Previous</button>
+      </div>
+      <div class="nav-right">
+        <button class="btn btn-ghost" id="next-btn">Next →</button>
+      </div>
+    </div>
+
+    <div class="navigator">
+      <h3>Question Navigator</h3>
+      <div class="nav-grid" id="nav-grid"></div>
+      <div class="nav-legend">
+        <div class="legend-item"><span class="legend-swatch"></span> Unanswered</div>
+        <div class="legend-item"><span class="legend-swatch answered"></span> Answered</div>
+        <div class="legend-item"><span class="legend-swatch current"></span> Current</div>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button class="btn btn-amber" id="submit-btn">Submit Exam</button>
+    </div>
+  </div>
+
+  <!-- ================= SUBMIT MODAL ================= -->
+  <div class="modal-overlay" id="submit-modal">
+    <div class="modal-box">
+      <h3>Are you sure you want to submit the exam?</h3>
+      <div class="modal-stats">
+        <div class="modal-stat">
+          <div class="n" id="modal-answered">0</div>
+          <div class="l">Answered</div>
+        </div>
+        <div class="modal-stat">
+          <div class="n" id="modal-unanswered">30</div>
+          <div class="l">Unanswered</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+        <button class="btn btn-amber" id="modal-submit">Submit Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RESULTS SCREEN ================= -->
+  <div class="screen" id="results-screen">
+    <div class="results-wrap">
+      <div class="results-header">
+        <span class="eyebrow mono">Exam Completed</span>
+      </div>
+      <div class="score-card">
+        <div class="grade-band mono" id="grade-band">RESULT</div>
+        <div class="score-big" id="score-big">24 / 30</div>
+        <div class="score-pct mono" id="score-pct">80%</div>
+        <div class="grade-pill" id="grade-pill">Very Good</div>
       </div>
 
-      <div class="chapter-list">
-        <span class="chapter-chip mono">Ch. 8 — Designing Your Web Database</span>
-        <span class="chapter-chip mono">Ch. 9 — Creating Your Web Database</span>
-        <span class="chapter-chip mono">Ch. 10 — Working with MySQL</span>
-        <span class="chapter-chip mono">Ch. 11 — Accessing MySQL from PHP</span>
+      <div class="breakdown-row">
+        <div class="breakdown-cell correct">
+          <div class="n" id="correct-count">0</div>
+          <div class="l">Correct</div>
+        </div>
+        <div class="breakdown-cell incorrect">
+          <div class="n" id="incorrect-count">0</div>
+          <div class="l">Incorrect</div>
+        </div>
+        <div class="breakdown-cell unanswered">
+          <div class="n" id="unanswered-count">0</div>
+          <div class="l">Unanswered</div>
+        </div>
       </div>
 
-      <div class="start-actions">
-        <button class="btn btn-primary" id="start-btn">Start Exam</button>
-        <span class="start-note">Timer begins as soon as you start</span>
+      <div class="results-actions">
+        <button class="btn btn-primary" id="review-btn">Review Answers</button>
+        <button class="btn btn-ghost" id="restart-btn">Retake Exam</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ================= EXAM SCREEN ================= -->
-<div class="screen" id="exam-screen">
-  <div class="exam-header">
-    <div class="title-block">
-      <span class="app-title">EXAM.QUERY</span>
-      <span class="qcount mono" id="q-count">Question 1 / 30</span>
+  <!-- ================= REVIEW SCREEN ================= -->
+  <div class="screen" id="review-screen">
+    <div class="review-header">
+      <div class="review-header-inner">
+        <span class="app-title" style="font-family:'Fraunces',serif; font-size:17px; font-weight:600;">Answer
+          Review</span>
+        <button class="btn btn-ghost" id="back-to-results-btn"
+          style="background:rgba(255,255,255,0.08); border-color:transparent; color:#fff;">← Back to Results</button>
+      </div>
     </div>
-    <div class="timer mono" id="timer"><span class="dot"></span><span id="timer-text">45:00</span></div>
-  </div>
-  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-
-  <div class="exam-body">
-    <div class="q-meta-row">
-      <span class="q-badge chapter mono" id="q-chapter">Chapter 8</span>
-      <span class="q-badge mono" id="q-difficulty">Easy</span>
-    </div>
-    <div class="question-card">
-      <div class="question-text" id="question-text">Loading question…</div>
-      <pre class="question-code mono" id="question-code" style="display:none;"></pre>
-      <div class="options" id="options-list"></div>
-    </div>
+    <div class="review-body" id="review-body"></div>
   </div>
 
-  <div class="nav-controls">
-    <div class="nav-left">
-      <button class="btn btn-ghost" id="prev-btn">← Previous</button>
-    </div>
-    <div class="nav-right">
-      <button class="btn btn-ghost" id="next-btn">Next →</button>
-    </div>
-  </div>
+  <script>
+    (function () {
+      "use strict";
 
-  <div class="navigator">
-    <h3>Question Navigator</h3>
-    <div class="nav-grid" id="nav-grid"></div>
-    <div class="nav-legend">
-      <div class="legend-item"><span class="legend-swatch"></span> Unanswered</div>
-      <div class="legend-item"><span class="legend-swatch answered"></span> Answered</div>
-      <div class="legend-item"><span class="legend-swatch current"></span> Current</div>
-    </div>
-  </div>
+      /* ============================================================
+         QUESTION DATA — Chapters 8–11
+         ============================================================ */
+      const QUESTIONS = [
+        // ---------------- Chapter 8 (7) ----------------
+        {
+          id: 1, chapter: 8, difficulty: "Easy",
+          question: "In relational database terminology, what is a \u201ckey\u201d?",
+          code: null,
+          options: { A: "A password used to log into MySQL", B: "A column (or set of columns) whose values uniquely identify a row", C: "Any column that stores numeric data", D: "A shortcut used to speed up queries" },
+          correctAnswer: "B",
+          explanation: "A key is a column, or combination of columns, whose values uniquely identify each row in a table so rows can be reliably referenced and related to other tables."
+        },
 
-  <div class="submit-bar">
-    <button class="btn btn-amber" id="submit-btn">Submit Exam</button>
-  </div>
-</div>
+        {
+          id: 2, chapter: 8, difficulty: "Easy",
+          question: "What does it mean for a column value to be \u201catomic\u201d?",
+          code: null,
+          options: { A: "It changes automatically over time", B: "It contains a single, indivisible piece of data", C: "It can never be updated", D: "It is stored using a special atomic data type" },
+          correctAnswer: "B",
+          explanation: "An atomic value holds one discrete piece of information rather than a list or combination of values, which keeps data easy to search, sort, and update."
+        },
 
-<!-- ================= SUBMIT MODAL ================= -->
-<div class="modal-overlay" id="submit-modal">
-  <div class="modal-box">
-    <h3>Are you sure you want to submit the exam?</h3>
-    <div class="modal-stats">
-      <div class="modal-stat"><div class="n" id="modal-answered">0</div><div class="l">Answered</div></div>
-      <div class="modal-stat"><div class="n" id="modal-unanswered">30</div><div class="l">Unanswered</div></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
-      <button class="btn btn-amber" id="modal-submit">Submit Exam</button>
-    </div>
-  </div>
-</div>
+        {
+          id: 3, chapter: 8, difficulty: "Medium",
+          question: "A table stores a customer's three phone numbers in one column, separated by commas. What design problem does this illustrate?",
+          code: null,
+          options: { A: "The column value is not atomic", B: "The table has too many keys", C: "The table type is incorrect", D: "The schema has too many relationships" },
+          correctAnswer: "A",
+          explanation: "Storing multiple phone numbers in a single column violates atomicity, making it hard to search, sort, or update individual numbers."
+        },
 
-<!-- ================= RESULTS SCREEN ================= -->
-<div class="screen" id="results-screen">
-  <div class="results-wrap">
-    <div class="results-header">
-      <span class="eyebrow mono">Exam Completed</span>
-    </div>
-    <div class="score-card">
-      <div class="grade-band mono" id="grade-band">RESULT</div>
-      <div class="score-big" id="score-big">24 / 30</div>
-      <div class="score-pct mono" id="score-pct">80%</div>
-      <div class="grade-pill" id="grade-pill">Very Good</div>
-    </div>
+        {
+          id: 4, chapter: 8, difficulty: "Medium",
+          question: "Which practice best helps avoid redundant data when designing a web database?",
+          code: null,
+          options: { A: "Repeating full customer details in every order row", B: "Splitting related data into separate tables linked by keys", C: "Storing every attribute in a single large table", D: "Avoiding the use of any keys" },
+          correctAnswer: "B",
+          explanation: "Splitting data into related tables connected by keys (e.g. a customers table and an orders table) lets each fact be stored once and referenced, rather than duplicated."
+        },
 
-    <div class="breakdown-row">
-      <div class="breakdown-cell correct"><div class="n" id="correct-count">0</div><div class="l">Correct</div></div>
-      <div class="breakdown-cell incorrect"><div class="n" id="incorrect-count">0</div><div class="l">Incorrect</div></div>
-      <div class="breakdown-cell unanswered"><div class="n" id="unanswered-count">0</div><div class="l">Unanswered</div></div>
-    </div>
+        {
+          id: 5, chapter: 8, difficulty: "Medium",
+          question: "What is a database \u201cschema\u201d?",
+          code: null,
+          options: { A: "A single row of data in a table", B: "The overall structure describing a database's tables, columns, and relationships", C: "A backup copy of the database", D: "A type of MySQL user account" },
+          correctAnswer: "B",
+          explanation: "A schema is the design, or blueprint, of a database: its tables, the columns each table contains, and how the tables relate to one another."
+        },
 
-    <div class="results-actions">
-      <button class="btn btn-primary" id="review-btn">Review Answers</button>
-      <button class="btn btn-ghost" id="restart-btn">Retake Exam</button>
-    </div>
-  </div>
-</div>
+        {
+          id: 6, chapter: 8, difficulty: "Hard",
+          question: "A designer creates one wide \u201cproducts\u201d table with columns for up to five optional supplier contacts, most of which are empty for any given product. What does this illustrate, and what is the better approach?",
+          code: null,
+          options: { A: "This is fine because MySQL handles empty columns efficiently", B: "Many empty attributes suggest a separate, related suppliers table would be better", C: "The table simply needs more indexes to fix the problem", D: "The columns should be merged into one comma-separated column" },
+          correctAnswer: "B",
+          explanation: "Many attributes that are frequently empty is a sign that data belongs in a separate, related table (e.g. a suppliers table linked by key) rather than as optional columns bolted onto the main table."
+        },
 
-<!-- ================= REVIEW SCREEN ================= -->
-<div class="screen" id="review-screen">
-  <div class="review-header">
-    <div class="review-header-inner">
-      <span class="app-title" style="font-family:'Fraunces',serif; font-size:17px; font-weight:600;">Answer Review</span>
-      <button class="btn btn-ghost" id="back-to-results-btn" style="background:rgba(255,255,255,0.08); border-color:transparent; color:#fff;">← Back to Results</button>
-    </div>
-  </div>
-  <div class="review-body" id="review-body"></div>
-</div>
+        {
+          id: 7, chapter: 8, difficulty: "Hard",
+          question: "Why does the book emphasize thinking about the queries a database will need to answer while still in the design stage?",
+          code: null,
+          options: { A: "Because MySQL requires all queries to be written before any table is created", B: "Because table structure directly affects how easily and efficiently needed data can be retrieved", C: "Because queries determine which storage engine MySQL uses automatically", D: "It isn't actually important; design should ignore future queries" },
+          correctAnswer: "B",
+          explanation: "Good schema design anticipates the questions an application will ask of the data, since a poor structure can make otherwise simple queries slow or awkward to write."
+        },
 
-<script>
-(function(){
-"use strict";
+        // ---------------- Chapter 9 (7) ----------------
+        {
+          id: 8, chapter: 9, difficulty: "Easy",
+          question: "Which tool is used to log in and interact with MySQL by typing SQL statements directly at a command line?",
+          code: null,
+          options: { A: "phpMyAdmin", B: "The MySQL Monitor (mysql client)", C: "The PHP interpreter", D: "The Apache web server" },
+          correctAnswer: "B",
+          explanation: "The MySQL Monitor is the command-line client used to log in to a MySQL server and issue SQL statements interactively."
+        },
 
-/* ============================================================
-   QUESTION DATA — Chapters 8–11
-   ============================================================ */
-const QUESTIONS = [
-  // ---------------- Chapter 8 (7) ----------------
-  {id:1, chapter:8, difficulty:"Easy",
-   question:"In relational database terminology, what is a \u201ckey\u201d?",
-   code:null,
-   options:{A:"A password used to log into MySQL", B:"A column (or set of columns) whose values uniquely identify a row", C:"Any column that stores numeric data", D:"A shortcut used to speed up queries"},
-   correctAnswer:"B",
-   explanation:"A key is a column, or combination of columns, whose values uniquely identify each row in a table so rows can be reliably referenced and related to other tables."},
+        {
+          id: 9, chapter: 9, difficulty: "Easy",
+          question: "Which SQL statement creates a new database?",
+          code: null,
+          options: { A: "NEW DATABASE dbname;", B: "MAKE DATABASE dbname;", C: "CREATE DATABASE dbname;", D: "INSERT DATABASE dbname;" },
+          correctAnswer: "C",
+          explanation: "CREATE DATABASE is the statement used to create a new, empty database on the MySQL server."
+        },
 
-  {id:2, chapter:8, difficulty:"Easy",
-   question:"What does it mean for a column value to be \u201catomic\u201d?",
-   code:null,
-   options:{A:"It changes automatically over time", B:"It contains a single, indivisible piece of data", C:"It can never be updated", D:"It is stored using a special atomic data type"},
-   correctAnswer:"B",
-   explanation:"An atomic value holds one discrete piece of information rather than a list or combination of values, which keeps data easy to search, sort, and update."},
+        {
+          id: 10, chapter: 9, difficulty: "Easy",
+          question: "What does the DESCRIBE statement show about a table?",
+          code: null,
+          options: { A: "The number of rows currently stored in the table", B: "The table's columns, their types, and related attributes", C: "The privileges granted to the current user", D: "The amount of disk space used by the table" },
+          correctAnswer: "B",
+          explanation: "DESCRIBE lists a table's column names, data types, and attributes such as whether NULL is allowed or a default value is set."
+        },
 
-  {id:3, chapter:8, difficulty:"Medium",
-   question:"A table stores a customer's three phone numbers in one column, separated by commas. What design problem does this illustrate?",
-   code:null,
-   options:{A:"The column value is not atomic", B:"The table has too many keys", C:"The table type is incorrect", D:"The schema has too many relationships"},
-   correctAnswer:"A",
-   explanation:"Storing multiple phone numbers in a single column violates atomicity, making it hard to search, sort, or update individual numbers."},
+        {
+          id: 11, chapter: 9, difficulty: "Medium",
+          question: "What does the \u201cprinciple of least privilege\u201d mean when creating MySQL user accounts?",
+          code: null,
+          options: { A: "Every user should be given full administrative access by default", B: "Users should be granted only the privileges they need to perform their tasks", C: "Only the root user should ever be allowed to log in", D: "Privileges should never be revoked once granted" },
+          correctAnswer: "B",
+          explanation: "The principle of least privilege means giving each account only the specific permissions it needs, limiting the damage a compromised account could cause."
+        },
 
-  {id:4, chapter:8, difficulty:"Medium",
-   question:"Which practice best helps avoid redundant data when designing a web database?",
-   code:null,
-   options:{A:"Repeating full customer details in every order row", B:"Splitting related data into separate tables linked by keys", C:"Storing every attribute in a single large table", D:"Avoiding the use of any keys"},
-   correctAnswer:"B",
-   explanation:"Splitting data into related tables connected by keys (e.g. a customers table and an orders table) lets each fact be stored once and referenced, rather than duplicated."},
+        {
+          id: 12, chapter: 9, difficulty: "Medium",
+          question: "Which SQL statement gives a MySQL user permission to perform specific actions on a database?",
+          code: null,
+          options: { A: "GRANT", B: "ALLOW", C: "PERMIT", D: "ENABLE" },
+          correctAnswer: "A",
+          explanation: "GRANT assigns specific privileges, such as SELECT or INSERT, on a database or table to a named user; REVOKE takes privileges away."
+        },
 
-  {id:5, chapter:8, difficulty:"Medium",
-   question:"What is a database \u201cschema\u201d?",
-   code:null,
-   options:{A:"A single row of data in a table", B:"The overall structure describing a database's tables, columns, and relationships", C:"A backup copy of the database", D:"A type of MySQL user account"},
-   correctAnswer:"B",
-   explanation:"A schema is the design, or blueprint, of a database: its tables, the columns each table contains, and how the tables relate to one another."},
+        {
+          id: 13, chapter: 9, difficulty: "Medium",
+          question: "Which MySQL column type is most appropriate for storing a short piece of text whose length varies, such as an email address?",
+          code: null,
+          options: { A: "INT", B: "VARCHAR", C: "DATE", D: "BLOB" },
+          correctAnswer: "B",
+          explanation: "VARCHAR stores variable-length character strings efficiently, which suits text like names or email addresses that vary in length up to a defined maximum."
+        },
 
-  {id:6, chapter:8, difficulty:"Hard",
-   question:"A designer creates one wide \u201cproducts\u201d table with columns for up to five optional supplier contacts, most of which are empty for any given product. What does this illustrate, and what is the better approach?",
-   code:null,
-   options:{A:"This is fine because MySQL handles empty columns efficiently", B:"Many empty attributes suggest a separate, related suppliers table would be better", C:"The table simply needs more indexes to fix the problem", D:"The columns should be merged into one comma-separated column"},
-   correctAnswer:"B",
-   explanation:"Many attributes that are frequently empty is a sign that data belongs in a separate, related table (e.g. a suppliers table linked by key) rather than as optional columns bolted onto the main table."},
+        {
+          id: 14, chapter: 9, difficulty: "Hard",
+          question: "A developer wants a dedicated MySQL account for a website that should only be able to SELECT and INSERT data in the \u201corders\u201d table, nothing more. Which approach best follows good practice?",
+          code: null,
+          options: { A: "Use the root account for the website's connection", B: "GRANT ALL PRIVILEGES to a new account and never review it", C: "Create a new user and GRANT only SELECT and INSERT on the orders table to that user", D: "Give the account SELECT on every database, just in case" },
+          correctAnswer: "C",
+          explanation: "Following the principle of least privilege, a web-facing account should be created specifically for the task and granted only the SELECT and INSERT privileges it actually needs on the relevant table."
+        },
 
-  {id:7, chapter:8, difficulty:"Hard",
-   question:"Why does the book emphasize thinking about the queries a database will need to answer while still in the design stage?",
-   code:null,
-   options:{A:"Because MySQL requires all queries to be written before any table is created", B:"Because table structure directly affects how easily and efficiently needed data can be retrieved", C:"Because queries determine which storage engine MySQL uses automatically", D:"It isn't actually important; design should ignore future queries"},
-   correctAnswer:"B",
-   explanation:"Good schema design anticipates the questions an application will ask of the data, since a poor structure can make otherwise simple queries slow or awkward to write."},
+        // ---------------- Chapter 10 (10) ----------------
+        {
+          id: 15, chapter: 10, difficulty: "Easy",
+          question: "Which clause is used to filter which rows a SELECT statement returns?",
+          code: null,
+          options: { A: "ORDER BY", B: "WHERE", C: "GROUP BY", D: "LIMIT" },
+          correctAnswer: "B",
+          explanation: "WHERE filters individual rows based on a condition, before any grouping or sorting happens."
+        },
 
-  // ---------------- Chapter 9 (7) ----------------
-  {id:8, chapter:9, difficulty:"Easy",
-   question:"Which tool is used to log in and interact with MySQL by typing SQL statements directly at a command line?",
-   code:null,
-   options:{A:"phpMyAdmin", B:"The MySQL Monitor (mysql client)", C:"The PHP interpreter", D:"The Apache web server"},
-   correctAnswer:"B",
-   explanation:"The MySQL Monitor is the command-line client used to log in to a MySQL server and issue SQL statements interactively."},
+        {
+          id: 16, chapter: 10, difficulty: "Easy",
+          question: "Which SQL statement adds a new row of data to a table?",
+          code: null,
+          options: { A: "ADD", B: "INSERT", C: "UPDATE", D: "CREATE" },
+          correctAnswer: "B",
+          explanation: "INSERT adds one or more new rows of data into a table."
+        },
 
-  {id:9, chapter:9, difficulty:"Easy",
-   question:"Which SQL statement creates a new database?",
-   code:null,
-   options:{A:"NEW DATABASE dbname;", B:"MAKE DATABASE dbname;", C:"CREATE DATABASE dbname;", D:"INSERT DATABASE dbname;"},
-   correctAnswer:"C",
-   explanation:"CREATE DATABASE is the statement used to create a new, empty database on the MySQL server."},
+        {
+          id: 17, chapter: 10, difficulty: "Easy",
+          question: "What does the following query return?",
+          code: "SELECT name, city\nFROM customers\nWHERE customerid = 5;",
+          options: { A: "Every column for the customer whose id is 5", B: "Only the name and city of the customer whose id is 5", C: "The name and city of all customers", D: "It deletes the row where customerid = 5" },
+          correctAnswer: "B",
+          explanation: "The SELECT list names only the columns to return (name, city), and WHERE restricts the result to the single row whose customerid equals 5."
+        },
 
-  {id:10, chapter:9, difficulty:"Easy",
-   question:"What does the DESCRIBE statement show about a table?",
-   code:null,
-   options:{A:"The number of rows currently stored in the table", B:"The table's columns, their types, and related attributes", C:"The privileges granted to the current user", D:"The amount of disk space used by the table"},
-   correctAnswer:"B",
-   explanation:"DESCRIBE lists a table's column names, data types, and attributes such as whether NULL is allowed or a default value is set."},
+        {
+          id: 18, chapter: 10, difficulty: "Medium",
+          question: "Which clause groups rows that share the same value so aggregate functions like COUNT() or AVG() can be applied to each group?",
+          code: null,
+          options: { A: "GROUP BY", B: "ORDER BY", C: "WHERE", D: "LIMIT" },
+          correctAnswer: "A",
+          explanation: "GROUP BY collects rows with matching values into groups so an aggregate function can be computed once per group."
+        },
 
-  {id:11, chapter:9, difficulty:"Medium",
-   question:"What does the \u201cprinciple of least privilege\u201d mean when creating MySQL user accounts?",
-   code:null,
-   options:{A:"Every user should be given full administrative access by default", B:"Users should be granted only the privileges they need to perform their tasks", C:"Only the root user should ever be allowed to log in", D:"Privileges should never be revoked once granted"},
-   correctAnswer:"B",
-   explanation:"The principle of least privilege means giving each account only the specific permissions it needs, limiting the damage a compromised account could cause."},
+        {
+          id: 19, chapter: 10, difficulty: "Medium",
+          question: "What is the purpose of the HAVING clause in this query?",
+          code: "SELECT customerid, AVG(amount)\nFROM orders\nGROUP BY customerid\nHAVING AVG(amount) > 50;",
+          options: { A: "It filters individual rows before grouping happens", B: "It filters groups after aggregation, keeping only customers whose average order amount exceeds 50", C: "It sorts customers by their average order amount", D: "It limits the results to 50 rows" },
+          correctAnswer: "B",
+          explanation: "HAVING filters groups after GROUP BY and aggregation have been applied, unlike WHERE, which filters individual rows before grouping."
+        },
 
-  {id:12, chapter:9, difficulty:"Medium",
-   question:"Which SQL statement gives a MySQL user permission to perform specific actions on a database?",
-   code:null,
-   options:{A:"GRANT", B:"ALLOW", C:"PERMIT", D:"ENABLE"},
-   correctAnswer:"A",
-   explanation:"GRANT assigns specific privileges, such as SELECT or INSERT, on a database or table to a named user; REVOKE takes privileges away."},
+        {
+          id: 20, chapter: 10, difficulty: "Medium",
+          question: "Which clause controls the order in which returned rows are displayed?",
+          code: null,
+          options: { A: "ORDER BY", B: "GROUP BY", C: "HAVING", D: "LIMIT" },
+          correctAnswer: "A",
+          explanation: "ORDER BY sorts the final result set by one or more columns, ascending or descending."
+        },
 
-  {id:13, chapter:9, difficulty:"Medium",
-   question:"Which MySQL column type is most appropriate for storing a short piece of text whose length varies, such as an email address?",
-   code:null,
-   options:{A:"INT", B:"VARCHAR", C:"DATE", D:"BLOB"},
-   correctAnswer:"B",
-   explanation:"VARCHAR stores variable-length character strings efficiently, which suits text like names or email addresses that vary in length up to a defined maximum."},
+        {
+          id: 21, chapter: 10, difficulty: "Medium",
+          question: "Which clause restricts a query's result set to a specific number of rows?",
+          code: null,
+          options: { A: "WHERE", B: "LIMIT", C: "HAVING", D: "GROUP BY" },
+          correctAnswer: "B",
+          explanation: "LIMIT caps the number of rows returned by a query, which is useful for things like pagination or \u201ctop N\u201d results."
+        },
 
-  {id:14, chapter:9, difficulty:"Hard",
-   question:"A developer wants a dedicated MySQL account for a website that should only be able to SELECT and INSERT data in the \u201corders\u201d table, nothing more. Which approach best follows good practice?",
-   code:null,
-   options:{A:"Use the root account for the website's connection", B:"GRANT ALL PRIVILEGES to a new account and never review it", C:"Create a new user and GRANT only SELECT and INSERT on the orders table to that user", D:"Give the account SELECT on every database, just in case"},
-   correctAnswer:"C",
-   explanation:"Following the principle of least privilege, a web-facing account should be created specifically for the task and granted only the SELECT and INSERT privileges it actually needs on the relevant table."},
+        {
+          id: 22, chapter: 10, difficulty: "Hard",
+          question: "What is a subquery?",
+          code: null,
+          options: { A: "A query that runs on a different MySQL server", B: "A query nested inside another SQL statement, used to supply a value or result set to the outer query", C: "A shortcut for the SELECT * syntax", D: "A stored procedure written in PHP" },
+          correctAnswer: "B",
+          explanation: "A subquery is a SELECT statement embedded inside another SQL statement, such as within a WHERE clause, whose result is used by the outer query."
+        },
 
-  // ---------------- Chapter 10 (10) ----------------
-  {id:15, chapter:10, difficulty:"Easy",
-   question:"Which clause is used to filter which rows a SELECT statement returns?",
-   code:null,
-   options:{A:"ORDER BY", B:"WHERE", C:"GROUP BY", D:"LIMIT"},
-   correctAnswer:"B",
-   explanation:"WHERE filters individual rows based on a condition, before any grouping or sorting happens."},
+        {
+          id: 23, chapter: 10, difficulty: "Hard",
+          question: "A query joins the customers and orders tables to list each customer's name alongside their order totals, without using any aggregate function or GROUP BY. If a customer has three orders, how many rows will that customer appear in?",
+          code: null,
+          options: { A: "Exactly one row, no matter how many orders they have", B: "Zero rows, because joins remove duplicates", C: "Three rows, one for each matching order", D: "It depends only on the ORDER BY clause" },
+          correctAnswer: "C",
+          explanation: "When a query joins tables without grouping, each matching combination of rows produces a separate result row, so a customer with three orders appears three times."
+        },
 
-  {id:16, chapter:10, difficulty:"Easy",
-   question:"Which SQL statement adds a new row of data to a table?",
-   code:null,
-   options:{A:"ADD", B:"INSERT", C:"UPDATE", D:"CREATE"},
-   correctAnswer:"B",
-   explanation:"INSERT adds one or more new rows of data into a table."},
+        {
+          id: 24, chapter: 10, difficulty: "Hard",
+          question: "Which pair correctly matches an SQL statement that changes the structure of an existing table with one that permanently removes an entire table, including its structure?",
+          code: null,
+          options: { A: "UPDATE changes structure; DELETE removes the table", B: "ALTER TABLE changes structure; DROP TABLE removes the table", C: "INSERT changes structure; DROP DATABASE removes the table", D: "ALTER TABLE removes the table; DROP TABLE changes structure" },
+          correctAnswer: "B",
+          explanation: "ALTER TABLE modifies an existing table's structure, such as adding a column, while DROP TABLE deletes the entire table \u2014 data and structure \u2014 from the database."
+        },
 
-  {id:17, chapter:10, difficulty:"Easy",
-   question:"What does the following query return?",
-   code:"SELECT name, city\nFROM customers\nWHERE customerid = 5;",
-   options:{A:"Every column for the customer whose id is 5", B:"Only the name and city of the customer whose id is 5", C:"The name and city of all customers", D:"It deletes the row where customerid = 5"},
-   correctAnswer:"B",
-   explanation:"The SELECT list names only the columns to return (name, city), and WHERE restricts the result to the single row whose customerid equals 5."},
+        // ---------------- Chapter 11 (6) ----------------
+        {
+          id: 25, chapter: 11, difficulty: "Easy",
+          question: "In the standard web database architecture, what is the correct order of components a request passes through?",
+          code: null,
+          options: { A: "PHP \u2192 Browser \u2192 MySQL \u2192 Web Server", B: "Browser \u2192 Web Server \u2192 PHP \u2192 MySQL", C: "MySQL \u2192 PHP \u2192 Web Server \u2192 Browser", D: "Web Server \u2192 MySQL \u2192 Browser \u2192 PHP" },
+          correctAnswer: "B",
+          explanation: "A request travels from the browser to the web server, which hands it to PHP, which in turn queries MySQL; results then flow back along the same path to the browser."
+        },
 
-  {id:18, chapter:10, difficulty:"Medium",
-   question:"Which clause groups rows that share the same value so aggregate functions like COUNT() or AVG() can be applied to each group?",
-   code:null,
-   options:{A:"GROUP BY", B:"ORDER BY", C:"WHERE", D:"LIMIT"},
-   correctAnswer:"A",
-   explanation:"GROUP BY collects rows with matching values into groups so an aggregate function can be computed once per group."},
+        {
+          id: 26, chapter: 11, difficulty: "Easy",
+          question: "What is the purpose of this statement?",
+          code: "$result = mysqli_query($connection, $query);",
+          options: { A: "Creates a database", B: "Executes a query against the database and returns the result", C: "Deletes a database", D: "Creates a PHP session" },
+          correctAnswer: "B",
+          explanation: "mysqli_query() sends a query to the database over an existing connection and returns the result set (or true/false for statements that don't return rows)."
+        },
 
-  {id:19, chapter:10, difficulty:"Medium",
-   question:"What is the purpose of the HAVING clause in this query?",
-   code:"SELECT customerid, AVG(amount)\nFROM orders\nGROUP BY customerid\nHAVING AVG(amount) > 50;",
-   options:{A:"It filters individual rows before grouping happens", B:"It filters groups after aggregation, keeping only customers whose average order amount exceeds 50", C:"It sorts customers by their average order amount", D:"It limits the results to 50 rows"},
-   correctAnswer:"B",
-   explanation:"HAVING filters groups after GROUP BY and aggregation have been applied, unlike WHERE, which filters individual rows before grouping."},
+        {
+          id: 27, chapter: 11, difficulty: "Medium",
+          question: "Why does the book emphasize checking and filtering input before using it in a database query?",
+          code: null,
+          options: { A: "To make the PHP code shorter", B: "To prevent invalid or malicious input from causing errors or security problems", C: "Because MySQL cannot accept any input coming from PHP", D: "To automatically format the output as HTML" },
+          correctAnswer: "B",
+          explanation: "Unchecked input can break a query, cause unexpected behavior, or be used to inject malicious SQL, so validating and filtering input before it reaches a query is an important safeguard."
+        },
 
-  {id:20, chapter:10, difficulty:"Medium",
-   question:"Which clause controls the order in which returned rows are displayed?",
-   code:null,
-   options:{A:"ORDER BY", B:"GROUP BY", C:"HAVING", D:"LIMIT"},
-   correctAnswer:"A",
-   explanation:"ORDER BY sorts the final result set by one or more columns, ascending or descending."},
+        {
+          id: 28, chapter: 11, difficulty: "Medium",
+          question: "What is the main benefit of using prepared statements when running queries from PHP?",
+          code: null,
+          options: { A: "They let a PHP script run without any database connection", B: "They separate SQL code from user-supplied data, helping prevent SQL injection and improving efficiency for repeated queries", C: "They automatically create the database if it doesn't already exist", D: "They remove the need to check for query errors" },
+          correctAnswer: "B",
+          explanation: "Prepared statements send the SQL structure separately from the data values, so user input is never interpreted as SQL code \u2014 which helps guard against SQL injection and can be more efficient for queries run repeatedly."
+        },
 
-  {id:21, chapter:10, difficulty:"Medium",
-   question:"Which clause restricts a query's result set to a specific number of rows?",
-   code:null,
-   options:{A:"WHERE", B:"LIMIT", C:"HAVING", D:"GROUP BY"},
-   correctAnswer:"B",
-   explanation:"LIMIT caps the number of rows returned by a query, which is useful for things like pagination or \u201ctop N\u201d results."},
+        {
+          id: 29, chapter: 11, difficulty: "Hard",
+          question: "A PHP script needs to: connect to MySQL, select a database, run a SELECT query, retrieve the results, then disconnect. Which sequence reflects the correct order of these steps?",
+          code: null,
+          options: { A: "Retrieve results \u2192 connect \u2192 select database \u2192 run query \u2192 disconnect", B: "Connect \u2192 select database \u2192 execute query \u2192 retrieve results \u2192 disconnect", C: "Select database \u2192 disconnect \u2192 connect \u2192 execute query \u2192 retrieve results", D: "Execute query \u2192 connect \u2192 retrieve results \u2192 select database \u2192 disconnect" },
+          correctAnswer: "B",
+          explanation: "A script must first establish a connection, then select the database to use, then execute the query, then retrieve the results it produced, and finally disconnect."
+        },
 
-  {id:22, chapter:10, difficulty:"Hard",
-   question:"What is a subquery?",
-   code:null,
-   options:{A:"A query that runs on a different MySQL server", B:"A query nested inside another SQL statement, used to supply a value or result set to the outer query", C:"A shortcut for the SELECT * syntax", D:"A stored procedure written in PHP"},
-   correctAnswer:"B",
-   explanation:"A subquery is a SELECT statement embedded inside another SQL statement, such as within a WHERE clause, whose result is used by the outer query."},
+        {
+          id: 30, chapter: 11, difficulty: "Hard",
+          question: "What was PEAR MDB2, as discussed in the book's coverage of PHP/database interfaces?",
+          code: null,
+          options: { A: "A MySQL storage engine", B: "A PHP library providing a common, database-independent interface for working with different database systems", C: "A web server module for handling HTTPS", D: "A MySQL command for managing user privileges" },
+          correctAnswer: "B",
+          explanation: "PEAR MDB2 was a PHP database abstraction library offering a consistent interface for interacting with multiple database systems, so application code did not need to be tightly bound to one database's specific API."
+        }
+      ];
 
-  {id:23, chapter:10, difficulty:"Hard",
-   question:"A query joins the customers and orders tables to list each customer's name alongside their order totals, without using any aggregate function or GROUP BY. If a customer has three orders, how many rows will that customer appear in?",
-   code:null,
-   options:{A:"Exactly one row, no matter how many orders they have", B:"Zero rows, because joins remove duplicates", C:"Three rows, one for each matching order", D:"It depends only on the ORDER BY clause"},
-   correctAnswer:"C",
-   explanation:"When a query joins tables without grouping, each matching combination of rows produces a separate result row, so a customer with three orders appears three times."},
+      /* ============================================================
+         STATE
+         ============================================================ */
+      let examQuestions = [];   // shuffled, working copies with remapped options
+      let currentIndex = 0;
+      let answers = {};         // {questionId: selectedLetter}
+      let timerInterval = null;
+      let secondsRemaining = 45 * 60;
+      let examSubmitted = false;
 
-  {id:24, chapter:10, difficulty:"Hard",
-   question:"Which pair correctly matches an SQL statement that changes the structure of an existing table with one that permanently removes an entire table, including its structure?",
-   code:null,
-   options:{A:"UPDATE changes structure; DELETE removes the table", B:"ALTER TABLE changes structure; DROP TABLE removes the table", C:"INSERT changes structure; DROP DATABASE removes the table", D:"ALTER TABLE removes the table; DROP TABLE changes structure"},
-   correctAnswer:"B",
-   explanation:"ALTER TABLE modifies an existing table's structure, such as adding a column, while DROP TABLE deletes the entire table \u2014 data and structure \u2014 from the database."},
+      /* ============================================================
+         HELPERS
+         ============================================================ */
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
 
-  // ---------------- Chapter 11 (6) ----------------
-  {id:25, chapter:11, difficulty:"Easy",
-   question:"In the standard web database architecture, what is the correct order of components a request passes through?",
-   code:null,
-   options:{A:"PHP \u2192 Browser \u2192 MySQL \u2192 Web Server", B:"Browser \u2192 Web Server \u2192 PHP \u2192 MySQL", C:"MySQL \u2192 PHP \u2192 Web Server \u2192 Browser", D:"Web Server \u2192 MySQL \u2192 Browser \u2192 PHP"},
-   correctAnswer:"B",
-   explanation:"A request travels from the browser to the web server, which hands it to PHP, which in turn queries MySQL; results then flow back along the same path to the browser."},
+      function buildExamQuestions() {
+        const shuffledQs = shuffle(QUESTIONS);
+        examQuestions = shuffledQs.map(q => {
+          const letters = ["A", "B", "C", "D"];
+          const entries = letters.map(l => ({ text: q.options[l], isCorrect: l === q.correctAnswer }));
+          const shuffledEntries = shuffle(entries);
+          const newOptions = {};
+          let newCorrectLetter = "A";
+          shuffledEntries.forEach((entry, idx) => {
+            const letter = letters[idx];
+            newOptions[letter] = entry.text;
+            if (entry.isCorrect) newCorrectLetter = letter;
+          });
+          return {
+            id: q.id,
+            chapter: q.chapter,
+            difficulty: q.difficulty,
+            question: q.question,
+            code: q.code,
+            options: newOptions,
+            correctAnswer: newCorrectLetter,
+            explanation: q.explanation
+          };
+        });
+      }
 
-  {id:26, chapter:11, difficulty:"Easy",
-   question:"What is the purpose of this statement?",
-   code:"$result = mysqli_query($connection, $query);",
-   options:{A:"Creates a database", B:"Executes a query against the database and returns the result", C:"Deletes a database", D:"Creates a PHP session"},
-   correctAnswer:"B",
-   explanation:"mysqli_query() sends a query to the database over an existing connection and returns the result set (or true/false for statements that don't return rows)."},
+      function formatTime(totalSeconds) {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      }
 
-  {id:27, chapter:11, difficulty:"Medium",
-   question:"Why does the book emphasize checking and filtering input before using it in a database query?",
-   code:null,
-   options:{A:"To make the PHP code shorter", B:"To prevent invalid or malicious input from causing errors or security problems", C:"Because MySQL cannot accept any input coming from PHP", D:"To automatically format the output as HTML"},
-   correctAnswer:"B",
-   explanation:"Unchecked input can break a query, cause unexpected behavior, or be used to inject malicious SQL, so validating and filtering input before it reaches a query is an important safeguard."},
+      function showScreen(id) {
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        window.scrollTo(0, 0);
+      }
 
-  {id:28, chapter:11, difficulty:"Medium",
-   question:"What is the main benefit of using prepared statements when running queries from PHP?",
-   code:null,
-   options:{A:"They let a PHP script run without any database connection", B:"They separate SQL code from user-supplied data, helping prevent SQL injection and improving efficiency for repeated queries", C:"They automatically create the database if it doesn't already exist", D:"They remove the need to check for query errors"},
-   correctAnswer:"B",
-   explanation:"Prepared statements send the SQL structure separately from the data values, so user input is never interpreted as SQL code \u2014 which helps guard against SQL injection and can be more efficient for queries run repeatedly."},
+      /* ============================================================
+         TIMER
+         ============================================================ */
+      function startTimer() {
+        secondsRemaining = 45 * 60;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+          secondsRemaining--;
+          if (secondsRemaining <= 0) {
+            secondsRemaining = 0;
+            updateTimerDisplay();
+            clearInterval(timerInterval);
+            finalizeSubmit(true);
+            return;
+          }
+          updateTimerDisplay();
+        }, 1000);
+      }
 
-  {id:29, chapter:11, difficulty:"Hard",
-   question:"A PHP script needs to: connect to MySQL, select a database, run a SELECT query, retrieve the results, then disconnect. Which sequence reflects the correct order of these steps?",
-   code:null,
-   options:{A:"Retrieve results \u2192 connect \u2192 select database \u2192 run query \u2192 disconnect", B:"Connect \u2192 select database \u2192 execute query \u2192 retrieve results \u2192 disconnect", C:"Select database \u2192 disconnect \u2192 connect \u2192 execute query \u2192 retrieve results", D:"Execute query \u2192 connect \u2192 retrieve results \u2192 select database \u2192 disconnect"},
-   correctAnswer:"B",
-   explanation:"A script must first establish a connection, then select the database to use, then execute the query, then retrieve the results it produced, and finally disconnect."},
+      function updateTimerDisplay() {
+        const el = document.getElementById("timer-text");
+        const wrap = document.getElementById("timer");
+        el.textContent = formatTime(secondsRemaining);
+        if (secondsRemaining <= 300) { // last 5 minutes
+          wrap.classList.add("low");
+        } else {
+          wrap.classList.remove("low");
+        }
+      }
 
-  {id:30, chapter:11, difficulty:"Hard",
-   question:"What was PEAR MDB2, as discussed in the book's coverage of PHP/database interfaces?",
-   code:null,
-   options:{A:"A MySQL storage engine", B:"A PHP library providing a common, database-independent interface for working with different database systems", C:"A web server module for handling HTTPS", D:"A MySQL command for managing user privileges"},
-   correctAnswer:"B",
-   explanation:"PEAR MDB2 was a PHP database abstraction library offering a consistent interface for interacting with multiple database systems, so application code did not need to be tightly bound to one database's specific API."}
-];
+      /* ============================================================
+         EXAM RENDERING
+         ============================================================ */
+      function renderQuestion() {
+        const q = examQuestions[currentIndex];
+        document.getElementById("q-count").textContent = `Question ${currentIndex + 1} / ${examQuestions.length}`;
+        document.getElementById("q-chapter").textContent = `Chapter ${q.chapter}`;
+        const diffBadge = document.getElementById("q-difficulty");
+        diffBadge.textContent = q.difficulty;
+        diffBadge.className = "q-badge mono diff-" + q.difficulty;
 
-/* ============================================================
-   STATE
-   ============================================================ */
-let examQuestions = [];   // shuffled, working copies with remapped options
-let currentIndex = 0;
-let answers = {};         // {questionId: selectedLetter}
-let timerInterval = null;
-let secondsRemaining = 45 * 60;
-let examSubmitted = false;
+        document.getElementById("question-text").textContent = q.question;
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+        const codeEl = document.getElementById("question-code");
+        if (q.code) {
+          codeEl.style.display = "block";
+          codeEl.textContent = q.code;
+        } else {
+          codeEl.style.display = "none";
+          codeEl.textContent = "";
+        }
 
-function buildExamQuestions(){
-  const shuffledQs = shuffle(QUESTIONS);
-  examQuestions = shuffledQs.map(q => {
-    const letters = ["A","B","C","D"];
-    const entries = letters.map(l => ({ text: q.options[l], isCorrect: l === q.correctAnswer }));
-    const shuffledEntries = shuffle(entries);
-    const newOptions = {};
-    let newCorrectLetter = "A";
-    shuffledEntries.forEach((entry, idx) => {
-      const letter = letters[idx];
-      newOptions[letter] = entry.text;
-      if(entry.isCorrect) newCorrectLetter = letter;
-    });
-    return {
-      id: q.id,
-      chapter: q.chapter,
-      difficulty: q.difficulty,
-      question: q.question,
-      code: q.code,
-      options: newOptions,
-      correctAnswer: newCorrectLetter,
-      explanation: q.explanation
-    };
-  });
-}
-
-function formatTime(totalSeconds){
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
-}
-
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  window.scrollTo(0,0);
-}
-
-/* ============================================================
-   TIMER
-   ============================================================ */
-function startTimer(){
-  secondsRemaining = 45 * 60;
-  updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    secondsRemaining--;
-    if(secondsRemaining <= 0){
-      secondsRemaining = 0;
-      updateTimerDisplay();
-      clearInterval(timerInterval);
-      finalizeSubmit(true);
-      return;
-    }
-    updateTimerDisplay();
-  }, 1000);
-}
-
-function updateTimerDisplay(){
-  const el = document.getElementById("timer-text");
-  const wrap = document.getElementById("timer");
-  el.textContent = formatTime(secondsRemaining);
-  if(secondsRemaining <= 300){ // last 5 minutes
-    wrap.classList.add("low");
-  } else {
-    wrap.classList.remove("low");
-  }
-}
-
-/* ============================================================
-   EXAM RENDERING
-   ============================================================ */
-function renderQuestion(){
-  const q = examQuestions[currentIndex];
-  document.getElementById("q-count").textContent = `Question ${currentIndex + 1} / ${examQuestions.length}`;
-  document.getElementById("q-chapter").textContent = `Chapter ${q.chapter}`;
-  const diffBadge = document.getElementById("q-difficulty");
-  diffBadge.textContent = q.difficulty;
-  diffBadge.className = "q-badge mono diff-" + q.difficulty;
-
-  document.getElementById("question-text").textContent = q.question;
-
-  const codeEl = document.getElementById("question-code");
-  if(q.code){
-    codeEl.style.display = "block";
-    codeEl.textContent = q.code;
-  } else {
-    codeEl.style.display = "none";
-    codeEl.textContent = "";
-  }
-
-  const optionsList = document.getElementById("options-list");
-  optionsList.innerHTML = "";
-  ["A","B","C","D"].forEach(letter => {
-    const row = document.createElement("div");
-    row.className = "option-row";
-    row.setAttribute("role","radio");
-    row.setAttribute("tabindex","0");
-    row.setAttribute("aria-checked", answers[q.id] === letter ? "true" : "false");
-    if(answers[q.id] === letter) row.classList.add("selected");
-    row.innerHTML = `
+        const optionsList = document.getElementById("options-list");
+        optionsList.innerHTML = "";
+        ["A", "B", "C", "D"].forEach(letter => {
+          const row = document.createElement("div");
+          row.className = "option-row";
+          row.setAttribute("role", "radio");
+          row.setAttribute("tabindex", "0");
+          row.setAttribute("aria-checked", answers[q.id] === letter ? "true" : "false");
+          if (answers[q.id] === letter) row.classList.add("selected");
+          row.innerHTML = `
       <span class="option-radio"></span>
       <span class="option-letter mono">${letter}</span>
       <span class="option-text">${escapeHtml(q.options[letter])}</span>
     `;
-    row.addEventListener("click", () => selectAnswer(q.id, letter));
-    row.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); selectAnswer(q.id, letter); }
-    });
-    optionsList.appendChild(row);
-  });
+          row.addEventListener("click", () => selectAnswer(q.id, letter));
+          row.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectAnswer(q.id, letter); }
+          });
+          optionsList.appendChild(row);
+        });
 
-  document.getElementById("prev-btn").disabled = currentIndex === 0;
-  document.getElementById("next-btn").textContent = currentIndex === examQuestions.length - 1 ? "Next →" : "Next →";
+        document.getElementById("prev-btn").disabled = currentIndex === 0;
+        document.getElementById("next-btn").textContent = currentIndex === examQuestions.length - 1 ? "Next →" : "Next →";
 
-  updateProgress();
-  renderNavigator();
-}
+        updateProgress();
+        renderNavigator();
+      }
 
-function escapeHtml(str){
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
+      function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
 
-function selectAnswer(qId, letter){
-  answers[qId] = letter;
-  renderQuestion();
-}
+      function selectAnswer(qId, letter) {
+        answers[qId] = letter;
+        renderQuestion();
+      }
 
-function updateProgress(){
-  const answeredCount = Object.keys(answers).length;
-  const pct = Math.round(((currentIndex + 1) / examQuestions.length) * 100);
-  document.getElementById("progress-fill").style.width = pct + "%";
-}
+      function updateProgress() {
+        const answeredCount = Object.keys(answers).length;
+        const pct = Math.round(((currentIndex + 1) / examQuestions.length) * 100);
+        document.getElementById("progress-fill").style.width = pct + "%";
+      }
 
-function renderNavigator(){
-  const grid = document.getElementById("nav-grid");
-  grid.innerHTML = "";
-  examQuestions.forEach((q, idx) => {
-    const cell = document.createElement("div");
-    let cls = "nav-cell";
-    if(answers[q.id] !== undefined) cls += " answered";
-    if(idx === currentIndex) cls += " current";
-    cell.className = cls;
-    cell.textContent = idx + 1;
-    cell.title = `Question ${idx + 1}${answers[q.id] !== undefined ? " (answered)" : ""}`;
-    cell.addEventListener("click", () => { currentIndex = idx; renderQuestion(); });
-    grid.appendChild(cell);
-  });
-}
+      function renderNavigator() {
+        const grid = document.getElementById("nav-grid");
+        grid.innerHTML = "";
+        examQuestions.forEach((q, idx) => {
+          const cell = document.createElement("div");
+          let cls = "nav-cell";
+          if (answers[q.id] !== undefined) cls += " answered";
+          if (idx === currentIndex) cls += " current";
+          cell.className = cls;
+          cell.textContent = idx + 1;
+          cell.title = `Question ${idx + 1}${answers[q.id] !== undefined ? " (answered)" : ""}`;
+          cell.addEventListener("click", () => { currentIndex = idx; renderQuestion(); });
+          grid.appendChild(cell);
+        });
+      }
 
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
-document.getElementById("prev-btn").addEventListener("click", () => {
-  if(currentIndex > 0){ currentIndex--; renderQuestion(); }
-});
-document.getElementById("next-btn").addEventListener("click", () => {
-  if(currentIndex < examQuestions.length - 1){ currentIndex++; renderQuestion(); }
-});
+      /* ============================================================
+         NAVIGATION
+         ============================================================ */
+      document.getElementById("prev-btn").addEventListener("click", () => {
+        if (currentIndex > 0) { currentIndex--; renderQuestion(); }
+      });
+      document.getElementById("next-btn").addEventListener("click", () => {
+        if (currentIndex < examQuestions.length - 1) { currentIndex++; renderQuestion(); }
+      });
 
-/* ============================================================
-   START / SUBMIT FLOW
-   ============================================================ */
-document.getElementById("start-btn").addEventListener("click", () => {
-  buildExamQuestions();
-  currentIndex = 0;
-  answers = {};
-  examSubmitted = false;
-  showScreen("exam-screen");
-  renderQuestion();
-  startTimer();
-});
+      /* ============================================================
+         START / SUBMIT FLOW
+         ============================================================ */
+      document.getElementById("start-btn").addEventListener("click", () => {
+        buildExamQuestions();
+        currentIndex = 0;
+        answers = {};
+        examSubmitted = false;
+        showScreen("exam-screen");
+        renderQuestion();
+        startTimer();
+      });
 
-document.getElementById("submit-btn").addEventListener("click", () => openSubmitModal());
+      document.getElementById("submit-btn").addEventListener("click", () => openSubmitModal());
 
-function openSubmitModal(){
-  const answeredCount = Object.keys(answers).length;
-  const total = examQuestions.length;
-  document.getElementById("modal-answered").textContent = answeredCount;
-  document.getElementById("modal-unanswered").textContent = total - answeredCount;
-  document.getElementById("submit-modal").classList.add("active");
-}
+      function openSubmitModal() {
+        const answeredCount = Object.keys(answers).length;
+        const total = examQuestions.length;
+        document.getElementById("modal-answered").textContent = answeredCount;
+        document.getElementById("modal-unanswered").textContent = total - answeredCount;
+        document.getElementById("submit-modal").classList.add("active");
+      }
 
-document.getElementById("modal-cancel").addEventListener("click", () => {
-  document.getElementById("submit-modal").classList.remove("active");
-});
-document.getElementById("modal-submit").addEventListener("click", () => {
-  document.getElementById("submit-modal").classList.remove("active");
-  finalizeSubmit(false);
-});
+      document.getElementById("modal-cancel").addEventListener("click", () => {
+        document.getElementById("submit-modal").classList.remove("active");
+      });
+      document.getElementById("modal-submit").addEventListener("click", () => {
+        document.getElementById("submit-modal").classList.remove("active");
+        finalizeSubmit(false);
+      });
 
-function finalizeSubmit(autoSubmitted){
-  if(examSubmitted) return;
-  examSubmitted = true;
-  clearInterval(timerInterval);
-  renderResults();
-  showScreen("results-screen");
-}
+      function finalizeSubmit(autoSubmitted) {
+        if (examSubmitted) return;
+        examSubmitted = true;
+        clearInterval(timerInterval);
+        renderResults();
+        showScreen("results-screen");
+      }
 
-/* Warn before leaving the exam page */
-window.addEventListener("beforeunload", function(e){
-  const examActive = document.getElementById("exam-screen").classList.contains("active");
-  if(examActive && !examSubmitted){
-    e.preventDefault();
-    e.returnValue = "";
-    return "";
-  }
-});
+      /* Warn before leaving the exam page */
+      window.addEventListener("beforeunload", function (e) {
+        const examActive = document.getElementById("exam-screen").classList.contains("active");
+        if (examActive && !examSubmitted) {
+          e.preventDefault();
+          e.returnValue = "";
+          return "";
+        }
+      });
 
-/* ============================================================
-   RESULTS
-   ============================================================ */
-function renderResults(){
-  let correct = 0, incorrect = 0, unanswered = 0;
-  examQuestions.forEach(q => {
-    const given = answers[q.id];
-    if(given === undefined) unanswered++;
-    else if(given === q.correctAnswer) correct++;
-    else incorrect++;
-  });
+      /* ============================================================
+         RESULTS
+         ============================================================ */
+      function renderResults() {
+        let correct = 0, incorrect = 0, unanswered = 0;
+        examQuestions.forEach(q => {
+          const given = answers[q.id];
+          if (given === undefined) unanswered++;
+          else if (given === q.correctAnswer) correct++;
+          else incorrect++;
+        });
 
-  const total = examQuestions.length;
-  const pct = Math.round((correct / total) * 100);
+        const total = examQuestions.length;
+        const pct = Math.round((correct / total) * 100);
 
-  document.getElementById("score-big").textContent = `${correct} / ${total}`;
-  document.getElementById("score-pct").textContent = `${pct}%`;
-  document.getElementById("correct-count").textContent = correct;
-  document.getElementById("incorrect-count").textContent = incorrect;
-  document.getElementById("unanswered-count").textContent = unanswered;
+        document.getElementById("score-big").textContent = `${correct} / ${total}`;
+        document.getElementById("score-pct").textContent = `${pct}%`;
+        document.getElementById("correct-count").textContent = correct;
+        document.getElementById("incorrect-count").textContent = incorrect;
+        document.getElementById("unanswered-count").textContent = unanswered;
 
-  let gradeLabel = "Needs Improvement";
-  let band = "BELOW 60%";
-  if(pct >= 90){ gradeLabel = "Excellent"; band = "90–100%"; }
-  else if(pct >= 80){ gradeLabel = "Very Good"; band = "80–89%"; }
-  else if(pct >= 70){ gradeLabel = "Good"; band = "70–79%"; }
-  else if(pct >= 60){ gradeLabel = "Pass"; band = "60–69%"; }
+        let gradeLabel = "Needs Improvement";
+        let band = "BELOW 60%";
+        if (pct >= 90) { gradeLabel = "Excellent"; band = "90–100%"; }
+        else if (pct >= 80) { gradeLabel = "Very Good"; band = "80–89%"; }
+        else if (pct >= 70) { gradeLabel = "Good"; band = "70–79%"; }
+        else if (pct >= 60) { gradeLabel = "Pass"; band = "60–69%"; }
 
-  document.getElementById("grade-band").textContent = band;
-  document.getElementById("grade-pill").textContent = gradeLabel;
+        document.getElementById("grade-band").textContent = band;
+        document.getElementById("grade-pill").textContent = gradeLabel;
 
-  renderReview();
-}
+        renderReview();
+      }
 
-/* ============================================================
-   REVIEW
-   ============================================================ */
-function renderReview(){
-  const body = document.getElementById("review-body");
-  body.innerHTML = "";
-  examQuestions.forEach((q, idx) => {
-    const given = answers[q.id];
-    const isAnswered = given !== undefined;
-    const isCorrect = isAnswered && given === q.correctAnswer;
+      /* ============================================================
+         REVIEW
+         ============================================================ */
+      function renderReview() {
+        const body = document.getElementById("review-body");
+        body.innerHTML = "";
+        examQuestions.forEach((q, idx) => {
+          const given = answers[q.id];
+          const isAnswered = given !== undefined;
+          const isCorrect = isAnswered && given === q.correctAnswer;
 
-    const item = document.createElement("div");
-    item.className = "review-item";
+          const item = document.createElement("div");
+          item.className = "review-item";
 
-    let statusHtml;
-    if(!isAnswered){
-      statusHtml = `<span class="status-pill unanswered">— Unanswered</span>`;
-    } else if(isCorrect){
-      statusHtml = `<span class="status-pill correct">✓ Correct</span>`;
-    } else {
-      statusHtml = `<span class="status-pill incorrect">✗ Incorrect</span>`;
-    }
+          let statusHtml;
+          if (!isAnswered) {
+            statusHtml = `<span class="status-pill unanswered">— Unanswered</span>`;
+          } else if (isCorrect) {
+            statusHtml = `<span class="status-pill correct">✓ Correct</span>`;
+          } else {
+            statusHtml = `<span class="status-pill incorrect">✗ Incorrect</span>`;
+          }
 
-    let optionsHtml = "";
-    ["A","B","C","D"].forEach(letter => {
-      let cls = "review-option";
-      let marker = letter;
-      if(letter === q.correctAnswer) cls += " is-correct";
-      if(isAnswered && letter === given && given !== q.correctAnswer) cls += " is-wrong";
-      optionsHtml += `
+          let optionsHtml = "";
+          ["A", "B", "C", "D"].forEach(letter => {
+            let cls = "review-option";
+            let marker = letter;
+            if (letter === q.correctAnswer) cls += " is-correct";
+            if (isAnswered && letter === given && given !== q.correctAnswer) cls += " is-wrong";
+            optionsHtml += `
         <div class="${cls}">
           <span class="option-letter mono">${letter}</span>
           <span>${escapeHtml(q.options[letter])}</span>
         </div>`;
-    });
+          });
 
-    const codeHtml = q.code ? `<pre class="question-code mono">${escapeHtml(q.code)}</pre>` : "";
+          const codeHtml = q.code ? `<pre class="question-code mono">${escapeHtml(q.code)}</pre>` : "";
 
-    item.innerHTML = `
+          item.innerHTML = `
       <div class="review-item-head">
         <div class="q-meta-row" style="margin:0;">
           <span class="q-badge mono">Question ${idx + 1}</span>
@@ -971,21 +1731,22 @@ function renderReview(){
       <div class="review-options">${optionsHtml}</div>
       <div class="review-explain"><b>Why:</b> ${escapeHtml(q.explanation)}</div>
     `;
-    body.appendChild(item);
-  });
-}
+          body.appendChild(item);
+        });
+      }
 
-document.getElementById("review-btn").addEventListener("click", () => {
-  showScreen("review-screen");
-});
-document.getElementById("back-to-results-btn").addEventListener("click", () => {
-  showScreen("results-screen");
-});
-document.getElementById("restart-btn").addEventListener("click", () => {
-  showScreen("start-screen");
-});
+      document.getElementById("review-btn").addEventListener("click", () => {
+        showScreen("review-screen");
+      });
+      document.getElementById("back-to-results-btn").addEventListener("click", () => {
+        showScreen("results-screen");
+      });
+      document.getElementById("restart-btn").addEventListener("click", () => {
+        showScreen("start-screen");
+      });
 
-})();
-</script>
+    })();
+  </script>
 </body>
+
 </html>
