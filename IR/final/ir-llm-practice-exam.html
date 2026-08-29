@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Information Retrieval &amp; LLMs — Practice Exam</title>
+<style>
+  :root{
+    --paper:#14171A;
+    --ink:#E7E4DA;
+    --ink-soft:#9A9F97;
+    --rule:#33383A;
+    --moss:#6FA37D;
+    --moss-deep:#8FC79C;
+    --gold:#D3AB55;
+    --brick:#D97A63;
+    --card:#1B1F22;
+    --good:#6FA37D;
+    --bad:#D97A63;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family: "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .bg-texture{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(var(--rule) 1px, transparent 1px);
+    background-size: 100% 42px;
+    opacity:0.35;
+  }
+  .wrap{
+    position:relative;z-index:1;
+    max-width:760px;
+    margin:0 auto;
+    padding:36px 22px 90px;
+  }
+  header.masthead{
+    border-bottom:3px double var(--ink);
+    padding-bottom:14px;
+    margin-bottom:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .masthead h1{
+    font-family:"Trajan Pro","Cinzel",Georgia,serif;
+    font-weight:700;
+    letter-spacing:0.04em;
+    font-size:1.5rem;
+    margin:0 0 4px;
+    color:var(--moss-deep);
+    text-transform:uppercase;
+  }
+  .masthead .sub{
+    font-family:"Courier New",monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    letter-spacing:0.02em;
+  }
+  .ledger{
+    font-family:"Courier New",monospace;
+    font-size:0.82rem;
+    text-align:right;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  .ledger b{ color:var(--moss-deep); font-size:1.05rem; }
+
+  .progress-rail{
+    display:flex;
+    gap:3px;
+    margin:0 0 26px;
+    flex-wrap:wrap;
+  }
+  .tick{
+    flex:1 1 0;
+    min-width:6px;
+    height:8px;
+    background:var(--rule);
+    border-radius:1px;
+  }
+  .tick.done-correct{ background:var(--moss); }
+  .tick.done-wrong{ background:var(--brick); }
+  .tick.current{ background:var(--gold); }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:3px;
+    padding:28px 26px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+  .qmeta{
+    display:flex;
+    justify-content:space-between;
+    font-family:"Courier New",monospace;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .qmeta .topic{ color:var(--moss-deep); font-weight:bold; }
+  .diff-easy{ color:var(--moss); }
+  .diff-medium{ color:var(--gold); }
+  .diff-hard{ color:var(--brick); }
+
+  h2.qtext{
+    font-size:1.28rem;
+    line-height:1.42;
+    margin:0 0 22px;
+    color:var(--ink);
+    font-weight:600;
+  }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    background:transparent;
+    border:1px solid var(--rule);
+    border-radius:2px;
+    padding:13px 15px;
+    font-family:inherit;
+    font-size:1rem;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .opt:hover:not(:disabled){ background:#22272A; border-color:var(--moss); }
+  .opt:disabled{ cursor:default; }
+  .opt .letter{
+    font-family:"Courier New",monospace;
+    font-weight:bold;
+    color:var(--moss-deep);
+    border:1px solid var(--moss-deep);
+    border-radius:50%;
+    width:24px;height:24px;
+    flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.82rem;
+  }
+  .opt.correct{ background:#1E2C21; border-color:var(--good); }
+  .opt.correct .letter{ background:var(--good); color:#0E1210; border-color:var(--good); }
+  .opt.wrong{ background:#2C1F1B; border-color:var(--bad); }
+  .opt.wrong .letter{ background:var(--bad); color:#0E1210; border-color:var(--bad); }
+
+  .feedback{
+    margin-top:20px;
+    padding-top:18px;
+    border-top:1px dashed var(--rule);
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .verdict{
+    font-family:"Courier New",monospace;
+    font-weight:bold;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    font-size:0.9rem;
+    margin-bottom:8px;
+  }
+  .verdict.right{ color:var(--good); }
+  .verdict.wrong{ color:var(--bad); }
+  .explain{ font-size:0.98rem; line-height:1.55; color:var(--ink-soft); margin-bottom:18px; }
+  .explain b{ color:var(--ink); }
+
+  .nextbar{ display:flex; justify-content:flex-end; }
+  button.next-btn{
+    font-family:"Courier New",monospace;
+    background:var(--moss-deep);
+    color:#0E1210;
+    border:none;
+    border-radius:2px;
+    padding:11px 20px;
+    font-size:0.85rem;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  button.next-btn:hover{ background:var(--moss); }
+
+  /* Final report */
+  .report{ }
+  .report h2{
+    font-family:"Trajan Pro","Cinzel",Georgia,serif;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--moss-deep);
+    font-size:1.2rem;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:8px;
+    margin:34px 0 14px;
+  }
+  .report h2:first-child{ margin-top:0; }
+  .scoreblock{
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    align-items:baseline;
+    margin-bottom:6px;
+  }
+  .scoreblock .big{
+    font-family:"Courier New",monospace;
+    font-size:2.6rem;
+    font-weight:bold;
+    color:var(--moss-deep);
+  }
+  .scoreblock .grade{
+    font-family:"Courier New",monospace;
+    font-size:1rem;
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .stat-row{
+    font-family:"Courier New",monospace;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  ul.plain{ padding-left:20px; margin:8px 0; }
+  ul.plain li{ margin-bottom:6px; line-height:1.5; }
+
+  .mistake{
+    border:1px solid var(--rule);
+    border-left:3px solid var(--brick);
+    background:var(--card);
+    padding:12px 15px;
+    margin-bottom:10px;
+    border-radius:2px;
+  }
+  .mistake .mtitle{
+    font-family:"Courier New",monospace;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .mistake .mtitle b{ color:var(--brick); }
+  .mistake p{ margin:4px 0; font-size:0.94rem; line-height:1.45; }
+
+  .sheet{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:3px;
+    padding:20px 22px;
+  }
+  .sheet h3{
+    font-size:0.95rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--moss-deep);
+    border-bottom:1px solid var(--rule);
+    padding-bottom:6px;
+    margin:20px 0 8px;
+  }
+  .sheet h3:first-child{ margin-top:0; }
+  .sheet dt{ font-weight:bold; color:var(--ink); margin-top:8px; }
+  .sheet dd{ margin:2px 0 0; color:var(--ink-soft); font-size:0.93rem; line-height:1.45; }
+
+  .restart-btn{
+    display:block;
+    margin:30px auto 0;
+    font-family:"Courier New",monospace;
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--rule);
+    border-radius:2px;
+    padding:10px 18px;
+    font-size:0.8rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .restart-btn:hover{ border-color:var(--ink); color:var(--ink); }
+
+  .intro{
+    text-align:center;
+    padding:60px 10px;
+  }
+  .intro p{ color:var(--ink-soft); line-height:1.6; max-width:520px; margin:14px auto 0; }
+  .start-btn{
+    margin-top:26px;
+    font-family:"Courier New",monospace;
+    background:var(--moss-deep);
+    color:#0E1210;
+    border:none;
+    border-radius:2px;
+    padding:14px 30px;
+    font-size:0.95rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  .start-btn:hover{ background:var(--moss); }
+
+  @media (max-width:480px){
+    .card{ padding:20px 16px; }
+    h2.qtext{ font-size:1.1rem; }
+    .masthead{ flex-direction:column; align-items:flex-start; }
+    .ledger{ text-align:left; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-texture"></div>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Information Retrieval &amp; LLMs</h1>
+      <div class="sub">Practice Examination · 40 Questions · Michaelmas Revision</div>
+    </div>
+    <div class="ledger" id="ledgerBox">
+      Score: <b>0 / 40</b><br>
+      Question 0 of 40
+    </div>
+  </header>
+
+  <div class="progress-rail" id="progressRail"></div>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+{topic:"Retrieval Systems", difficulty:"easy",
+ q:"What is the primary function of an inverted index in a classical retrieval system?",
+ options:[
+  "It stores document embeddings for nearest-neighbor search",
+  "It maps each term in the vocabulary to a list of documents/positions where that term occurs",
+  "It ranks documents using a neural network",
+  "It compresses the raw text of documents for storage"],
+ correct:1,
+ explain:"An inverted index maps vocabulary terms to <b>postings lists</b> — the documents (and positions) containing them — enabling fast lookup for queries."},
+
+{topic:"Retrieval Systems", difficulty:"medium",
+ q:"In Salton's classical term vector model (the basis of lexical retrieval), how are words treated?",
+ options:[
+  "As semantically meaningful vectors positioned by context",
+  "As uninterpreted, statistically independent tokens",
+  "As nodes in a knowledge graph",
+  "As probability distributions over topics"],
+ correct:1,
+ explain:"The term vector model treats words as <b>uninterpreted tokens</b> assumed to be statistically independent — it captures lexical overlap, not meaning."},
+
+{topic:"Embeddings", difficulty:"easy",
+ q:"What is the key idea behind word embeddings such as word2vec?",
+ options:[
+  "Words are assigned a unique integer ID with no relationship to other words",
+  "Words are represented as fixed-size real-valued vectors learned to predict their surrounding context",
+  "Words are represented by their frequency count across the corpus only",
+  "Words are mapped directly to a hierarchical subject taxonomy"],
+ correct:1,
+ explain:"Word embeddings represent each word as a dense vector trained so that words appearing in similar <b>contexts</b> end up with similar vectors — 'a word is known by the company it keeps.'"},
+
+{topic:"Embeddings", difficulty:"medium",
+ q:"Which of the following correctly contrasts lexical (term vector) and semantic (embedding) document representations?",
+ options:[
+  "Lexical representations are low-dimensional and dense; semantic representations are high-dimensional and sparse",
+  "Lexical representations are high-dimensional and sparse; semantic representations are low-dimensional and dense",
+  "Both representations are equally dense and of the same dimensionality",
+  "Semantic representations cannot be compared using distance metrics"],
+ correct:1,
+ explain:"Term vectors have one dimension per vocabulary word (very high-dimensional, sparse); embeddings compress meaning into a much smaller, <b>dense</b> vector space."},
+
+{topic:"Retrieval Systems", difficulty:"medium",
+ q:"What is the main purpose of a vector database in a semantic retrieval system?",
+ options:[
+  "To store the raw HTML of crawled web pages",
+  "To efficiently find the k nearest vectors to a given query vector",
+  "To compute term frequency statistics for BM25",
+  "To translate queries into Boolean expressions"],
+ correct:1,
+ explain:"Vector databases (e.g., FAISS, ScaNN) exist to perform fast <b>approximate nearest-neighbor search</b> over high-dimensional embeddings."},
+
+{topic:"Retrieval Systems", difficulty:"medium",
+ q:"Why do many production systems use a hybrid lexical/semantic retrieval architecture rather than semantic retrieval alone?",
+ options:[
+  "Semantic retrieval is more accurate for every query type, so hybrids are only used for legacy reasons",
+  "Inverted indices scale and update more easily, and lexical matching is strong for precision queries such as exact part numbers",
+  "Vector databases cannot represent documents of variable length",
+  "Lexical retrieval requires no offline indexing at all"],
+ correct:1,
+ explain:"Hybrid systems combine the two because inverted indices are cheaper to scale/update and excel at precision (exact-match) queries, while embeddings capture semantic similarity."},
+
+{topic:"Retrieval Systems", difficulty:"medium",
+ q:"What does the term 'Delphic Cost' refer to in information retrieval?",
+ options:[
+  "The monetary cost of running a search engine's servers",
+  "The non-monetary costs to the user — time, cognitive load, and interactivity — of satisfying an information need",
+  "The cost of training a large language model",
+  "The cost of indexing new documents into an inverted index"],
+ correct:1,
+ explain:"Delphic Cost describes the <b>time and cognitive effort</b> a user spends framing queries and scanning results — much of IR research aims to reduce it."},
+
+{topic:"Retrieval Systems", difficulty:"medium",
+ q:"What made BERT's pre-training approach a significant advance for language representation over earlier models?",
+ options:[
+  "It only reads text left-to-right, like earlier language models",
+  "It is bidirectional and contextual, so the same word can have different representations depending on context",
+  "It removed the need for any training data",
+  "It replaced transformers with LSTMs for better scalability"],
+ correct:1,
+ explain:"BERT is <b>bidirectional</b> (uses both left and right context) and produces <b>contextual</b> representations, so homonyms get different vectors depending on usage."},
+
+{topic:"RAG / Generative QA", difficulty:"hard",
+ q:"What is the fundamental distinguishing feature of closed-book generative question answering compared to open-book (retrieval-augmented) approaches?",
+ options:[
+  "Closed-book systems rely solely on knowledge stored in the language model's parameters, with no external memory used during generation",
+  "Closed-book systems always outperform open-book systems on factual accuracy",
+  "Closed-book systems require a retriever but no generator",
+  "Open-book systems never use a language model"],
+ correct:0,
+ explain:"In <b>closed-book</b> QA, the language model itself is the only knowledge source; <b>open-book</b> systems draw on external memory such as a retriever before/during generation."},
+
+{topic:"RAG / Generative QA", difficulty:"hard",
+ q:"Which of the following best distinguishes RAG (Retrieval-Augmented Generation) from its precursor REALM?",
+ options:[
+  "RAG retrieves and segments text at the passage level and generates a separate hypothesis per passage before selecting the best one, whereas REALM retrieves whole documents and then extracts a span",
+  "RAG uses no retriever at all, unlike REALM",
+  "REALM is a purely generative model, while RAG is purely extractive",
+  "RAG cannot be trained end-to-end, while REALM can"],
+ correct:0,
+ explain:"RAG performs passage-level retrieval and generates candidate answers per passage, ranking them; REALM retrieves whole documents and then extracts a span using a separate extractor."},
+
+{topic:"RAG / Generative QA", difficulty:"easy",
+ q:"What is the main purpose of Retrieval-Augmented Generation (RAG)?",
+ options:[
+  "To replace the language model entirely with a search engine",
+  "To ground a generative model's output in retrieved external documents rather than relying only on parameters",
+  "To compress a language model into fewer parameters",
+  "To eliminate the need for tokenization"],
+ correct:1,
+ explain:"RAG combines a retriever with a generator so that answers are <b>grounded</b> in retrieved evidence, improving factuality and freshness."},
+
+{topic:"RAG / Generative QA", difficulty:"medium",
+ q:"What is a key advantage of RAG-style systems over relying purely on a fine-tuned model's memorized knowledge?",
+ options:[
+  "They eliminate the need for any language model",
+  "They can incorporate up-to-date or newly added information at query time without retraining the model",
+  "They always require less compute than closed-book models",
+  "They guarantee zero hallucinations"],
+ correct:1,
+ explain:"Because knowledge lives in an external, updatable corpus, RAG systems can reflect new information immediately, avoiding costly retraining of the model's parameters."},
+
+{topic:"RAG / Generative QA", difficulty:"medium",
+ q:"Which of the following is a genuine limitation of retrieval-augmented generation?",
+ options:[
+  "The system's overall answer quality is bottlenecked by the quality/relevance of the documents the retriever returns",
+  "RAG systems cannot use a language model for generation",
+  "RAG systems cannot be evaluated on standard QA benchmarks",
+  "RAG systems require no corpus at all"],
+ correct:0,
+ explain:"If the retriever fails to surface relevant passages, the generator has nothing good to ground on — retrieval quality is a key bottleneck."},
+
+{topic:"RAG / Generative QA", difficulty:"medium",
+ q:"In the context of generative QA, what does 'attribution' refer to?",
+ options:[
+  "Assigning blame when a model produces toxic output",
+  "Providing a reference/citation linking a generated statement back to its supporting source",
+  "The process of tokenizing input text",
+  "Determining which company trained a given model"],
+ correct:1,
+ explain:"Attribution means the system indicates <b>which source</b> supports a generated claim, similar to a citation — important for transparency and verifiability."},
+
+{topic:"Ethics / Practicalities", difficulty:"medium",
+ q:"What is 'model collapse'?",
+ options:[
+  "A hardware failure that halts model training",
+  "A degradation in model quality that occurs when generative models are recursively trained on their own (or other models') generated output",
+  "The process of shrinking a large model into a smaller one via distillation",
+  "A sudden increase in model accuracy after fine-tuning"],
+ correct:1,
+ explain:"Model collapse occurs when successive generations of models are trained on synthetic data produced by prior models, causing loss of information about the true data distribution."},
+
+{topic:"Ethics / Practicalities", difficulty:"hard",
+ q:"Why is human-authored training data considered important for avoiding model collapse?",
+ options:[
+  "Human data is always factually perfect",
+  "Recursively training on generated content compounds statistical and functional approximation errors, degrading the diversity/accuracy of the resulting model over generations",
+  "Human data trains faster on GPUs",
+  "Generated content is copyrighted and cannot legally be used"],
+ correct:1,
+ explain:"Research shows recursive training on synthetic data leads to compounding errors (statistical and functional approximation error) — human data anchors the distribution to reality."},
+
+{topic:"Tokenization", difficulty:"easy",
+ q:"What is the main purpose of tokenization in an LLM pipeline?",
+ options:[
+  "To translate text between languages",
+  "To break raw text into smaller units (tokens) that the model can process as numerical input",
+  "To remove all punctuation from a document",
+  "To compute the embedding of a sentence directly"],
+ correct:1,
+ explain:"Tokenization converts raw text into a sequence of discrete tokens (subwords, words, or characters) that can be mapped to numeric IDs and fed into the model."},
+
+{topic:"Tokenization", difficulty:"medium",
+ q:"What is Byte Pair Encoding (BPE) used for in modern LLMs?",
+ options:[
+  "Compressing model weights after training",
+  "Building a subword vocabulary by iteratively merging the most frequent pairs of adjacent characters/tokens",
+  "Encrypting training data for privacy",
+  "Assigning attention weights to tokens"],
+ correct:1,
+ explain:"BPE is a subword tokenization algorithm that starts from characters and iteratively merges the most frequent adjacent pairs to build an efficient vocabulary."},
+
+{topic:"Tokenization", difficulty:"medium",
+ q:"What is a key advantage of subword tokenization (e.g., BPE) over whole-word tokenization?",
+ options:[
+  "It guarantees every token corresponds to a grammatically complete word",
+  "It can represent rare or unseen words by combining known subword units, reducing out-of-vocabulary issues",
+  "It removes the need for any vocabulary at all",
+  "It always produces a smaller number of tokens per sentence than word-level tokenization"],
+ correct:1,
+ explain:"By breaking rare/unknown words into familiar subword pieces, subword tokenization avoids the out-of-vocabulary problem that plagues fixed whole-word vocabularies."},
+
+{topic:"Attention", difficulty:"easy",
+ q:"What is the main purpose of the attention mechanism in a transformer?",
+ options:[
+  "To reduce the vocabulary size of the tokenizer",
+  "To allow the model to weigh the relevance of different tokens in the input when producing a representation for each token",
+  "To compress the model's parameters",
+  "To randomly sample the next token during generation"],
+ correct:1,
+ explain:"Attention lets each token's representation be computed as a weighted combination of other tokens, letting the model focus on the most relevant context."},
+
+{topic:"Attention", difficulty:"medium",
+ q:"In the standard attention formulation, what are the roles of Query, Key, and Value?",
+ options:[
+  "Query selects the model architecture; Key and Value are unused in transformers",
+  "The Query represents what a token is 'looking for', Keys represent what other tokens 'offer', and Values are the content retrieved based on the Query-Key match",
+  "Query and Key are the same vector; Value is a random vector",
+  "Query is only used at inference time, never during training"],
+ correct:1,
+ explain:"Attention scores are computed by comparing a token's Query against all Keys; those scores weight the corresponding Values that get aggregated into the output."},
+
+{topic:"Attention", difficulty:"medium",
+ q:"What is the main benefit of using multi-head attention instead of a single attention function?",
+ options:[
+  "It reduces the total number of parameters in the model",
+  "It allows the model to jointly attend to information from different representation subspaces at different positions",
+  "It removes the need for positional information",
+  "It guarantees faster training with no added computation"],
+ correct:1,
+ explain:"Multiple attention 'heads' let the model capture different types of relationships (e.g., syntactic vs semantic) in parallel, then combine them."},
+
+{topic:"Attention", difficulty:"hard",
+ q:"What is the key difference between self-attention and cross-attention?",
+ options:[
+  "Self-attention relates tokens within the same sequence to each other; cross-attention relates tokens from one sequence (e.g., a decoder) to tokens in a different sequence (e.g., an encoder's output)",
+  "Self-attention is only used in decoders, cross-attention only in encoders",
+  "Cross-attention does not use Query, Key, or Value vectors",
+  "Self-attention and cross-attention are mathematically identical with no distinction"],
+ correct:0,
+ explain:"Self-attention operates within one sequence; cross-attention lets one sequence (e.g., decoder queries) attend over another (e.g., encoder outputs), as in encoder-decoder architectures."},
+
+{topic:"Sampling & Training", difficulty:"medium",
+ q:"What effect does increasing the 'temperature' have when sampling from a language model's output distribution?",
+ options:[
+  "It has no effect on the output distribution",
+  "It flattens the probability distribution, making less-likely tokens relatively more likely to be chosen, increasing randomness",
+  "It always selects the single highest-probability token",
+  "It reduces the model's vocabulary size"],
+ correct:1,
+ explain:"Higher temperature flattens the softmax distribution, increasing diversity/randomness of sampled tokens; lower temperature sharpens it toward the most likely token."},
+
+{topic:"Sampling & Training", difficulty:"medium",
+ q:"What is the main trade-off of using greedy decoding (always picking the highest-probability next token)?",
+ options:[
+  "It produces the most diverse and creative text possible",
+  "It is deterministic and can produce repetitive or locally-optimal but globally suboptimal text, sacrificing diversity",
+  "It requires more compute than sampling-based methods",
+  "It cannot be used with any transformer-based model"],
+ correct:1,
+ explain:"Greedy decoding is fast and deterministic but often leads to repetitive, bland text since it never explores lower-probability but potentially better continuations."},
+
+{topic:"Sampling & Training", difficulty:"hard",
+ q:"What is the key difference between top-k sampling and top-p (nucleus) sampling?",
+ options:[
+  "Top-k samples from a fixed number of the most probable tokens, while top-p samples from the smallest set of tokens whose cumulative probability exceeds a threshold p",
+  "Top-p always selects exactly one token regardless of the threshold",
+  "Top-k and top-p are the same technique with different names",
+  "Top-k considers all tokens in the vocabulary, while top-p considers only two tokens"],
+ correct:0,
+ explain:"Top-k fixes the candidate pool size (k tokens); top-p (nucleus sampling) dynamically adjusts pool size to cover a cumulative probability mass p, adapting to how peaked the distribution is."},
+
+{topic:"Sampling & Training", difficulty:"medium",
+ q:"What is the standard training objective for an autoregressive (decoder-only) language model?",
+ options:[
+  "Predicting the sentiment label of a full document",
+  "Predicting the next token in a sequence given all previous tokens",
+  "Predicting a randomly masked-out token anywhere in the sequence",
+  "Predicting whether two sentences are semantically similar"],
+ correct:1,
+ explain:"Autoregressive models like GPT are trained with <b>next-token prediction</b>: given prior context, predict the next token in the sequence."},
+
+{topic:"Fine-tuning", difficulty:"easy",
+ q:"What is the main purpose of fine-tuning a pre-trained language model?",
+ options:[
+  "To train a model completely from scratch on a new architecture",
+  "To adapt a pre-trained model's parameters to a specific task or domain using additional, typically smaller, task-specific data",
+  "To reduce the number of tokens in the vocabulary",
+  "To remove the model's ability to generate text"],
+ correct:1,
+ explain:"Fine-tuning continues training a pre-trained model on task/domain-specific data so it specializes without training a new model from scratch."},
+
+{topic:"Fine-tuning", difficulty:"medium",
+ q:"What is the main advantage of parameter-efficient fine-tuning methods (e.g., LoRA) over full fine-tuning?",
+ options:[
+  "They update all model parameters for maximum flexibility",
+  "They update only a small number of additional parameters, drastically reducing compute/memory cost while adapting the model to a task",
+  "They eliminate the need for any pre-trained model",
+  "They always outperform full fine-tuning on every task"],
+ correct:1,
+ explain:"Methods like LoRA freeze most of the original weights and train a small number of extra parameters, making adaptation far cheaper in memory and compute."},
+
+{topic:"Fine-tuning", difficulty:"medium",
+ q:"What is 'catastrophic forgetting' in the context of fine-tuning or continual learning?",
+ options:[
+  "A model achieving perfect accuracy on a new task",
+  "A model losing previously learned knowledge/capabilities as it is trained on new data or tasks",
+  "The tokenizer forgetting rare words",
+  "A hardware failure during training"],
+ correct:1,
+ explain:"Catastrophic forgetting is the tendency of neural networks to overwrite previously learned information when trained on new data, degrading performance on earlier tasks."},
+
+{topic:"Fine-tuning / Prompting", difficulty:"hard",
+ q:"Which statement best captures the difference between fine-tuning and prompting as ways to adapt an LLM to a task?",
+ options:[
+  "Fine-tuning permanently updates model parameters using training examples, while prompting steers behavior at inference time via the input text without changing the model's weights",
+  "Prompting always requires more compute than fine-tuning",
+  "Fine-tuning and prompting are identical processes with different names",
+  "Prompting permanently changes the model's weights, while fine-tuning does not"],
+ correct:0,
+ explain:"Fine-tuning changes the model's weights through additional training; prompting only changes the model's behavior via the input at inference time, leaving parameters untouched."},
+
+{topic:"Prompting", difficulty:"easy",
+ q:"What does 'few-shot prompting' mean?",
+ options:[
+  "Providing the model with a small number of example input-output pairs in the prompt to demonstrate the desired task before asking it to complete a new instance",
+  "Training the model on a small dataset for a few epochs",
+  "Reducing the vocabulary size to a few thousand tokens",
+  "Asking the model the same question multiple times"],
+ correct:0,
+ explain:"Few-shot prompting includes a handful of demonstration examples directly in the prompt, letting the model infer the task pattern without weight updates."},
+
+{topic:"Prompting", difficulty:"medium",
+ q:"What is the main purpose of chain-of-thought prompting?",
+ options:[
+  "To make the model output shorter, more concise answers",
+  "To encourage the model to generate intermediate reasoning steps before producing a final answer, improving performance on multi-step reasoning tasks",
+  "To reduce the number of tokens the model needs to process",
+  "To force the model to only output single-word answers"],
+ correct:1,
+ explain:"Chain-of-thought prompting asks the model to 'think step by step,' producing intermediate reasoning that often improves accuracy on complex reasoning tasks."},
+
+{topic:"Prompting", difficulty:"medium",
+ q:"What distinguishes zero-shot prompting from few-shot prompting?",
+ options:[
+  "Zero-shot provides no task examples in the prompt, relying on the instruction alone; few-shot provides one or more examples",
+  "Zero-shot always performs better than few-shot",
+  "Zero-shot requires fine-tuning first; few-shot does not",
+  "There is no meaningful difference between the two"],
+ correct:0,
+ explain:"Zero-shot prompting gives the model only an instruction/question with no demonstrations; few-shot adds example input-output pairs to guide the model."},
+
+{topic:"Ethics", difficulty:"easy",
+ q:"What is 'hallucination' in the context of LLMs?",
+ options:[
+  "The model refusing to answer a question",
+  "The model generating text that is fluent and confident-sounding but factually incorrect or unsupported by evidence",
+  "A visual glitch in the model's user interface",
+  "The model running out of memory during inference"],
+ correct:1,
+ explain:"Hallucination refers to a model producing plausible-sounding but false or ungrounded statements, a major concern for reliability and trust."},
+
+{topic:"Practicalities / Hardware", difficulty:"medium",
+ q:"Which of the following is commonly cited as a major practical/ethical concern regarding the training of very large language models?",
+ options:[
+  "Training large models has negligible computational and environmental cost",
+  "Training large models requires substantial compute (e.g., GPU/TPU clusters) and energy, raising cost and environmental impact concerns",
+  "Large models can be trained entirely on a single laptop CPU",
+  "Model size has no relationship to training cost"],
+ correct:1,
+ explain:"Training frontier-scale LLMs requires large clusters of accelerators (GPUs/TPUs) running for extended periods, incurring significant financial and energy/environmental costs."}
+];
+
+let idx = 0;
+let score = 0;
+let answered = false;
+let history = []; // {correct: bool, chosen: idx, q: reference}
+
+function letter(i){ return String.fromCharCode(65+i); }
+
+function renderProgress(){
+  const rail = document.getElementById('progressRail');
+  rail.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const t = document.createElement('div');
+    t.className = 'tick';
+    if(i < history.length){
+      t.classList.add(history[i].correct ? 'done-correct' : 'done-wrong');
+    } else if(i === idx){
+      t.classList.add('current');
+    }
+    rail.appendChild(t);
+  });
+}
+
+function renderLedger(){
+  document.getElementById('ledgerBox').innerHTML =
+    'Score: <b>' + score + ' / ' + QUESTIONS.length + '</b><br>' +
+    'Question ' + Math.min(idx+1, QUESTIONS.length) + ' of ' + QUESTIONS.length;
+}
+
+function startExam(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  renderQuestion();
+}
+
+function renderIntro(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="card intro">
+      <h2 style="font-family:'Trajan Pro','Cinzel',Georgia,serif;text-transform:uppercase;color:var(--moss-deep);letter-spacing:0.04em;">Ready to begin</h2>
+      <p>Forty multiple-choice questions covering classical &amp; semantic retrieval, retrieval-augmented generation, and LLM fundamentals — tokenization, embeddings, attention, sampling, fine-tuning, and prompting. One question at a time. Answer, review the explanation, move on.</p>
+      <button class="start-btn" onclick="idx=0;score=0;history=[];answered=false;renderQuestion();renderProgress();renderLedger();">Begin Exam</button>
+    </div>
+  `;
+}
+
+function renderQuestion(){
+  if(idx >= QUESTIONS.length){
+    renderReport();
+    return;
+  }
+  answered = false;
+  const q = QUESTIONS[idx];
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="card">
+      <div class="qmeta">
+        <span class="topic">${q.topic}</span>
+        <span class="diff-${q.difficulty}">${q.difficulty}</span>
+      </div>
+      <h2 class="qtext">Q${idx+1}. ${q.q}</h2>
+      <div class="options" id="optionsBox">
+        ${q.options.map((opt,i)=>`
+          <button class="opt" data-i="${i}" onclick="selectOption(${i})">
+            <span class="letter">${letter(i)}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="feedbackBox"></div>
+    </div>
+  `;
+  renderProgress();
+  renderLedger();
+}
+
+function selectOption(i){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[idx];
+  const correct = i === q.correct;
+  if(correct) score++;
+  history.push({correct, chosen:i, q});
+
+  const buttons = document.querySelectorAll('#optionsBox .opt');
+  buttons.forEach((b,bi)=>{
+    b.disabled = true;
+    if(bi === q.correct) b.classList.add('correct');
+    if(bi === i && !correct) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedbackBox');
+  fb.innerHTML = `
+    <div class="verdict ${correct ? 'right' : 'wrong'}">${correct ? 'Correct.' : 'Incorrect.'}</div>
+    <div class="explain"><b>Correct answer: ${letter(q.correct)}.</b> ${q.explain}</div>
+    <div class="nextbar"><button class="next-btn" onclick="idx++;renderQuestion();">${idx+1 < QUESTIONS.length ? 'Next Question →' : 'See Final Results →'}</button></div>
+  `;
+  fb.classList.add('show');
+  renderLedger();
+  renderProgress();
+}
+
+function grade(pct){
+  if(pct >= 90) return 'Excellent / A';
+  if(pct >= 80) return 'Very Good';
+  if(pct >= 70) return 'Good';
+  if(pct >= 60) return 'Needs Improvement';
+  return 'Review the Material';
+}
+
+function topicStats(){
+  const byTopic = {};
+  history.forEach(h=>{
+    const t = h.q.topic;
+    if(!byTopic[t]) byTopic[t] = {right:0, total:0};
+    byTopic[t].total++;
+    if(h.correct) byTopic[t].right++;
+  });
+  return byTopic;
+}
+
+function renderReport(){
+  const app = document.getElementById('app');
+  const total = QUESTIONS.length;
+  const pct = Math.round((score/total)*100);
+  const wrong = history.filter(h=>!h.correct);
+  const stats = topicStats();
+  const topicList = Object.entries(stats).map(([t,s])=>({topic:t, rate: s.right/s.total, right:s.right, total:s.total}));
+  topicList.sort((a,b)=>a.rate-b.rate);
+  const weakest = topicList.slice(0,3);
+  const strongest = topicList.slice(-3).reverse();
+
+  const mistakesHtml = wrong.length === 0
+    ? '<p style="color:var(--ink-soft);">No mistakes — a clean run.</p>'
+    : wrong.map((h,i)=>`
+        <div class="mistake">
+          <div class="mtitle">Q${QUESTIONS.indexOf(h.q)+1} · <b>${h.q.topic}</b></div>
+          <p><b>Your answer:</b> ${letter(h.chosen)}. ${h.q.options[h.chosen]}</p>
+          <p><b>Correct answer:</b> ${letter(h.q.correct)}. ${h.q.options[h.q.correct]}</p>
+          <p>${h.q.explain}</p>
+        </div>
+      `).join('');
+
+  app.innerHTML = `
+    <div class="card report">
+      <h2 style="margin-top:0;">Final Exam Analysis</h2>
+      <div class="scoreblock">
+        <div class="big">${score} / ${total}</div>
+        <div class="grade">${pct}% — ${grade(pct)}</div>
+      </div>
+      <div class="stat-row">Correct: ${score} &nbsp;·&nbsp; Incorrect: ${total-score}</div>
+
+      <h2>Strongest Topics</h2>
+      <ul class="plain">
+        ${strongest.map(t=>`<li><b>${t.topic}</b> — ${t.right}/${t.total} correct</li>`).join('')}
+      </ul>
+
+      <h2>Weakest Topics</h2>
+      <ul class="plain">
+        ${weakest.map(t=>`<li><b>${t.topic}</b> — ${t.right}/${t.total} correct</li>`).join('')}
+      </ul>
+
+      <h2>Topics I Need to Review</h2>
+      ${mistakesHtml}
+
+      <h2>Last-Minute Memorization Sheet</h2>
+      <div class="sheet">
+        <h3>Retrieval Fundamentals</h3>
+        <dt>Inverted index</dt><dd>Maps terms → postings lists (documents/positions); backbone of lexical search; easy to shard/update; enables BM25/tf-idf.</dd>
+        <dt>Embedding</dt><dd>Dense, low-dimensional vector capturing semantic meaning; similar meaning → close vectors (cosine similarity).</dd>
+        <dt>Lexical vs semantic</dt><dd>Lexical = sparse, high-dim, uninterpreted tokens, cheap, precise. Semantic = dense, low-dim, meaning-aware, costlier, better for synonymy.</dd>
+        <dt>Delphic Cost</dt><dd>The time/cognitive cost a user pays to satisfy an information need; IR research aims to reduce it (ranking, snippets, direct answers).</dd>
+
+        <h3>RAG &amp; Generative QA</h3>
+        <dt>RAG</dt><dd>Retriever + generator; grounds generation in retrieved passages; updatable without retraining; quality bounded by retrieval.</dd>
+        <dt>Closed-book vs open-book</dt><dd>Closed-book = knowledge only in model weights. Open-book = model can draw on external memory (retriever) at inference time.</dd>
+        <dt>Attribution</dt><dd>Linking a generated statement back to a supporting source (citation) for transparency/verifiability.</dd>
+        <dt>Model collapse</dt><dd>Quality degradation from recursively training generative models on their own generated (synthetic) output.</dd>
+
+        <h3>LLM Core Mechanics</h3>
+        <dt>Tokenization / BPE</dt><dd>Splits text into subwords by merging frequent character pairs; handles rare/unseen words gracefully.</dd>
+        <dt>Attention (Q/K/V)</dt><dd>Query = what a token seeks; Key = what others offer; Value = content retrieved. Multi-head = parallel attention "views."</dd>
+        <dt>Self- vs cross-attention</dt><dd>Self = within one sequence. Cross = one sequence attends over another (e.g., decoder over encoder output).</dd>
+        <dt>Temperature</dt><dd>Higher = flatter distribution = more random output. Lower = sharper = more deterministic.</dd>
+        <dt>Top-k vs top-p</dt><dd>Top-k = fixed candidate count. Top-p (nucleus) = smallest set covering cumulative probability p.</dd>
+        <dt>Training objective</dt><dd>Autoregressive LMs: predict the next token given prior context.</dd>
+
+        <h3>Adaptation &amp; Prompting</h3>
+        <dt>Fine-tuning</dt><dd>Updates model weights on task-specific data; permanent; can cause catastrophic forgetting.</dd>
+        <dt>LoRA / PEFT</dt><dd>Updates a small added parameter set instead of the whole model — cheaper, faster adaptation.</dd>
+        <dt>Prompting</dt><dd>Steers behavior via input text at inference time; no weight changes; zero-shot = no examples, few-shot = some examples in-context.</dd>
+        <dt>Chain-of-thought</dt><dd>Prompting the model to reason step-by-step before answering; boosts multi-step reasoning accuracy.</dd>
+
+        <h3>Ethics &amp; Practicalities</h3>
+        <dt>Hallucination</dt><dd>Fluent but false/unsupported output — a core reliability risk, mitigated by grounding (RAG) and attribution.</dd>
+        <dt>Compute cost</dt><dd>Training frontier LLMs requires large GPU/TPU clusters — significant financial and environmental cost.</dd>
+      </div>
+
+      <button class="restart-btn" onclick="idx=0;score=0;history=[];renderIntro();">Restart Exam</button>
+    </div>
+  `;
+}
+
+renderIntro();
+</script>
+</body>
+</html>
