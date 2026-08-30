@@ -1321,7 +1321,15 @@
     function highlightCode(code, lang) {
       let s = esc(code);
       const stash = [];
-      const put = (m) => { stash.push(m); return "\u0000" + (stash.length - 1) + "\u0001"; };
+      // FIX: the placeholder wraps the stash index in letters (X...Y) rather than
+      // leaving the digits bounded only by \u0000/\u0001. Previously the bare
+      // digits were themselves matched by the later \b\d+\b number-highlighting
+      // regex (control chars count as word-boundary-adjacent non-word chars),
+      // which corrupted the placeholder so the final unstash regex could never
+      // find it again — the string literal was permanently replaced by its own
+      // stash index (e.g. "Guest" -> "0", "Sara" -> "2"). Wrapping the digits in
+      // word characters removes the \b boundary the number regex relies on.
+      const put = (m) => { stash.push(m); return "\u0000X" + (stash.length - 1) + "Y\u0001"; };
 
       if (lang === 'php') {
         s = s.replace(/"([^"\\]|\\.)*"/g, m => put('<span class="tok-string">' + m + '</span>'));
@@ -1337,7 +1345,7 @@
         const kw = ['SELECT', 'FROM', 'WHERE', 'ORDER', 'BY', 'GROUP', 'UPDATE', 'SET', 'DELETE', 'INSERT', 'INTO', 'VALUES', 'CREATE', 'TABLE', 'DATABASE', 'DROP', 'GRANT', 'REVOKE', 'SHOW', 'DESCRIBE', 'LIMIT', 'COUNT', 'AND', 'OR', 'NOT', 'AS', 'PRIMARY', 'KEY', 'ALTER', 'mysql'];
         s = s.replace(new RegExp('\\b(' + kw.join('|') + ')\\b', 'gi'), m => '<span class="tok-kw">' + m + '</span>');
       }
-      s = s.replace(/\u0000(\d+)\u0001/g, (_, i) => stash[Number(i)]);
+      s = s.replace(/\u0000X(\d+)Y\u0001/g, (_, i) => stash[Number(i)]);
       return s;
     }
 
@@ -1397,7 +1405,7 @@
       app.innerHTML = `
     <div class="topbar">
       <div class="prompt">student@examhost:~$ ./php_mysql_exam.sh<span class="caret"></span></div>
-      <div class="pill">v1.0 · 40Q</div>
+      <div class="pill">v1.1 · 40Q</div>
     </div>
     <div class="hero">
       <h1>PHP &amp; MySQL <span class="accent">Exam Simulator</span></h1>
