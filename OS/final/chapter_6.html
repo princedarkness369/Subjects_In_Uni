@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operating Systems – Chapter 6 Exam Simulator</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1d4ed8;
+            --bg-main: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --success: #15803d;
+            --success-bg: #f0fdf4;
+            --danger: #b91c1c;
+            --danger-bg: #fef2f2;
+            --warning: #b45309;
+            --warning-bg: #fffbeb;
+            --accent: #0284c7;
+            --radius: 10px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        .app-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .brand h1 {
+            font-size: 1.5rem;
+            margin-top: 5px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .timer-card {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 10px 18px;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .timer-warning {
+            background-color: #dc2626 !important;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0.7;
+            }
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1000px;
+            margin: 30px auto 0;
+            padding: 0 20px;
+        }
+
+        /* Progress */
+        .progress-bar-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .progress-track {
+            height: 10px;
+            background-color: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 5%;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        /* Question Palette */
+        .palette-container {
+            background: var(--surface);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        .palette-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-right: 10px;
+        }
+
+        .palette-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .palette-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .palette-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .palette-btn.answered {
+            background: #e0f2fe;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .question-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .badge-type,
+        .badge-diff,
+        .badge-topic {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .badge-type {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .badge-diff {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-topic {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .question-text code,
+        pre {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        pre {
+            display: block;
+            padding: 12px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        /* Options */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-card {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--surface);
+        }
+
+        .option-card:hover {
+            border-color: var(--accent);
+            background-color: #f0f9ff;
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            accent-color: var(--primary);
+        }
+
+        .option-label {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Nav Controls */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #991b1b;
+        }
+
+        .btn-lg {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+        }
+
+        /* Results Screen */
+        .results-screen.hidden,
+        .modal-backdrop.hidden {
+            display: none;
+        }
+
+        .results-header-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .score-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .score-box {
+            background: var(--bg-main);
+            padding: 15px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .score-title {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .text-success {
+            color: var(--success);
+        }
+
+        .text-danger {
+            color: var(--danger);
+        }
+
+        .text-warning {
+            color: var(--warning);
+        }
+
+        .performance-banner {
+            padding: 15px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        /* Question Review Cards */
+        .review-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .review-card.correct {
+            border-left: 6px solid var(--success);
+        }
+
+        .review-card.incorrect {
+            border-left: 6px solid var(--danger);
+        }
+
+        .review-card.unanswered {
+            border-left: 6px solid var(--warning);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .result-tag {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .result-tag.correct {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .result-tag.incorrect {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .result-tag.unanswered {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .explanation-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        .explanation-box strong {
+            color: var(--primary);
+        }
+
+        .retake-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .modal-card p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        @media (max-width: 640px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .question-card {
+                padding: 20px;
+            }
+
+            .nav-controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <span class="badge">CS 401 / Operating Systems</span>
+                <h1>Chapter 6: Synchronization Tools</h1>
+                <p class="subtitle">Exam Simulator • 20 Multiple-Choice Questions</p>
+            </div>
+            <div class="timer-card" id="timerCard">
+                <span class="timer-label">Time Remaining</span>
+                <div class="timer-display" id="timer">20:00</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- QUIZ INTERFACE -->
+        <section id="quizScreen" class="quiz-screen">
+            <div class="progress-bar-container">
+                <div class="progress-info">
+                    <span id="questionProgressText">Question 1 of 20</span>
+                    <span id="completionPercentText">0% Completed</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Question Palette -->
+            <div class="palette-container">
+                <span class="palette-title">Question Grid:</span>
+                <div class="palette-grid" id="paletteGrid"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="question-card" id="questionCard">
+                <div class="question-header">
+                    <span class="badge-type" id="questionType">Calculation</span>
+                    <span class="badge-diff" id="questionDifficulty">Hard</span>
+                    <span class="badge-topic" id="questionTopic">Semaphores</span>
+                </div>
+                <h2 class="question-text" id="questionText">Loading question...</h2>
+                <div class="options-grid" id="optionsContainer"></div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="nav-controls">
+                <button id="prevBtn" class="btn btn-secondary">← Previous</button>
+                <button id="nextBtn" class="btn btn-primary">Next →</button>
+                <button id="submitBtn" class="btn btn-danger">Submit Quiz 🚀</button>
+            </div>
+        </section>
+
+        <!-- RESULTS SCREEN -->
+        <section id="resultsScreen" class="results-screen hidden">
+            <div class="results-header-card">
+                <h2>Quiz Completed!</h2>
+                <p class="results-subtitle">Operating Systems – Chapter 6 Exam Summary</p>
+
+                <div class="score-summary-grid">
+                    <div class="score-box">
+                        <span class="score-title">Final Score</span>
+                        <span class="score-value" id="finalScore">0 / 20</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-title">Percentage</span>
+                        <span class="score-value" id="finalPercentage">0%</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-title">Correct</span>
+                        <span class="score-value text-success" id="correctCount">0</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-title">Incorrect</span>
+                        <span class="score-value text-danger" id="incorrectCount">0</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-title">Unanswered</span>
+                        <span class="score-value text-warning" id="unansweredCount">0</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-title">Time Used</span>
+                        <span class="score-value" id="timeUsed">00:00</span>
+                    </div>
+                </div>
+
+                <div class="performance-banner" id="performanceBanner">
+                    Performance Summary Loading...
+                </div>
+            </div>
+
+            <!-- Detailed Question Review -->
+            <div class="review-section">
+                <h3>Detailed Question Review & Worked Solutions</h3>
+                <div id="reviewContainer"></div>
+            </div>
+
+            <div class="retake-container">
+                <button id="restartBtn" class="btn btn-primary btn-lg">Retake Quiz (Shuffled)</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- CONFIRMATION MODAL -->
+    <div class="modal-backdrop hidden" id="modalBackdrop">
+        <div class="modal-card">
+            <h3>Submit Quiz Confirmation</h3>
+            <p id="modalSummaryText">Are you sure you want to submit your quiz?</p>
+            <div class="modal-actions">
+                <button id="modalCancelBtn" class="btn btn-secondary">Cancel (Continue Quiz)</button>
+                <button id="modalConfirmBtn" class="btn btn-danger">Confirm & Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const rawQuestions = [
+            {
+                question: "A counting semaphore S is initialized to S = 3. A sequence of operations is executed by concurrent processes: 7 wait(S) operations and 4 signal(S) operations. Assuming no other operations occur, what is the final integer value of S, and how many processes are currently blocked in the waiting queue?",
+                options: [
+                    "Final value S = 0; 0 processes blocked",
+                    "Final value S = -1; 1 process blocked",
+                    "Final value S = 0; 3 processes blocked",
+                    "Final value S = 4; 0 processes blocked"
+                ],
+                correctAnswer: 0,
+                difficulty: "Hard",
+                type: "Calculation",
+                topic: "Semaphores",
+                explanation: "Step 1: Initial value S = 3.<br>Step 2: 7 wait(S) operations decrement S by 7: S = 3 - 7 = -4.<br>Step 3: 4 signal(S) operations increment S by 4: S = -4 + 4 = 0.<br>Step 4: In a standard semaphore implementation, when S ≥ 0, the value represents available resources, and 0 processes are waiting in the queue."
+            },
+            {
+                question: "In the non-busy waiting implementation of a semaphore struct { int value; struct process *list; }, an OS inspector finds sem.value = -4. Which statement accurately describes the state of the semaphore?",
+                options: [
+                    "There are 4 available resources, and 0 processes are waiting.",
+                    "There are 0 available resources, and 4 processes are currently suspended in the wait list.",
+                    "There are 4 processes currently executing in their critical section simultaneously.",
+                    "The semaphore is in an illegal state because semaphore values cannot be negative."
+                ],
+                correctAnswer: 1,
+                difficulty: "Hard",
+                type: "Calculation",
+                topic: "Semaphores",
+                explanation: "Step 1: Non-busy waiting semaphores decrement 'value' before checking if value < 0.<br>Step 2: If value < 0, the process is added to 'list' and blocked.<br>Step 3: Thus, the magnitude of a negative value |value| equals the exact number of processes waiting in the queue.<br>Therefore, sem.value = -4 means 0 available resources and 4 blocked processes."
+            },
+            {
+                question: "Consider a multi-core system where a context switch takes T_cs = 12 microseconds (6 μs to block and 6 μs to wake up). Thread A attempts to acquire a lock held by Thread B. The critical section takes T_exec = 8 microseconds to complete. Compare the CPU overhead of using a Spinlock versus a Blocking Mutex Lock.",
+                options: [
+                    "Spinlock wastes 8 μs; Blocking Mutex wastes 12 μs. Spinlock is more efficient by 4 μs.",
+                    "Spinlock wastes 12 μs; Blocking Mutex wastes 8 μs. Blocking Mutex is more efficient by 4 μs.",
+                    "Spinlock wastes 20 μs; Blocking Mutex wastes 8 μs. Blocking Mutex is more efficient by 12 μs.",
+                    "Spinlock wastes 8 μs; Blocking Mutex wastes 20 μs. Spinlock is more efficient by 12 μs."
+                ],
+                correctAnswer: 0,
+                difficulty: "Hard",
+                type: "Calculation",
+                topic: "Mutex & Spinlocks",
+                explanation: "Step 1: Spinlock CPU overhead = time spent spinning until lock released = T_exec = 8 μs.<br>Step 2: Blocking Mutex CPU overhead = context switch to block (6 μs) + context switch to wake up (6 μs) = 12 μs.<br>Step 3: Comparison: Spinlock (8 μs) < Blocking Mutex (12 μs). Spinlock saves 4 μs of CPU overhead.<br>Rule: Spinlocks are preferred when expected lock wait time is shorter than two context switches."
+            },
+            {
+                question: "In Peterson's Solution for two processes (P0 and P1), process P0 sets flag[0] = true and turn = 1. Almost simultaneously, P1 sets flag[1] = true and turn = 0. Both processes reach their while loop: while (flag[j] && turn == j) ;. Which process enters the critical section first?",
+                options: [
+                    "P1 enters first, because turn == 0 forces P0 into an infinite loop.",
+                    "P0 enters first, because turn == 0 causes P0's loop condition (flag[1] && turn == 1) to evaluate to false.",
+                    "Both processes enter simultaneously, causing a race condition.",
+                    "Neither process enters; a deadlock occurs because both flags are true."
+                ],
+                correctAnswer: 1,
+                difficulty: "Medium",
+                type: "Algorithm",
+                topic: "Peterson's Solution",
+                explanation: "Step 1: Final memory state: flag[0] = true, flag[1] = true, turn = 0 (since P1 wrote last).<br>Step 2: Evaluate P0's loop condition: (flag[1] && turn == 1) -> (true && 0 == 1) -> (true && false) = FALSE. P0 exits loop and ENTERS CS.<br>Step 3: Evaluate P1's loop condition: (flag[0] && turn == 0) -> (true && 0 == 0) -> (true && true) = TRUE. P1 continues busy-waiting.<br>Therefore, P0 enters first."
+            },
+            {
+                question: "Two concurrent processes P1 and P2 share an integer counter initialized to 10. P1 executes count += 2 and P2 executes count -= 1. The compiled assembly instructions execute in the order: S1 (P1: R1 = count) -> S4 (P2: R2 = count) -> S2 (P1: R1 = R1 + 2) -> S3 (P1: count = R1) -> S5 (P2: R2 = R2 - 1) -> S6 (P2: count = R2). What is the final value stored in count?",
+                options: [
+                    "11",
+                    "9",
+                    "10",
+                    "12"
+                ],
+                correctAnswer: 1,
+                difficulty: "Hard",
+                type: "Calculation",
+                topic: "Race Conditions",
+                explanation: "Step 1: Initial count = 10.<br>Step 2: S1 (P1 reads count): R1 = 10.<br>Step 3: S4 (P2 reads count): R2 = 10.<br>Step 4: S2 (P1 modifies R1): R1 = 10 + 2 = 12.<br>Step 5: S3 (P1 writes count): count = 12.<br>Step 6: S5 (P2 modifies R2): R2 = 10 - 1 = 9.<br>Step 7: S6 (P2 writes count): count = 9 (overwrites P1's write!).<br>Final value of count = 9."
+            },
+            {
+                question: "Shared variable lock = 1. Process PA attempts to acquire the lock using atomic instruction compare_and_swap(&lock, 0, 1). The function returns original *value. What does compare_and_swap(&lock, 0, 1) return, what is the new value of lock, and does PA enter its critical section?",
+                options: [
+                    "Returns 0, lock becomes 1, PA enters CS.",
+                    "Returns 1, lock remains 1, PA continues spinning in the while loop.",
+                    "Returns 1, lock becomes 0, PA enters CS.",
+                    "Returns 0, lock remains 1, PA continues spinning."
+                ],
+                correctAnswer: 1,
+                difficulty: "Medium",
+                type: "Algorithm",
+                topic: "Hardware Atomic Instructions",
+                explanation: "Step 1: compare_and_swap checks if *value == expected (1 == 0), which is FALSE.<br>Step 2: Because condition is false, lock is NOT modified and remains 1.<br>Step 3: Function returns original value (1).<br>Step 4: Loop condition while (compare_and_swap(&lock, 0, 1) != 0) evaluates to (1 != 0) = TRUE, so PA continues spinning."
+            },
+            {
+                question: "In a 4-process system (P0, P1, P2, P3) using bounded-waiting test_and_set, P1 leaves its critical section (i = 1). The exit section scans waiting array circularly starting at j = (i + 1) % 4 = 2. Given waiting[0] = true, waiting[2] = false, and waiting[3] = true, which process enters the critical section next?",
+                options: [
+                    "P0",
+                    "P3",
+                    "P2",
+                    "None; lock is set to false."
+                ],
+                correctAnswer: 1,
+                difficulty: "Hard",
+                type: "Algorithm",
+                topic: "Hardware Atomic Instructions",
+                explanation: "Step 1: Circular scan starts at j = (1 + 1) % 4 = 2.<br>Step 2: Check j = 2: waiting[2] is false, so scan advances to j = (2 + 1) % 4 = 3.<br>Step 3: Check j = 3: waiting[3] is true! Scan loop terminates.<br>Step 4: Exit section executes waiting[3] = false, granting P3 access to CS next."
+            },
+            {
+                question: "Inside a monitor, condition variable x is declared. Sequence of operations: P_A calls x.wait(), P_B calls x.wait(), P_C calls x.signal(), P_D calls x.signal(), P_E calls x.signal(). How many processes remain waiting on x after P_E's signal, and what was the effect of P_E's signal?",
+                options: [
+                    "0 processes remain waiting; P_E's signal resumed P_B.",
+                    "0 processes remain waiting; P_E's signal had NO effect because no processes were waiting.",
+                    "1 process remains waiting; P_E's signal incremented x by 1.",
+                    "2 processes remain waiting; signals are queued."
+                ],
+                correctAnswer: 1,
+                difficulty: "Medium",
+                type: "Scenario",
+                topic: "Monitors",
+                explanation: "Step 1: P_A and P_B wait -> Queue contains [P_A, P_B].<br>Step 2: P_C signals -> P_A resumed. Queue = [P_B].<br>Step 3: P_D signals -> P_B resumed. Queue = [].<br>Step 4: P_E signals on empty queue -> Monitor condition variables have NO memory/counter! Signal has no effect.<br>Remaining waiting processes = 0."
+            },
+            {
+                question: "A system has 6 buffer resources managed by counting semaphore buf_sem = 6. 10 processes execute wait(buf_sem). Then 2 active processes execute signal(buf_sem). What is the value of buf_sem.value, how many processes are actively holding buffers, and how many are blocked?",
+                options: [
+                    "buf_sem = -2; 6 processes holding buffers; 2 processes blocked",
+                    "buf_sem = -4; 6 processes holding buffers; 4 processes blocked",
+                    "buf_sem = 0; 4 processes holding buffers; 4 processes blocked",
+                    "buf_sem = 2; 6 processes holding buffers; 0 processes blocked"
+                ],
+                correctAnswer: 0,
+                difficulty: "Hard",
+                type: "Calculation",
+                topic: "Semaphores",
+                explanation: "Step 1: Initial buf_sem = 6.<br>Step 2: 10 wait() calls: first 6 acquire buffers (buf_sem becomes 0). Next 4 block (buf_sem becomes -4).<br>Step 3: 2 signal() calls: buf_sem increases from -4 -> -3 -> -2.<br>Step 4: Each signal wakes up 1 blocked process, so 6 processes actively hold buffers and |-2| = 2 processes remain blocked."
+            },
+            {
+                question: "A proposed critical section solution guarantees Mutual Exclusion. However, if Process PA is executing in its REMAINDER section, it prevents Process PB (which wants to enter its CS) from entering. Which CS requirement is violated?",
+                options: [
+                    "Mutual Exclusion",
+                    "Progress",
+                    "Bounded Waiting",
+                    "Starvation Immunity"
+                ],
+                correctAnswer: 1,
+                difficulty: "Easy",
+                type: "Conceptual",
+                topic: "Critical Section Problem",
+                explanation: "Progress Requirement: 'If no process is in its CS and some processes wish to enter, only processes NOT in their remainder section can participate in deciding who enters next.' Since PA is in its remainder section yet blocks PB, Progress is violated."
+            },
+            {
+                question: "Why might Peterson's Solution fail on modern multi-core microprocessors if compiled without explicit memory barrier instructions (memory_barrier())?",
+                options: [
+                    "Modern CPUs do not support boolean variables in hardware.",
+                    "Compilers and processors may reorder independent read/write operations (like flag[i] = true and turn = j) for optimization.",
+                    "Multi-core processors automatically disable interrupts.",
+                    "Peterson's solution requires at least 4 CPU cores."
+                ],
+                correctAnswer: 1,
+                difficulty: "Medium",
+                type: "Conceptual",
+                topic: "Peterson's Solution",
+                explanation: "Modern hardware uses out-of-order execution. If flag[i] = true and turn = j are reordered by compiler/CPU, both processes may see flag as false and enter CS simultaneously. Memory barriers prevent instruction reordering across the barrier."
+            },
+            {
+                question: "What is the fundamental difference between executing signal() on a Counting Semaphore vs x.signal() on a Monitor Condition Variable when NO processes are waiting?",
+                options: [
+                    "Semaphore signal() increments the counter (saving the signal), whereas Condition Variable x.signal() has NO effect and is lost.",
+                    "Condition Variable signal() increments an internal counter, while Semaphore signal() blocks.",
+                    "Both operations behave identically by incrementing internal counters.",
+                    "Semaphore signal() throws an exception, while Condition Variable signal() sleeps."
+                ],
+                correctAnswer: 0,
+                difficulty: "Medium",
+                type: "Comparison",
+                topic: "Semaphores vs Monitors",
+                explanation: "Semaphores have state (integer counter). A signal() increments the value, saving it for future wait() calls. Monitor condition variables have NO state; if no process is waiting, x.signal() is lost."
+            },
+            {
+                question: "In a real-time system, low-priority process L holds mutex M. High-priority process H requests M and blocks. Medium-priority process Med (which does not need M) preempts process L. How does Priority Inheritance resolve this Priority Inversion?",
+                options: [
+                    "It terminates process Med.",
+                    "Process L temporarily inherits the higher priority of process H until L releases mutex M.",
+                    "Process H lowers its priority to match process L.",
+                    "It converts mutex M into a counting semaphore."
+                ],
+                correctAnswer: 1,
+                difficulty: "Medium",
+                type: "Conceptual",
+                topic: "Priority Inversion",
+                explanation: "Under Priority Inheritance, process L holding mutex M requested by H temporarily inherits H's high priority. Thus Med cannot preempt L, allowing L to quickly finish CS, release M, and unblock H."
+            },
+            {
+                question: "Why are non-preemptive kernel designs inherently free from race conditions on kernel data structures when running on single-core processors?",
+                options: [
+                    "Non-preemptive kernels execute code in hardware registers.",
+                    "A process running in kernel mode will execute without preemption until it exits kernel mode, blocks, or yields CPU.",
+                    "Non-preemptive kernels do not allow system calls.",
+                    "They use spinlocks for every memory access."
+                ],
+                correctAnswer: 1,
+                difficulty: "Easy",
+                type: "Conceptual",
+                topic: "Kernel Synchronization",
+                explanation: "Non-preemptive kernels do not allow a process in kernel mode to be preempted. Thus only one process runs in kernel mode at a time, eliminating concurrent access to kernel data structures on single-core systems."
+            },
+            {
+                question: "In Peterson's Solution for two processes P0 and P1, which code segment represents the correct entry section for process P0?",
+                options: [
+                    "flag[0] = true; turn = 1; while (flag[1] && turn == 1) ;",
+                    "flag[0] = false; turn = 0; while (flag[0] && turn == 0) ;",
+                    "turn = 0; flag[1] = true; while (flag[0] || turn == 1) ;",
+                    "while (turn == 0) { flag[0] = true; }"
+                ],
+                correctAnswer: 0,
+                difficulty: "Medium",
+                type: "Algorithm",
+                topic: "Peterson's Solution",
+                explanation: "P0 entry protocol: 1. Set flag[0] = true (express interest). 2. Set turn = 1 (give away turn). 3. Busy-wait while (flag[1] && turn == 1)."
+            },
+            {
+                question: "The hardware instruction test_and_set(&lock) executes atomically. If initial lock = false, what are the return value of test_and_set(&lock) and the new value of lock?",
+                options: [
+                    "Returns true; lock becomes false",
+                    "Returns false; lock becomes true",
+                    "Returns false; lock remains false",
+                    "Returns true; lock remains true"
+                ],
+                correctAnswer: 1,
+                difficulty: "Easy",
+                type: "Algorithm",
+                topic: "Hardware Atomic Instructions",
+                explanation: "test_and_set(&lock) atomically reads current lock value (false), sets lock to true, and returns the old value (false)."
+            },
+            {
+                question: "In a non-busy waiting semaphore implementation, wait(S) decrements S->value and calls block() if S->value < 0. What is the main advantage over a busy-waiting spinlock?",
+                options: [
+                    "Rather than wasting CPU clock cycles spinning in a loop, the waiting process suspends itself (block()) so CPU can run other processes.",
+                    "It avoids using system calls.",
+                    "It allows multiple processes in CS simultaneously when value < 0.",
+                    "It does not require atomic operations."
+                ],
+                correctAnswer: 0,
+                difficulty: "Medium",
+                type: "Algorithm",
+                topic: "Semaphores",
+                explanation: "Non-busy waiting semaphores eliminate CPU cycle wasting by putting waiting threads into WAITING state via block(), letting CPU scheduler execute other active tasks."
+            },
+            {
+                question: "When implementing a monitor using semaphores, what is the purpose of semaphore 'next' (initialized to 0) and integer 'next_count'?",
+                options: [
+                    "To count processes inside CS.",
+                    "To allow signaling processes to suspend themselves when using Signal-and-Wait scheme, giving priority to signaled process.",
+                    "To track hardware interrupts.",
+                    "To prevent condition variables."
+                ],
+                correctAnswer: 1,
+                difficulty: "Medium",
+                type: "Algorithm",
+                topic: "Monitors",
+                explanation: "Under Signal-and-Wait, a signaling process must wait until signaled process leaves or waits. Semaphore 'next' queues these signaling processes, and 'next_count' tracks their number."
+            },
+            {
+                question: "What is the formal definition of a Race Condition in concurrent operating systems?",
+                options: [
+                    "A situation where two high-priority processes run faster than CPU clock.",
+                    "A situation where several processes access shared data concurrently, and outcome depends on the particular order of execution.",
+                    "A hardware clock sync error.",
+                    "An algorithm where processes race to finish before a timer expires."
+                ],
+                correctAnswer: 1,
+                difficulty: "Easy",
+                type: "Definition",
+                topic: "Race Conditions",
+                explanation: "Silberschatz Ch 6 definition: A race condition occurs when concurrent processes manipulate shared data and outcome depends on the execution order."
+            },
+            {
+                question: "How does Deadlock differ from Starvation (Indefinite Blocking) in semaphore operations?",
+                options: [
+                    "Deadlock occurs on single-core; starvation on multi-core.",
+                    "Deadlock occurs when 2+ processes wait indefinitely for an event only another waiting process can cause; Starvation occurs when a process waits indefinitely in a semaphore queue (e.g. LIFO order).",
+                    "Starvation means all processes blocked; Deadlock means only one.",
+                    "Deadlock is software bug; starvation is hardware failure."
+                ],
+                correctAnswer: 1,
+                difficulty: "Easy",
+                type: "Definition",
+                topic: "Liveness Hazards",
+                explanation: "Deadlock = mutual waiting cycle where no process can issue signal. Starvation = individual process delayed indefinitely in a queue while other processes get served."
+            }
+        ];
+
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let timerInterval = null;
+        let totalTimeSeconds = 20 * 60; // 20 minutes
+        let remainingSeconds = totalTimeSeconds;
+        let isSubmitted = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initQuiz();
+        });
+
+        function initQuiz() {
+            // Deep clone and shuffle questions
+            questions = shuffleArray([...rawQuestions]).map(q => {
+                const optionsWithIndices = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.correctAnswer }));
+                const shuffledOpts = shuffleArray(optionsWithIndices);
+                const newCorrectIdx = shuffledOpts.findIndex(o => o.isCorrect);
+
+                return {
+                    ...q,
+                    options: shuffledOpts.map(o => o.text),
+                    correctAnswer: newCorrectIdx
+                };
+            });
+
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            isSubmitted = false;
+            remainingSeconds = totalTimeSeconds;
+
+            renderPalette();
+            renderQuestion(currentQuestionIndex);
+            startTimer();
+            setupEventListeners();
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                if (remainingSeconds > 0) {
+                    remainingSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    autoSubmitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const timerElem = document.getElementById('timer');
+            const timerCard = document.getElementById('timerCard');
+
+            timerElem.textContent = displayStr;
+
+            if (remainingSeconds <= 180) {
+                timerCard.classList.add('timer-warning');
+            } else {
+                timerCard.classList.remove('timer-warning');
+            }
+        }
+
+        function renderQuestion(index) {
+            const q = questions[index];
+            document.getElementById('questionType').textContent = q.type;
+            document.getElementById('questionDifficulty').textContent = q.difficulty;
+            document.getElementById('questionTopic').textContent = q.topic;
+
+            document.getElementById('questionText').innerHTML = q.question;
+
+            document.getElementById('questionProgressText').textContent = `Question ${index + 1} of ${questions.length}`;
+            const answeredCount = Object.keys(userAnswers).length;
+            const progressPercent = Math.round((answeredCount / questions.length) * 100);
+            document.getElementById('completionPercentText').textContent = `${progressPercent}% Completed`;
+            document.getElementById('progressFill').style.width = `${((index + 1) / questions.length) * 100}%`;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((optionText, optIdx) => {
+                const isSelected = userAnswers[index] === optIdx;
+                const optionCard = document.createElement('div');
+                optionCard.className = `option-card ${isSelected ? 'selected' : ''}`;
+                optionCard.onclick = () => selectOption(index, optIdx);
+
+                optionCard.innerHTML = `
+                    <input type="radio" name="option" class="option-radio" ${isSelected ? 'checked' : ''} readonly>
+                    <span class="option-label"><strong>${String.fromCharCode(65 + optIdx)}.</strong> ${optionText}</span>
+                `;
+                optionsContainer.appendChild(optionCard);
+            });
+
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').textContent = index === questions.length - 1 ? 'Review & Submit' : 'Next →';
+
+            updatePaletteActiveState();
+        }
+
+        function selectOption(questionIdx, optionIdx) {
+            if (isSubmitted) return;
+            userAnswers[questionIdx] = optionIdx;
+            renderQuestion(questionIdx);
+            updatePaletteActiveState();
+        }
+
+        function renderPalette() {
+            const paletteGrid = document.getElementById('paletteGrid');
+            paletteGrid.innerHTML = '';
+
+            questions.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'palette-btn';
+                btn.textContent = idx + 1;
+                btn.onclick = () => {
+                    currentQuestionIndex = idx;
+                    renderQuestion(currentQuestionIndex);
+                };
+                paletteGrid.appendChild(btn);
+            });
+        }
+
+        function updatePaletteActiveState() {
+            const buttons = document.querySelectorAll('.palette-btn');
+            buttons.forEach((btn, idx) => {
+                btn.classList.remove('active', 'answered');
+                if (idx === currentQuestionIndex) {
+                    btn.classList.add('active');
+                } else if (userAnswers.hasOwnProperty(idx)) {
+                    btn.classList.add('answered');
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('prevBtn').onclick = () => {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    renderQuestion(currentQuestionIndex);
+                }
+            };
+
+            document.getElementById('nextBtn').onclick = () => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    renderQuestion(currentQuestionIndex);
+                } else {
+                    showSubmitModal();
+                }
+            };
+
+            document.getElementById('submitBtn').onclick = () => showSubmitModal();
+            document.getElementById('modalCancelBtn').onclick = () => hideSubmitModal();
+            document.getElementById('modalConfirmBtn').onclick = () => {
+                hideSubmitModal();
+                submitQuiz();
+            };
+
+            document.getElementById('restartBtn').onclick = () => {
+                document.getElementById('resultsScreen').classList.add('hidden');
+                document.getElementById('quizScreen').classList.remove('hidden');
+                initQuiz();
+            };
+        }
+
+        function showSubmitModal() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const unansweredCount = questions.length - answeredCount;
+            const text = unansweredCount > 0
+                ? `You have answered ${answeredCount} of 20 questions (${unansweredCount} unanswered). Are you sure you want to submit?`
+                : `You have answered all 20 questions. Ready to submit?`;
+
+            document.getElementById('modalSummaryText').textContent = text;
+            document.getElementById('modalBackdrop').classList.remove('hidden');
+        }
+
+        function hideSubmitModal() {
+            document.getElementById('modalBackdrop').classList.add('hidden');
+        }
+
+        function autoSubmitQuiz() {
+            hideSubmitModal();
+            submitQuiz();
+        }
+
+        function submitQuiz() {
+            isSubmitted = true;
+            clearInterval(timerInterval);
+
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unansweredCount = 0;
+
+            questions.forEach((q, idx) => {
+                if (!userAnswers.hasOwnProperty(idx)) {
+                    unansweredCount++;
+                } else if (userAnswers[idx] === q.correctAnswer) {
+                    correctCount++;
+                } else {
+                    incorrectCount++;
+                }
+            });
+
+            const percentage = Math.round((correctCount / questions.length) * 100);
+            const timeUsedSeconds = totalTimeSeconds - remainingSeconds;
+            const timeUsedStr = `${Math.floor(timeUsedSeconds / 60)}m ${timeUsedSeconds % 60}s`;
+
+            document.getElementById('finalScore').textContent = `${correctCount} / ${questions.length}`;
+            document.getElementById('finalPercentage').textContent = `${percentage}%`;
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('incorrectCount').textContent = incorrectCount;
+            document.getElementById('unansweredCount').textContent = unansweredCount;
+            document.getElementById('timeUsed').textContent = timeUsedStr;
+
+            const banner = document.getElementById('performanceBanner');
+            if (percentage >= 85) {
+                banner.textContent = "🌟 Outstanding Performance! You have mastered Chapter 6 Synchronization Tools!";
+                banner.style.background = "#f0fdf4"; banner.style.color = "#15803d";
+            } else if (percentage >= 70) {
+                banner.textContent = "👍 Good Job! Solid understanding of core synchronization concepts.";
+                banner.style.background = "#e0f2fe"; banner.style.color = "#0369a1";
+            } else {
+                banner.textContent = "⚠️ Review Recommended: Re-study Peterson's Algorithm, Semaphore calculations, and Monitors.";
+                banner.style.background = "#fef2f2"; banner.style.color = "#b91c1c";
+            }
+
+            renderReviewSection();
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+        }
+
+        function renderReviewSection() {
+            const reviewContainer = document.getElementById('reviewContainer');
+            reviewContainer.innerHTML = '';
+
+            questions.forEach((q, idx) => {
+                const userAnsIdx = userAnswers[idx];
+                const isCorrect = userAnsIdx === q.correctAnswer;
+                const isUnanswered = userAnsIdx === undefined;
+
+                let statusClass = isCorrect ? 'correct' : (isUnanswered ? 'unanswered' : 'incorrect');
+                let statusBadge = isCorrect ? '✓ Correct' : (isUnanswered ? '— Unanswered' : '✗ Incorrect');
+
+                const reviewCard = document.createElement('div');
+                reviewCard.className = `review-card ${statusClass}`;
+
+                const userChoiceText = isUnanswered ? 'None Selected' : `${String.fromCharCode(65 + userAnsIdx)}. ${q.options[userAnsIdx]}`;
+                const correctChoiceText = `${String.fromCharCode(65 + q.correctAnswer)}. ${q.options[q.correctAnswer]}`;
+
+                reviewCard.innerHTML = `
+                    <div class="review-header">
+                        <strong>Question ${idx + 1} (${q.type} • ${q.difficulty})</strong>
+                        <span class="result-tag ${statusClass}">${statusBadge}</span>
+                    </div>
+                    <p class="question-text">${q.question}</p>
+                    <p><strong>Your Answer:</strong> ${userChoiceText}</p>
+                    <p><strong>Correct Answer:</strong> ${correctChoiceText}</p>
+                    <div class="explanation-box">
+                        <strong>Step-by-Step Explanation:</strong><br>
+                        ${q.explanation}
+                    </div>
+                `;
+
+                reviewContainer.appendChild(reviewCard);
+            });
+        }
+    </script>
+</body>
+
+</html>

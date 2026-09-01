@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operating Systems – Chapter 9: Main Memory Quiz</title>
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #60a5fa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 20px 28px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .header-title h1 {
+      font-size: 1.4rem;
+      color: var(--accent-blue);
+      font-weight: 700;
+    }
+
+    .header-title h2 {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    /* Timer */
+    .timer-badge {
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent-blue);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timer-badge.warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+    }
+
+    .timer-badge.danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    /* Theme Toggle */
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    /* Progress Bar */
+    .progress-section {
+      margin-bottom: 24px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      background: var(--border-color);
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: var(--accent-blue);
+      height: 100%;
+      width: 5%;
+      transition: width 0.3s ease;
+    }
+
+    /* Layout Grid */
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .quiz-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Question Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .question-tags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .tag-easy {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+
+    .tag-medium {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+    }
+
+    .tag-hard {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+    }
+
+    .tag-type {
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent-blue);
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: var(--text-main);
+    }
+
+    .question-text code {
+      background: rgba(100, 116, 139, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    /* Options */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-item {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.2s;
+      background: var(--bg-card);
+    }
+
+    .option-item:hover {
+      border-color: var(--accent-blue);
+      background: rgba(37, 99, 235, 0.03);
+    }
+
+    .option-item.selected {
+      border-color: var(--accent-blue);
+      background: rgba(37, 99, 235, 0.08);
+      font-weight: 600;
+    }
+
+    .option-marker {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .option-item.selected .option-marker {
+      border-color: var(--accent-blue);
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .option-content {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    /* Palette Sidebar */
+    .sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      height: fit-content;
+    }
+
+    .sidebar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .palette-btn {
+      aspect-ratio: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .palette-btn:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .palette-btn.active {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px var(--accent-blue);
+    }
+
+    .palette-btn.answered {
+      background: var(--accent-blue);
+      color: white;
+      border-color: var(--accent-blue);
+    }
+
+    /* Navigation Buttons */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 28px;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      opacity: 0.8;
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-blue-hover);
+    }
+
+    .btn-submit {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.9;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .modal-card p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    /* Results Screen */
+    .results-container {
+      display: none;
+    }
+
+    .score-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .score-badge {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--accent-blue);
+      margin: 12px 0;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .stat-box {
+      background: var(--bg-primary);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Tables & Analysis */
+    .analysis-section {
+      margin-top: 32px;
+    }
+
+    .section-header {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .analysis-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .analysis-table th,
+    .analysis-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    .analysis-table th {
+      background: var(--bg-primary);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    .weakness-card {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .weakness-card h4 {
+      color: var(--accent-red);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    /* Review Questions */
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .status-correct {
+      color: var(--accent-green);
+    }
+
+    .status-incorrect {
+      color: var(--accent-red);
+    }
+
+    .explanation-box {
+      background: var(--bg-primary);
+      border-left: 4px solid var(--accent-blue);
+      padding: 16px;
+      margin-top: 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .explanation-box strong {
+      color: var(--accent-blue);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-title">
+        <h1>Operating Systems – Chapter 9</h1>
+        <h2>Chapter 9 Main Memory Exam Simulator</h2>
+      </div>
+      <div class="header-meta">
+        <div class="timer-badge" id="timerBadge">
+          ⏱️ <span id="timerDisplay">20:00</span>
+        </div>
+        <button class="theme-btn" id="themeToggle">🌙 Dark</button>
+      </div>
+    </header>
+
+    <!-- Quiz Screen -->
+    <div id="quizScreen">
+      <!-- Progress Section -->
+      <div class="progress-section">
+        <div class="progress-info">
+          <span id="questionCounter">Question 1 of 20</span>
+          <span id="progressPercent">5% Completed</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="quiz-grid">
+        <!-- Question Container -->
+        <div class="card">
+          <div class="question-tags" id="questionTags">
+            <!-- Tags injected by JS -->
+          </div>
+          <div class="question-text" id="questionText">
+            <!-- Question text injected by JS -->
+          </div>
+          <div class="options-list" id="optionsList">
+            <!-- Options injected by JS -->
+          </div>
+
+          <div class="controls">
+            <button class="btn btn-secondary" id="btnPrev" onclick="navigate(-1)" disabled>Previous</button>
+            <button class="btn btn-primary" id="btnNext" onclick="navigate(1)">Next</button>
+            <button class="btn btn-submit" id="btnSubmitModal" onclick="openSubmitModal()">Submit Quiz</button>
+          </div>
+        </div>
+
+        <!-- Navigation Palette Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-title">Question Navigator</div>
+          <div class="palette-grid" id="paletteGrid">
+            <!-- Palette buttons injected by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="submitModal">
+      <div class="modal-card">
+        <h3>Submit Your Exam?</h3>
+        <p id="modalAnswerSummary">You have answered 0 of 20 questions.</p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeSubmitModal()">Cancel</button>
+          <button class="btn btn-submit" onclick="submitQuiz()">Confirm & Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div class="results-container" id="resultsScreen">
+      <div class="score-summary">
+        <h2>Chapter 9 Exam Completed</h2>
+        <div class="score-badge" id="scoreBadge">0 / 20</div>
+        <p id="scorePercentage" style="font-size: 1.2rem; font-weight: 700; color: var(--text-muted);">0%</p>
+
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-num" id="statCorrect">0</div>
+            <div class="stat-label">Correct</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="statIncorrect">0</div>
+            <div class="stat-label">Incorrect</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="statUnanswered">0</div>
+            <div class="stat-label">Unanswered</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="statTimeUsed">00:00</div>
+            <div class="stat-label">Time Used</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Analysis -->
+      <div class="analysis-section">
+        <div class="section-header">Performance Breakdown by Question Type</div>
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>Question Type</th>
+              <th>Correct</th>
+              <th>Total</th>
+              <th>Accuracy</th>
+            </tr>
+          </thead>
+          <tbody id="typeAnalysisBody">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Topic Analysis -->
+      <div class="analysis-section">
+        <div class="section-header">Topic Mastery Analysis</div>
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="topicAnalysisBody">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Diagnostic Weak Areas -->
+      <div class="analysis-section">
+        <div class="section-header">Diagnostic & Study Recommendations</div>
+        <div id="weaknessList">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Detailed Question Review -->
+      <div class="analysis-section">
+        <div class="section-header">Detailed Question Review & Worked Solutions</div>
+        <div id="reviewList">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 20 High-Quality Questions derived strictly from Silberschatz Chapter 9
+    const rawQuestions = [
+      {
+        id: 1,
+        question: "A process is allocated memory starting at base address 300,040 with a limit register value of 120,900. The CPU generates a logical address of 120,900. Which of the following statements correctly describes the hardware protection action?",
+        options: [
+          "The legal physical address range is 300,040 to 420,940. Access is granted and maps to 420,940.",
+          "The access is valid, and the resulting physical address is 300,040.",
+          "The legal physical address range is 300,040 to 420,939. Since logical address 120,900 is not strictly less than limit 120,900, a trap to the operating system is generated.",
+          "The address is translated to 120,900 by the relocation register without error."
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Identify Given Values</strong><br>Base Address = 300,040<br>Limit Register = 120,900<br>Generated Logical Address = 120,900<br><br><strong>Step 2: Apply Bound Check Formula</strong><br>Hardware requirement: <code>0 &le; Logical Address &lt; Limit Register</code>.<br>Here, Logical Address = 120,900, Limit = 120,900.<br>Is 120,900 &lt; 120,900? <strong>FALSE</strong>.<br><br><strong>Step 3: Calculate Legal Range</strong><br>Smallest legal physical address = Base + 0 = 300,040.<br>Largest legal physical address = Base + Limit - 1 = 300,040 + 120,899 = 420,939.<br><br><strong>Final Answer</strong><br>An addressing trap is generated because 120,900 equals the limit, falling outside the legal physical range of 300,040 to 420,939.",
+        difficulty: "Medium",
+        type: "Calculation",
+        topic: "Memory Protection Hardware"
+      },
+      {
+        id: 2,
+        question: "At which address binding stage can executable instructions be moved dynamically from one memory segment to another during process execution?",
+        options: [
+          "Compile time binding",
+          "Load time binding",
+          "Execution time (Run time) binding",
+          "Link time binding"
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Compare Binding Times</strong><br>• Compile time: Absolute physical code generated; cannot move.<br>• Load time: Relocatable code generated; fixed once loaded into memory.<br>• Execution time: Binding delayed until run time. Special hardware (relocation register) maps addresses dynamically, allowing processes to be moved during execution.<br><br><strong>Final Answer</strong><br>Execution time (Run time) binding.",
+        difficulty: "Easy",
+        type: "Conceptual",
+        topic: "Address Binding"
+      },
+      {
+        id: 3,
+        question: "Given memory partitions of size 100 KB, 500 KB, 200 KB, 300 KB, and 600 KB (in order), how would the Best-Fit algorithm allocate processes of sizes 212 KB, 417 KB, 112 KB, and 426 KB (in order)?",
+        options: [
+          "212 KB &rarr; 300 KB partition; 417 KB &rarr; 500 KB partition; 112 KB &rarr; 200 KB partition; 426 KB &rarr; 600 KB partition.",
+          "212 KB &rarr; 500 KB partition; 417 KB &rarr; 600 KB partition; 112 KB &rarr; 200 KB partition; 426 KB cannot be allocated.",
+          "212 KB &rarr; 300 KB partition; 417 KB &rarr; 500 KB partition; 112 KB &rarr; 100 KB partition; 426 KB &rarr; 600 KB partition.",
+          "212 KB &rarr; 600 KB partition; 417 KB &rarr; 500 KB partition; 112 KB &rarr; 200 KB partition; 426 KB &rarr; 300 KB partition."
+        ],
+        correctAnswer: 0,
+        explanation: "<strong>Step 1: Understand Best-Fit Algorithm</strong><br>Best-Fit searches all free partitions and chooses the smallest partition that is large enough.<br><br><strong>Step 2: Trace Allocation Step-by-Step</strong><br>• <strong>Process 1 (212 KB)</strong>: Fits in 500, 300, 600. Smallest fitting partition = <strong>300 KB</strong>. Remaining in 300 KB block = 88 KB.<br>• <strong>Process 2 (417 KB)</strong>: Fits in 500, 600. Smallest fitting partition = <strong>500 KB</strong>. Remaining in 500 KB block = 83 KB.<br>• <strong>Process 3 (112 KB)</strong>: Fits in 200 KB, 600 KB. Smallest fitting partition = <strong>200 KB</strong>. Remaining in 200 KB block = 88 KB.<br>• <strong>Process 4 (426 KB)</strong>: Fits in 600 KB. Allocated to <strong>600 KB</strong> partition.<br><br><strong>Final Answer</strong><br>212 KB &rarr; 300 KB; 417 KB &rarr; 500 KB; 112 KB &rarr; 200 KB; 426 KB &rarr; 600 KB.",
+        difficulty: "Hard",
+        type: "Algorithm",
+        topic: "Memory Allocation Strategies"
+      },
+      {
+        id: 4,
+        question: "A system with 1,024 KB total memory allocates: OS = 200 KB, Process A requests 180 KB in a 200 KB block, Process B requests 270 KB in a 300 KB block, and Process C requests 150 KB in a 200 KB block. Unallocated memory consists of two holes of 60 KB and 64 KB. What are the total Internal and External Fragmentation?",
+        options: [
+          "Internal = 100 KB, External = 124 KB",
+          "Internal = 124 KB, External = 100 KB",
+          "Internal = 50 KB, External = 124 KB",
+          "Internal = 100 KB, External = 0 KB"
+        ],
+        correctAnswer: 0,
+        explanation: "<strong>Step 1: Calculate Internal Fragmentation</strong><br>Internal fragmentation is unused memory inside allocated partitions:<br>• Block A: 200 KB - 180 KB = 20 KB<br>• Block B: 300 KB - 270 KB = 30 KB<br>• Block C: 200 KB - 150 KB = 50 KB<br>Total Internal Fragmentation = 20 + 30 + 50 = <strong>100 KB</strong>.<br><br><strong>Step 2: Calculate External Fragmentation</strong><br>External fragmentation is total free unallocated memory outside blocks that cannot satisfy requests due to non-contiguity:<br>Hole 1 + Hole 2 = 60 KB + 64 KB = <strong>124 KB</strong>.<br><br><strong>Final Answer</strong><br>Internal = 100 KB, External = 124 KB.",
+        difficulty: "Medium",
+        type: "Calculation",
+        topic: "Fragmentation Analysis"
+      },
+      {
+        id: 5,
+        question: "In a system with a 32-bit logical address space and a page size of 4 KB (4,096 bytes), a process generates the logical address 0x000035A4 (decimal 13,732). What are the page number (p) in decimal and offset (d) in hex?",
+        options: [
+          "Page number p = 3, Offset d = 0x5A4 (1,444 decimal)",
+          "Page number p = 3, Offset d = 0x35A (858 decimal)",
+          "Page number p = 4, Offset d = 0x5A4 (1,444 decimal)",
+          "Page number p = 13, Offset d = 0x732 (1,842 decimal)"
+        ],
+        correctAnswer: 0,
+        explanation: "<strong>Step 1: Determine Offset Bits</strong><br>Page size = 4 KB = 4,096 bytes = 2<sup>12</sup> bytes.<br>Offset (d) uses the lowest 12 bits (3 hex digits).<br><br><strong>Step 2: Split Logical Address 0x000035A4</strong><br>• Lowest 3 hex digits (12 bits) = <code>0x5A4</code> = 5&times;256 + 10&times;16 + 4 = 1,444 decimal.<br>• Remaining high bits (page number p) = <code>0x00003</code> = 3 decimal.<br><br><strong>Step 3: Verification via Division</strong><br>p = floor(13,732 / 4096) = 3.<br>d = 13,732 mod 4096 = 1,444.<br><br><strong>Final Answer</strong><br>Page number p = 3, Offset d = 0x5A4.",
+        difficulty: "Medium",
+        type: "Calculation",
+        topic: "Paging & Address Translation"
+      },
+      {
+        id: 6,
+        question: "A paged memory system has a main memory access time of 100 ns and a TLB access time of 20 ns. If the TLB hit ratio is 90%, what is the Effective Access Time (EAT)?",
+        options: [
+          "120 ns",
+          "130 ns",
+          "140 ns",
+          "220 ns"
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Identify Given Values</strong><br>&alpha; (Hit ratio) = 0.90<br>TLB lookup time = 20 ns<br>Memory access time = 100 ns<br><br><strong>Step 2: Apply EAT Formula</strong><br>EAT = &alpha; &times; (TLB + Mem) + (1 - &alpha;) &times; (TLB + 2 &times; Mem)<br>• Hit Time = 20 + 100 = 120 ns<br>• Miss Time = 20 + 100 + 100 = 220 ns<br><br><strong>Step 3: Compute EAT</strong><br>EAT = (0.90 &times; 120 ns) + (0.10 &times; 220 ns)<br>EAT = 108 ns + 22 ns = <strong>130 ns</strong>.<br><br><strong>Final Answer</strong><br>Effective Access Time = 130 ns.",
+        difficulty: "Hard",
+        type: "Calculation",
+        topic: "TLB & Effective Access Time"
+      },
+      {
+        id: 7,
+        question: "A 32-bit computer system uses a page size of 8 KB (8,192 bytes). How many bits are used for the page offset (d) and page number (p)?",
+        options: [
+          "Offset d = 12 bits, Page number p = 20 bits",
+          "Offset d = 13 bits, Page number p = 19 bits",
+          "Offset d = 14 bits, Page number p = 18 bits",
+          "Offset d = 8 bits, Page number p = 24 bits"
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Calculate Offset Bits</strong><br>Page size = 8 KB = 8,192 bytes = 2<sup>13</sup> bytes.<br>Therefore, offset d = <strong>13 bits</strong>.<br><br><strong>Step 2: Calculate Page Number Bits</strong><br>Total logical address space = 32 bits.<br>Page number p = Total bits - Offset bits = 32 - 13 = <strong>19 bits</strong>.<br><br><strong>Final Answer</strong><br>Offset d = 13 bits, Page number p = 19 bits.",
+        difficulty: "Easy",
+        type: "Calculation",
+        topic: "Paging & Address Translation"
+      },
+      {
+        id: 8,
+        question: "In a 32-bit system with two-level hierarchical paging, page size is 4 KB and each Page Table Entry (PTE) is 4 bytes. To ensure the outer page table fits in exactly one 4 KB frame, how should address bits (p1, p2, d) be divided?",
+        options: [
+          "p1 = 10 bits, p2 = 10 bits, d = 12 bits",
+          "p1 = 12 bits, p2 = 8 bits, d = 12 bits",
+          "p1 = 8 bits, p2 = 12 bits, d = 12 bits",
+          "p1 = 10 bits, p2 = 12 bits, d = 10 bits"
+        ],
+        correctAnswer: 0,
+        explanation: "<strong>Step 1: Calculate Page Offset Bits (d)</strong><br>Page size = 4 KB = 2<sup>12</sup> bytes &rarr; d = 12 bits.<br>Remaining bits for p1 + p2 = 32 - 12 = 20 bits.<br><br><strong>Step 2: Determine Entries per Frame</strong><br>Frame size = 4 KB = 4,096 bytes.<br>PTE size = 4 bytes.<br>Entries per page table frame = 4,096 / 4 = 1,024 entries = 2<sup>10</sup> entries.<br><br><strong>Step 3: Allocate Bits to p1 and p2</strong><br>To index 1,024 entries in outer page table frame: p1 = 10 bits.<br>Inner page table index p2 = 20 - 10 = 10 bits.<br><br><strong>Final Answer</strong><br>p1 = 10 bits, p2 = 10 bits, d = 12 bits.",
+        difficulty: "Hard",
+        type: "Calculation",
+        topic: "Hierarchical Paging"
+      },
+      {
+        id: 9,
+        question: "Which continuous memory allocation strategy leaves behind the largest leftover unallocated block of memory after satisfying a request?",
+        options: [
+          "First-fit",
+          "Best-fit",
+          "Worst-fit",
+          "Next-fit"
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Compare Allocation Strategies</strong><br>• First-fit: Allocates the first hole that is big enough.<br>• Best-fit: Allocates the smallest hole that is big enough, leaving the smallest leftover.<br>• Worst-fit: Allocates the largest available hole. The rationale is that the remaining leftover block will be large enough to host another process.<br><br><strong>Final Answer</strong><br>Worst-fit.",
+        difficulty: "Medium",
+        type: "Comparison",
+        topic: "Memory Allocation Strategies"
+      },
+      {
+        id: 10,
+        question: "A system uses a 32-bit logical address space and a page size of 4 KB. If each Page Table Entry (PTE) requires 4 bytes, what is the maximum size of a single-level page table for one process?",
+        options: [
+          "1 MB",
+          "4 MB",
+          "2 MB",
+          "8 MB"
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Calculate Total Number of Pages</strong><br>Logical address space = 2<sup>32</sup> bytes.<br>Page size = 4 KB = 2<sup>12</sup> bytes.<br>Total pages = 2<sup>32 - 12</sup> = 2<sup>20</sup> = 1,048,576 pages.<br><br><strong>Step 2: Compute Total Page Table Size</strong><br>Size = Total pages &times; PTE size<br>Size = 2<sup>20</sup> entries &times; 4 bytes = 4 &times; 2<sup>20</sup> bytes = <strong>4 MB</strong>.<br><br><strong>Final Answer</strong><br>Maximum single-level page table size = 4 MB.",
+        difficulty: "Hard",
+        type: "Calculation",
+        topic: "Page Table Overhead"
+      },
+      {
+        id: 11,
+        question: "What is the primary advantage of an Inverted Page Table compared to traditional or hierarchical page tables?",
+        options: [
+          "It completely eliminates page fault exceptions during address translation.",
+          "It eliminates the need for hardware TLB lookup.",
+          "It significantly reduces memory overhead by having only one entry per physical frame regardless of the number of processes.",
+          "It eliminates the need to store Process IDs (PIDs) in table entries."
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Analyze Inverted Page Table Architecture</strong><br>Standard page tables have one entry per virtual page per process (consuming gigabytes in 64-bit systems).<br>An Inverted Page Table has exactly one entry per physical memory frame.<br><br><strong>Step 2: Identify Trade-off</strong><br>Advantage: Drastically reduces physical memory consumed by page tables.<br>Disadvantage: Searching takes longer (requires hash tables to find virtual page numbers).<br><br><strong>Final Answer</strong><br>It significantly reduces memory overhead by maintaining only one entry per physical frame.",
+        difficulty: "Medium",
+        type: "Conceptual",
+        topic: "Advanced Page Tables"
+      },
+      {
+        id: 12,
+        question: "A system has a main memory access time of 50 ns and a TLB access time of 10 ns. To achieve an Effective Access Time (EAT) of no more than 65 ns, what minimum TLB hit ratio (&alpha;) is required?",
+        options: [
+          "80%",
+          "85%",
+          "90%",
+          "95%"
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Set Up EAT Inequality</strong><br>EAT = &alpha;(10 + 50) + (1 - &alpha;)(10 + 50 + 50) &le; 65<br>EAT = 60&alpha; + 110(1 - &alpha;) &le; 65<br><br><strong>Step 2: Solve for &alpha;</strong><br>60&alpha; + 110 - 110&alpha; &le; 65<br>110 - 50&alpha; &le; 65<br>50&alpha; &ge; 45 &rarr; &alpha; &ge; 45 / 50 = 0.90 = <strong>90%</strong>.<br><br><strong>Final Answer</strong><br>Minimum TLB hit ratio required = 90%.",
+        difficulty: "Medium",
+        type: "Calculation",
+        topic: "TLB & Effective Access Time"
+      },
+      {
+        id: 13,
+        question: "A system uses paging with a page size of 1 KB (1,024 bytes). Page table for Process P: Page 0 &rarr; Frame 5, Page 1 &rarr; Frame 2, Page 2 &rarr; Frame 9, Page 3 &rarr; Frame 7. What physical address corresponds to logical address 2,500?",
+        options: [
+          "9,668",
+          "9,284",
+          "7,616",
+          "2,500"
+        ],
+        correctAnswer: 0,
+        explanation: "<strong>Step 1: Calculate Page Number and Offset</strong><br>Page size = 1,024 bytes.<br>Logical address = 2,500.<br>• Page number p = floor(2,500 / 1024) = <strong>2</strong>.<br>• Offset d = 2,500 mod 1024 = 2,500 - 2,048 = <strong>452</strong>.<br><br><strong>Step 2: Look Up Frame Number</strong><br>Page 2 maps to <strong>Frame 9</strong>.<br><br><strong>Step 3: Compute Physical Address</strong><br>Physical Address = (Frame &times; Page Size) + Offset<br>Physical Address = (9 &times; 1,024) + 452 = 9,216 + 452 = <strong>9,668</strong>.<br><br><strong>Final Answer</strong><br>Physical address = 9,668.",
+        difficulty: "Easy",
+        type: "Calculation",
+        topic: "Paging & Address Translation"
+      },
+      {
+        id: 14,
+        question: "For two or more processes to share code pages (such as shared C libraries) in a paged system, which condition MUST be met?",
+        options: [
+          "The shared code must be writeable by all processes.",
+          "The shared code must be reentrant (read-only) and appear at the same logical address location in all processes.",
+          "The shared code must be allocated in contiguous physical frames starting at frame 0.",
+          "The processes must share the exact same Page Table Base Register (PTBR)."
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Understand Reentrant Code Rules</strong><br>Shared code must be reentrant (non-self-modifying, read-only) so execution never alters instructions.<br><br><strong>Step 2: Understand Logical Address Space Alignment</strong><br>Because code uses relative or absolute jump instructions, shared code must appear at the exact same logical address space location across all processes.<br><br><strong>Final Answer</strong><br>The code must be reentrant and reside at the same logical address in all processes.",
+        difficulty: "Medium",
+        type: "Conceptual",
+        topic: "Shared Memory & Paging"
+      },
+      {
+        id: 15,
+        question: "In a Hashed Page Table handling address spaces larger than 32 bits, what data structure is used at each hash table bucket to handle collisions?",
+        options: [
+          "A binary search tree indexed by frame number.",
+          "A linked list of elements containing (virtual page number, frame number, pointer to next element).",
+          "A secondary 2-level page table.",
+          "A stack operating under a Least Recently Used policy."
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Recall Hashed Page Table Structure</strong><br>In hashed page tables, the virtual page number is hashed into a bucket.<br>Each bucket contains a linked list of elements that hash to the same location.<br>Each element contains: (1) Virtual Page Number, (2) Mapped Frame Number, (3) Pointer to next node.<br><br><strong>Final Answer</strong><br>A linked list of elements containing (virtual page number, frame number, next pointer).",
+        difficulty: "Medium",
+        type: "Definition",
+        topic: "Advanced Page Tables"
+      },
+      {
+        id: 16,
+        question: "In dynamic relocation using a relocation register (MMU), how is the physical address computed from the CPU-generated logical address?",
+        options: [
+          "The logical address is multiplied by the relocation register value.",
+          "The logical address is subtracted from the limit register.",
+          "The relocation register value is added to every logical address generated by a user process.",
+          "The logical address is used as a direct bitwise mask over the relocation register."
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Define Relocation Hardware Function</strong><br>The relocation register holds the base physical address where the process is loaded in memory.<br>Physical Address = Logical Address + Relocation Register Value.<br><br><strong>Final Answer</strong><br>The relocation register value is added to every logical address generated by the user process.",
+        difficulty: "Easy",
+        type: "Conceptual",
+        topic: "Memory Protection Hardware"
+      },
+      {
+        id: 17,
+        question: "What is compaction in continuous memory allocation, and when is it possible to perform?",
+        options: [
+          "Compaction combines internal fragmentation blocks; possible at compile time only.",
+          "Compaction shuffles memory contents to place all free memory together in one large block; possible ONLY if relocation is dynamic and done at execution time.",
+          "Compaction compresses code using Huffman coding; possible at load time.",
+          "Compaction divides physical memory into fixed-sized frames; possible under static relocation."
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Define Compaction</strong><br>Compaction solves external fragmentation by shuffling allocated memory blocks to consolidate all free space into one contiguous block.<br><br><strong>Step 2: Hardware Prerequisite</strong><br>Compaction is possible ONLY if address binding is dynamic and done at execution time (using relocation registers). If code is bound at compile/load time, moving it breaks address references.<br><br><strong>Final Answer</strong><br>Shuffles memory to consolidate free space; possible ONLY under dynamic execution-time relocation.",
+        difficulty: "Easy",
+        type: "Conceptual",
+        topic: "Fragmentation Analysis"
+      },
+      {
+        id: 18,
+        question: "Suppose a 64-bit virtual address space uses 4-level hierarchical paging with a page size of 4 KB (2<sup>12</sup> bytes). If each level of page table index uses 9 bits, how many bits of the 64-bit virtual address space are actually used for address translation?",
+        options: [
+          "64 bits",
+          "48 bits",
+          "52 bits",
+          "36 bits"
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Count Page Offset Bits</strong><br>Page size = 4 KB = 2<sup>12</sup> bytes &rarr; Offset = 12 bits.<br><br><strong>Step 2: Sum Hierarchical Index Bits</strong><br>4 levels of page tables &times; 9 bits per level = 36 bits.<br><br><strong>Step 3: Total Translated Virtual Address Bits</strong><br>Total = 36 (index bits) + 12 (offset bits) = <strong>48 bits</strong>.<br>(Note: This matches x86-64 architecture where 48-bit virtual addressing is standard).<br><br><strong>Final Answer</strong><br>48 bits.",
+        difficulty: "Hard",
+        type: "Calculation",
+        topic: "Hierarchical Paging"
+      },
+      {
+        id: 19,
+        question: "A system uses segmentation with the following Segment Table:<br>• Seg 0: Base=219, Limit=600<br>• Seg 1: Base=2300, Limit=140<br>• Seg 2: Base=90, Limit=100<br>What physical address is produced for <Seg 2, Offset 85> and what occurs for <Seg 1, Offset 150>?",
+        options: [
+          "<Seg 2, Offset 85> &rarr; 175; <Seg 1, Offset 150> &rarr; 2,450",
+          "<Seg 2, Offset 85> &rarr; 175; <Seg 1, Offset 150> &rarr; Addressing Trap (Offset &ge; Limit)",
+          "<Seg 2, Offset 85> &rarr; 90; <Seg 1, Offset 150> &rarr; Addressing Trap (Offset &ge; Limit)",
+          "<Seg 2, Offset 85> &rarr; 260; <Seg 1, Offset 150> &rarr; 2,450"
+        ],
+        correctAnswer: 1,
+        explanation: "<strong>Step 1: Evaluate Address 1 &lt;Seg 2, Offset 85&gt;</strong><br>• Seg 2: Base = 90, Limit = 100.<br>• Check: Is Offset (85) &lt; Limit (100)? <strong>YES</strong> (Valid).<br>• Physical Address = Base + Offset = 90 + 85 = <strong>175</strong>.<br><br><strong>Step 2: Evaluate Address 2 &lt;Seg 1, Offset 150&gt;</strong><br>• Seg 1: Base = 2300, Limit = 140.<br>• Check: Is Offset (150) &lt; Limit (140)? <strong>NO!</strong> (150 &ge; 140).<br>• Result: Hardware generates an addressing error trap.<br><br><strong>Final Answer</strong><br>&lt;Seg 2, Offset 85&gt; &rarr; 175; &lt;Seg 1, Offset 150&gt; &rarr; Addressing Trap.",
+        difficulty: "Medium",
+        type: "Calculation",
+        topic: "Segmentation"
+      },
+      {
+        id: 20,
+        question: "In a page table entry, which bit indicates whether a page is residing in the process's logical address space and is a legal page to access?",
+        options: [
+          "Dirty bit (Modified bit)",
+          "Referenced bit",
+          "Valid-invalid bit",
+          "Protection mode bit"
+        ],
+        correctAnswer: 2,
+        explanation: "<strong>Step 1: Define Page Protection Bits</strong><br>• Valid-Invalid bit: Set to 'valid' if the page is in the process's logical address space; set to 'invalid' if the page is illegal or not in the logical address space.<br>• Dirty bit: Tracks if page was modified.<br>• Referenced bit: Tracks if page was accessed.<br><br><strong>Final Answer</strong><br>Valid-invalid bit.",
+        difficulty: "Easy",
+        type: "Definition",
+        topic: "Paging Protection"
+      }
+    ];
+
+    // App State
+    let questions = [];
+    let currentIndex = 0;
+    let userAnswers = {};
+    let timerSeconds = 20 * 60;
+    let timerInterval = null;
+    let quizSubmitted = false;
+
+    // DOM Elements
+    const quizScreen = document.getElementById('quizScreen');
+    const resultsScreen = document.getElementById('resultsScreen');
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    const questionTags = document.getElementById('questionTags');
+    const questionCounter = document.getElementById('questionCounter');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressFill = document.getElementById('progressFill');
+    const paletteGrid = document.getElementById('paletteGrid');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerBadge = document.getElementById('timerBadge');
+    const submitModal = document.getElementById('submitModal');
+    const modalAnswerSummary = document.getElementById('modalAnswerSummary');
+
+    // Initialize Quiz
+    function initQuiz() {
+      // Deep clone questions & shuffle options order preserving correctness
+      questions = JSON.parse(JSON.stringify(rawQuestions)).map(q => {
+        let indexedOptions = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.correctAnswer }));
+        // Shuffle options
+        for (let i = indexedOptions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [indexedOptions[i], indexedOptions[j]] = [indexedOptions[j], indexedOptions[i]];
+        }
+        q.options = indexedOptions.map(o => o.text);
+        q.correctAnswer = indexedOptions.findIndex(o => o.isCorrect);
+        return q;
+      });
+
+      // Shuffle question order for simulation
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+      }
+
+      buildPalette();
+      renderQuestion();
+      startTimer();
+    }
+
+    // Build Question Palette
+    function buildPalette() {
+      paletteGrid.innerHTML = '';
+      questions.forEach((q, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `palette-btn ${idx === currentIndex ? 'active' : ''}`;
+        btn.textContent = idx + 1;
+        btn.id = `palette-btn-${idx}`;
+        btn.onclick = () => jumpToQuestion(idx);
+        paletteGrid.appendChild(btn);
+      });
+    }
+
+    // Render Current Question
+    function renderQuestion() {
+      const q = questions[currentIndex];
+
+      // Counter & Progress
+      questionCounter.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      const pct = Math.round(((currentIndex + 1) / questions.length) * 100);
+      progressPercent.textContent = `${pct}% Completed`;
+      progressFill.style.width = `${pct}%`;
+
+      // Tags
+      const diffClass = q.difficulty.toLowerCase() === 'easy' ? 'tag-easy' : (q.difficulty.toLowerCase() === 'medium' ? 'tag-medium' : 'tag-hard');
+      questionTags.innerHTML = `
+    <span class="tag ${diffClass}">${q.difficulty}</span>
+    <span class="tag tag-type">${q.type}</span>
+    <span class="tag" style="background:var(--border-color); color:var(--text-main);">${q.topic}</span>
+  `;
+
+      // Text
+      questionText.innerHTML = q.question;
+
+      // Options
+      optionsList.innerHTML = '';
+      const labels = ['A', 'B', 'C', 'D'];
+      q.options.forEach((optText, idx) => {
+        const isSelected = userAnswers[currentIndex] === idx;
+        const optDiv = document.createElement('div');
+        optDiv.className = `option-item ${isSelected ? 'selected' : ''}`;
+        optDiv.onclick = () => selectOption(idx);
+        optDiv.innerHTML = `
+      <div class="option-marker">${labels[idx]}</div>
+      <div class="option-content">${optText}</div>
+    `;
+        optionsList.appendChild(optDiv);
+      });
+
+      // Palette Active State
+      document.querySelectorAll('.palette-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === currentIndex);
+      });
+
+      // Nav buttons
+      document.getElementById('btnPrev').disabled = currentIndex === 0;
+      document.getElementById('btnNext').style.display = currentIndex === questions.length - 1 ? 'none' : 'block';
+    }
+
+    // Option Selection
+    function selectOption(optIndex) {
+      if (quizSubmitted) return;
+      userAnswers[currentIndex] = optIndex;
+
+      // Update palette button
+      const pBtn = document.getElementById(`palette-btn-${currentIndex}`);
+      if (pBtn) pBtn.classList.add('answered');
+
+      renderQuestion();
+    }
+
+    // Navigation
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        currentIndex = newIndex;
+        renderQuestion();
+      }
+    }
+
+    function jumpToQuestion(idx) {
+      currentIndex = idx;
+      renderQuestion();
+    }
+
+    // Timer Functions
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          submitQuiz(true); // Auto-submit when time runs out
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      const str = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      timerDisplay.textContent = str;
+
+      if (timerSeconds <= 300 && timerSeconds > 60) {
+        timerBadge.className = 'timer-badge warning';
+      } else if (timerSeconds <= 60) {
+        timerBadge.className = 'timer-badge danger';
+      }
+    }
+
+    // Modal Controls
+    function openSubmitModal() {
+      const answeredCount = Object.keys(userAnswers).length;
+      modalAnswerSummary.textContent = `You have answered ${answeredCount} of ${questions.length} questions. Are you sure you want to finalize your exam?`;
+      submitModal.classList.add('active');
+    }
+
+    function closeSubmitModal() {
+      submitModal.classList.remove('active');
+    }
+
+    // Submit Quiz & Generate Results
+    function submitQuiz(autoSubmitted = false) {
+      if (quizSubmitted) return;
+      quizSubmitted = true;
+      clearInterval(timerInterval);
+      closeSubmitModal();
+
+      // Hide Quiz, Show Results
+      quizScreen.style.display = 'none';
+      resultsScreen.style.display = 'block';
+
+      // Calculate Scores
+      let correctCount = 0;
+      let incorrectCount = 0;
+      let unansweredCount = 0;
+
+      const typeStats = {};
+      const topicStats = {};
+
+      questions.forEach((q, idx) => {
+        const userAns = userAnswers[idx];
+        const isCorrect = userAns === q.correctAnswer;
+
+        // Track Stats
+        if (userAns === undefined) {
+          unansweredCount++;
+        } else if (isCorrect) {
+          correctCount++;
+        } else {
+          incorrectCount++;
+        }
+
+        // Type Stats
+        if (!typeStats[q.type]) typeStats[q.type] = { correct: 0, total: 0 };
+        typeStats[q.type].total++;
+        if (isCorrect) typeStats[q.type].correct++;
+
+        // Topic Stats
+        if (!topicStats[q.topic]) topicStats[q.topic] = { correct: 0, total: 0 };
+        topicStats[q.topic].total++;
+        if (isCorrect) topicStats[q.topic].correct++;
+      });
+
+      const pct = Math.round((correctCount / questions.length) * 100);
+      const timeUsedSec = (20 * 60) - timerSeconds;
+      const timeUsedM = Math.floor(timeUsedSec / 60);
+      const timeUsedS = timeUsedSec % 60;
+
+      // Render Score Banner
+      document.getElementById('scoreBadge').textContent = `${correctCount} / ${questions.length}`;
+      document.getElementById('scorePercentage').textContent = `${pct}% ${pct >= 75 ? '— PASSED' : '— NEEDS REVIEW'}`;
+      document.getElementById('statCorrect').textContent = correctCount;
+      document.getElementById('statIncorrect').textContent = incorrectCount;
+      document.getElementById('statUnanswered').textContent = unansweredCount;
+      document.getElementById('statTimeUsed').textContent = `${timeUsedM}m ${timeUsedS}s`;
+
+      // Render Type Breakdown Table
+      const typeBody = document.getElementById('typeAnalysisBody');
+      typeBody.innerHTML = '';
+      Object.keys(typeStats).forEach(type => {
+        const stat = typeStats[type];
+        const acc = Math.round((stat.correct / stat.total) * 100);
+        typeBody.innerHTML += `
+      <tr>
+        <td><strong>${type}</strong></td>
+        <td>${stat.correct}</td>
+        <td>${stat.total}</td>
+        <td><strong style="color:${acc >= 70 ? 'var(--accent-green)' : 'var(--accent-red)'}">${acc}%</strong></td>
+      </tr>
+    `;
+      });
+
+      // Render Topic Mastery Table
+      const topicBody = document.getElementById('topicAnalysisBody');
+      topicBody.innerHTML = '';
+      Object.keys(topicStats).forEach(topic => {
+        const stat = topicStats[topic];
+        const acc = Math.round((stat.correct / stat.total) * 100);
+        const statusTag = acc >= 80 ? '<span style="color:var(--accent-green); font-weight:700;">Mastered</span>' : '<span style="color:var(--accent-red); font-weight:700;">Needs Review</span>';
+        topicBody.innerHTML += `
+      <tr>
+        <td><strong>${topic}</strong></td>
+        <td>${stat.correct} / ${stat.total}</td>
+        <td>${acc}%</td>
+        <td>${statusTag}</td>
+      </tr>
+    `;
+      });
+
+      // Render Diagnostic Weak Areas
+      const weaknessList = document.getElementById('weaknessList');
+      weaknessList.innerHTML = '';
+      let weakFound = false;
+      Object.keys(topicStats).forEach(topic => {
+        const stat = topicStats[topic];
+        const acc = (stat.correct / stat.total) * 100;
+        if (acc < 75) {
+          weakFound = true;
+          weaknessList.innerHTML += `
+        <div class="weakness-card">
+          <h4>⚠️ Weak Area Detected: ${topic}</h4>
+          <p>You scored ${stat.correct} out of ${stat.total} (${Math.round(acc)}%) in this topic. Re-read the corresponding section in Silberschatz Chapter 9 and re-solve worked calculation examples for ${topic}.</p>
+        </div>
+      `;
+        }
+      });
+
+      if (!weakFound) {
+        weaknessList.innerHTML = `<div class="weakness-card" style="background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.3);">
+      <h4 style="color:var(--accent-green)">🎉 Excellent Performance!</h4>
+      <p>You demonstrated strong mastery across all Chapter 9 topics!</p>
+    </div>`;
+      }
+
+      // Render Detailed Question Review
+      const reviewList = document.getElementById('reviewList');
+      reviewList.innerHTML = '';
+      const labels = ['A', 'B', 'C', 'D'];
+
+      questions.forEach((q, idx) => {
+        const userAns = userAnswers[idx];
+        const isCorrect = userAns === q.correctAnswer;
+        const userAnsStr = userAns !== undefined ? `${labels[userAns]}: ${q.options[userAns]}` : '<em>Unanswered</em>';
+        const correctAnsStr = `${labels[q.correctAnswer]}: ${q.options[q.correctAnswer]}`;
+
+        reviewList.innerHTML += `
+      <div class="review-card">
+        <div class="review-header">
+          <span>Question ${idx + 1} (${q.topic})</span>
+          <span class="${isCorrect ? 'status-correct' : 'status-incorrect'}">
+            ${isCorrect ? '✅ Correct' : '❌ Incorrect'}
+          </span>
+        </div>
+        <div class="question-text" style="font-size:1rem; margin-bottom:12px;">${q.question}</div>
+        <div style="font-size:0.95rem; margin-bottom:6px;"><strong>Your Answer:</strong> ${userAnsStr}</div>
+        <div style="font-size:0.95rem; margin-bottom:12px; color:var(--accent-green);"><strong>Correct Answer:</strong> ${correctAnsStr}</div>
+        <div class="explanation-box">
+          ${q.explanation}
+        </div>
+      </div>
+    `;
+      });
+    }
+
+    // Dark Mode Toggle
+    document.getElementById('themeToggle').onclick = () => {
+      const current = document.body.getAttribute('data-theme');
+      if (current === 'dark') {
+        document.body.removeAttribute('data-theme');
+        document.getElementById('themeToggle').textContent = '🌙 Dark';
+      } else {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').textContent = '☀️ Light';
+      }
+    };
+
+    // Start
+    initQuiz();
+  </script>
+</body>
+
+</html>
