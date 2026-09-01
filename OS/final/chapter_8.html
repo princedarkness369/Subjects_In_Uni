@@ -1,1224 +1,1348 @@
-< !DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>OS Chapter 8 Exam Simulator – Deadlocks & Banker's Algorithm</title>
- <style> :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-card: #334155;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --accent: #38bdf8;
-    --accent-hover: #0284c7;
-    --success: #22c55e;
-    --success-bg: rgba(34, 197, 94, 0.15);
-    --danger: #ef4444;
-    --danger-bg: rgba(239, 68, 68, 0.15);
-    --warning: #f59e0b;
-    --warning-bg: rgba(245, 158, 11, 0.15);
-    --border: #475569;
-    --radius: 12px;
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'Fira Code', 'Consolas', monospace;
-}
-
-[data-theme="light"] {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #ffffff;
-    --bg-card: #f1f5f9;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --accent: #0284c7;
-    --accent-hover: #0369a1;
-    --border: #cbd5e1;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: var(--font-sans);
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    line-height: 1.6;
-    padding-bottom: 60px;
-}
-
-/* Sticky Header */
-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(30, 41, 59, 0.9);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header-titles h1 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--accent);
-}
-
-.header-titles p {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-
-.header-controls {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.timer-badge {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.timer-badge.warning {
-    color: var(--warning);
-    border-color: var(--warning);
-    animation: pulse 1s infinite alternate;
-}
-
-.timer-badge.danger {
-    color: var(--danger);
-    border-color: var(--danger);
-    animation: pulse 0.5s infinite alternate;
-}
-
-@keyframes pulse {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0.5;
-    }
-}
-
-.btn-icon {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-}
-
-.btn-icon:hover {
-    background: var(--border);
-}
-
-/* Main Layout */
-.container {
-    max-width: 1200px;
-    margin: 24px auto;
-    padding: 0 16px;
-}
-
-/* Tabs */
-.nav-tabs {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-}
-
-.tab-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: 8px 16px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border-radius: 6px;
-}
-
-.tab-btn.active {
-    color: var(--accent);
-    background: var(--bg-secondary);
-    border-bottom: 2px solid var(--accent);
-}
-
-/* Progress Bar */
-.progress-container {
-    width: 100%;
-    height: 8px;
-    background: var(--bg-card);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 24px;
-}
-
-.progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent), #06b6d4);
-    transition: width 0.3s ease;
-}
-
-/* Main Grid: Question Content + Question Palette */
-.quiz-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 24px;
-}
-
-@media (max-width: 900px) {
-    .quiz-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-/* Question Header Badges */
-.question-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-}
-
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.badge-easy {
-    background: var(--success-bg);
-    color: var(--success);
-    border: 1px solid var(--success);
-}
-
-.badge-medium {
-    background: var(--warning-bg);
-    color: var(--warning);
-    border: 1px solid var(--warning);
-}
-
-.badge-hard {
-    background: var(--danger-bg);
-    color: var(--danger);
-    border: 1px solid var(--danger);
-}
-
-.badge-topic {
-    background: rgba(56, 189, 248, 0.15);
-    color: var(--accent);
-    border: 1px solid var(--accent);
-}
-
-.question-text {
-    font-size: 1.15rem;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-/* Matrix Table Display */
-.matrix-container {
-    overflow-x: auto;
-    margin: 16px 0;
-    background: var(--bg-primary);
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-}
-
-.matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-.matrix-table th,
-.matrix-table td {
-    border: 1px solid var(--border);
-    padding: 8px 12px;
-}
-
-.matrix-table th {
-    background: var(--bg-card);
-    color: var(--accent);
-}
-
-/* Options List */
-.options-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.option-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 18px;
-    background: var(--bg-card);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.option-item:hover {
-    border-color: var(--accent);
-    background: rgba(56, 189, 248, 0.05);
-}
-
-.option-item.selected {
-    border-color: var(--accent);
-    background: rgba(56, 189, 248, 0.15);
-}
-
-.option-item input[type="radio"] {
-    margin-top: 4px;
-    accent-color: var(--accent);
-}
-
-/* Navigation Buttons */
-.quiz-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-primary {
-    background: var(--accent);
-    color: #fff;
-}
-
-.btn-primary:hover {
-    background: var(--accent-hover);
-}
-
-.btn-secondary {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-    background: var(--border);
-}
-
-.btn-warning {
-    background: var(--warning);
-    color: #000;
-}
-
-.btn-submit {
-    background: var(--success);
-    color: #fff;
-    font-size: 1rem;
-    padding: 12px 24px;
-}
-
-.btn-submit:hover {
-    opacity: 0.9;
-}
-
-/* Palette Sidebar */
-.palette-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-top: 16px;
-}
-
-.palette-btn {
-    height: 42px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-primary);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-}
-
-.palette-btn:hover {
-    border-color: var(--accent);
-}
-
-.palette-btn.current {
-    border: 2px solid var(--accent);
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-}
-
-.palette-btn.answered {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-}
-
-.palette-btn.flagged::after {
-    content: '★';
-    position: absolute;
-    top: 2px;
-    right: 4px;
-    color: var(--warning);
-    font-size: 0.75rem;
-}
-
-/* Results Screen */
-.results-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, min × max(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.stat-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    padding: 20px;
-    border-radius: var(--radius);
-    text-align: center;
-}
-
-.stat-val {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--accent);
-    font-family: var(--font-mono);
-}
-
-.stat-lbl {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-}
-
-/* Review Questions Section */
-.review-item {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.review-item.correct {
-    border-left: 6px solid var(--success);
-}
-
-.review-item.incorrect {
-    border-left: 6px solid var(--danger);
-}
-
-.explanation-box {
-    background: var(--bg-primary);
-    border: 1px solid var(--border);
-    padding: 16px;
-    border-radius: 8px;
-    margin-top: 16px;
-    font-size: 0.95rem;
-}
-
-.explanation-box h4 {
-    color: var(--accent);
-    margin-bottom: 8px;
-}
-
-.explanation-box ol {
-    margin-left: 20px;
-    margin-top: 8px;
-}
-
-/* Banker's Calculator Playground */
-.calc-section {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-}
-
-.calc-inputs {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, min × max(250px, 1fr));
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-textarea {
-    width: 100%;
-    height: 100px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    padding: 10px;
-    border-radius: 6px;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-}
-
-.hidden {
-    display: none !important;
-}
-
-</style></head><body><header><div class="header-titles"><h1>Operating Systems – Chapter 8</h1><p>Deadlocks & Resource Allocation Exam Simulator</p></div><div class="header-controls"><div class="timer-badge" id="timerBadge">⏱️ <span id="timerDisplay">20:00</span></div><button class="btn-icon" id="themeToggle" title="Toggle Light/Dark Theme">🌙</button></div></header><div class="container">< !-- Navigation Tabs --><div class="nav-tabs"><button class="tab-btn active" id="tabQuizBtn" onclick="switchTab('quiz')">📝 Exam Simulator</button><button class="tab-btn hidden" id="tabResultsBtn" onclick="switchTab('results')">📊 Score Review</button><button class="tab-btn" id="tabCalcBtn" onclick="switchTab('calc')">🧮 Banker's Algorithm Sandbox</button>
- </div>< !-- Progress Bar --><div class="progress-container" id="progressContainer"><div class="progress-fill" id="progressFill"></div></div>< !-- EXAM TAB CONTENT --><div id="quizTab"><div class="quiz-grid">< !-- Left Column: Current Question --><div class="card"><div class="question-meta"><span class="badge badge-topic" id="qTopic">Banker's Algorithm</span>
- <span class="badge badge-medium" id="qDifficulty">Medium</span><span class="badge" style="background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--border)" id="qType">Calculation</span><span style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);" id="qNumText">Question 1 of 20</span></div><div class="question-text" id="qText"></div><div id="qMatrixContainer"></div><div class="options-list" id="qOptions"></div><div class="quiz-actions"><button class="btn btn-secondary" id="prevBtn" onclick="navigate(-1)">← Previous</button><button class="btn btn-warning" id="flagBtn" onclick="toggleFlag()">★ Flag for Review</button><button class="btn btn-primary" id="nextBtn" onclick="navigate(1)">Next →</button><button class="btn btn-submit" id="submitBtn" onclick="confirmSubmit()">Submit Exam 🚀</button></div></div>< !-- Right Column: Question Palette Sidebar --><div class="card"><h3>Question Palette</h3><p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">Click a question number to jump directly.</p><div class="palette-grid" id="paletteGrid"></div><div style="margin-top: 24px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: var(--accent); border-radius: 2px;"></span>Answered </div><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: var(--bg-card); border: 2px solid var(--accent); border-radius: 2px;"></span>Current </div><div style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--warning);">★</span>Flagged for Review </div></div></div></div></div>< !-- RESULTS TAB CONTENT --><div id="resultsTab" class="hidden"><div class="results-summary"><div class="stat-card"><div class="stat-val" id="resScore">0 / 20</div><div class="stat-lbl">Final Score</div></div><div class="stat-card"><div class="stat-val" id="resPercent">0%</div><div class="stat-lbl">Percentage</div></div><div class="stat-card"><div class="stat-val" id="resTime">00:00</div><div class="stat-lbl">Time Spent</div></div><div class="stat-card"><div class="stat-val" id="resStatus" style="font-size: 1.5rem;">-</div><div class="stat-lbl">Exam Result</div></div></div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h3>Detailed Answer Explanations</h3><div style="display: flex; gap: 8px;"><button class="btn btn-secondary" onclick="filterReview('all')">All</button><button class="btn btn-secondary" onclick="filterReview('correct')">Correct</button><button class="btn btn-secondary" onclick="filterReview('incorrect')">Incorrect</button></div></div><div id="reviewContainer"></div></div>< !-- BANKER'S CALC SANDBOX TAB -->
- <div id="calcTab" class="hidden"><div class="calc-section"><h2>🧮 Interactive Banker's Algorithm Calculator</h2>
- <p style="color: var(--text-secondary); margin-bottom: 16px;">Enter custom matrices to compute the Need matrix,
-run the Safety Algorithm,
-and find safe sequences step-by-step.</p><div class="calc-inputs"><div><label><strong>Available Vector (A B C)</strong></label><input type="text" id="sandboxAvail" value="3 3 2" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border); color:var(--text-primary); border-radius:6px; margin-top:4px;"></div><div><label><strong>Allocation Matrix (Row=Process)</strong></label><textarea id="sandboxAlloc">0 1 0
+< !DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>OS Chapter 8 Exam Simulator – Deadlocks & Banker's Algorithm</title>
+        <style>
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-card: #334155;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --accent: #38bdf8;
+                --accent-hover: #0284c7;
+                --success: #22c55e;
+                --success-bg: rgba(34, 197, 94, 0.15);
+                --danger: #ef4444;
+                --danger-bg: rgba(239, 68, 68, 0.15);
+                --warning: #f59e0b;
+                --warning-bg: rgba(245, 158, 11, 0.15);
+                --border: #475569;
+                --radius: 12px;
+                --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                --font-mono: 'Fira Code', 'Consolas', monospace;
+            }
+
+            [data-theme="light"] {
+                --bg-primary: #f8fafc;
+                --bg-secondary: #ffffff;
+                --bg-card: #f1f5f9;
+                --text-primary: #0f172a;
+                --text-secondary: #475569;
+                --accent: #0284c7;
+                --accent-hover: #0369a1;
+                --border: #cbd5e1;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: var(--font-sans);
+                background-color: var(--bg-primary);
+                color: var(--text-primary);
+                line-height: 1.6;
+                padding-bottom: 60px;
+            }
+
+            /* Sticky Header */
+            header {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: rgba(30, 41, 59, 0.9);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--border);
+                padding: 12px 24px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .header-titles h1 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+
+            .header-titles p {
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+            }
+
+            .header-controls {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .timer-badge {
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-family: var(--font-mono);
+                font-weight: 700;
+                font-size: 1.1rem;
+                color: var(--accent);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .timer-badge.warning {
+                color: var(--warning);
+                border-color: var(--warning);
+                animation: pulse 1s infinite alternate;
+            }
+
+            .timer-badge.danger {
+                color: var(--danger);
+                border-color: var(--danger);
+                animation: pulse 0.5s infinite alternate;
+            }
+
+            @keyframes pulse {
+                from {
+                    opacity: 1;
+                }
+
+                to {
+                    opacity: 0.5;
+                }
+            }
+
+            .btn-icon {
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                color: var(--text-primary);
+                padding: 8px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+            }
+
+            .btn-icon:hover {
+                background: var(--border);
+            }
+
+            /* Main Layout */
+            .container {
+                max-width: 1200px;
+                margin: 24px auto;
+                padding: 0 16px;
+            }
+
+            /* Tabs */
+            .nav-tabs {
+                display: flex;
+                gap: 12px;
+                margin-bottom: 20px;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 8px;
+            }
+
+            .tab-btn {
+                background: transparent;
+                border: none;
+                color: var(--text-secondary);
+                padding: 8px 16px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                cursor: pointer;
+                border-radius: 6px;
+            }
+
+            .tab-btn.active {
+                color: var(--accent);
+                background: var(--bg-secondary);
+                border-bottom: 2px solid var(--accent);
+            }
+
+            /* Progress Bar */
+            .progress-container {
+                width: 100%;
+                height: 8px;
+                background: var(--bg-card);
+                border-radius: 4px;
+                overflow: hidden;
+                margin-bottom: 24px;
+            }
+
+            .progress-fill {
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(90deg, var(--accent), #06b6d4);
+                transition: width 0.3s ease;
+            }
+
+            /* Main Grid: Question Content + Question Palette */
+            .quiz-grid {
+                display: grid;
+                grid-template-columns: 1fr 300px;
+                gap: 24px;
+            }
+
+            @media (max-width: 900px) {
+                .quiz-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 24px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Question Header Badges */
+            .question-meta {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 16px;
+            }
+
+            .badge {
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .badge-easy {
+                background: var(--success-bg);
+                color: var(--success);
+                border: 1px solid var(--success);
+            }
+
+            .badge-medium {
+                background: var(--warning-bg);
+                color: var(--warning);
+                border: 1px solid var(--warning);
+            }
+
+            .badge-hard {
+                background: var(--danger-bg);
+                color: var(--danger);
+                border: 1px solid var(--danger);
+            }
+
+            .badge-topic {
+                background: rgba(56, 189, 248, 0.15);
+                color: var(--accent);
+                border: 1px solid var(--accent);
+            }
+
+            .question-text {
+                font-size: 1.15rem;
+                font-weight: 600;
+                margin-bottom: 20px;
+            }
+
+            /* Matrix Table Display */
+            .matrix-container {
+                overflow-x: auto;
+                margin: 16px 0;
+                background: var(--bg-primary);
+                padding: 16px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+            }
+
+            .matrix-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: var(--font-mono);
+                font-size: 0.9rem;
+                text-align: center;
+            }
+
+            .matrix-table th,
+            .matrix-table td {
+                border: 1px solid var(--border);
+                padding: 8px 12px;
+            }
+
+            .matrix-table th {
+                background: var(--bg-card);
+                color: var(--accent);
+            }
+
+            /* Options List */
+            .options-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+
+            .option-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 14px 18px;
+                background: var(--bg-card);
+                border: 2px solid var(--border);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .option-item:hover {
+                border-color: var(--accent);
+                background: rgba(56, 189, 248, 0.05);
+            }
+
+            .option-item.selected {
+                border-color: var(--accent);
+                background: rgba(56, 189, 248, 0.15);
+            }
+
+            .option-item input[type="radio"] {
+                margin-top: 4px;
+                accent-color: var(--accent);
+            }
+
+            /* Navigation Buttons */
+            .quiz-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .btn-primary {
+                background: var(--accent);
+                color: #fff;
+            }
+
+            .btn-primary:hover {
+                background: var(--accent-hover);
+            }
+
+            .btn-secondary {
+                background: var(--bg-card);
+                color: var(--text-primary);
+                border: 1px solid var(--border);
+            }
+
+            .btn-secondary:hover {
+                background: var(--border);
+            }
+
+            .btn-warning {
+                background: var(--warning);
+                color: #000;
+            }
+
+            .btn-submit {
+                background: var(--success);
+                color: #fff;
+                font-size: 1rem;
+                padding: 12px 24px;
+            }
+
+            .btn-submit:hover {
+                opacity: 0.9;
+            }
+
+            /* Palette Sidebar */
+            .palette-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 10px;
+                margin-top: 16px;
+            }
+
+            .palette-btn {
+                height: 42px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                background: var(--bg-card);
+                color: var(--text-primary);
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+            }
+
+            .palette-btn:hover {
+                border-color: var(--accent);
+            }
+
+            .palette-btn.current {
+                border: 2px solid var(--accent);
+                box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+            }
+
+            .palette-btn.answered {
+                background: var(--accent);
+                color: #fff;
+                border-color: var(--accent);
+            }
+
+            .palette-btn.flagged::after {
+                content: '★';
+                position: absolute;
+                top: 2px;
+                right: 4px;
+                color: var(--warning);
+                font-size: 0.75rem;
+            }
+
+            /* Results Screen */
+            .results-summary {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, min × max(200px, 1fr));
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+
+            .stat-card {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                padding: 20px;
+                border-radius: var(--radius);
+                text-align: center;
+            }
+
+            .stat-val {
+                font-size: 2.2rem;
+                font-weight: 800;
+                color: var(--accent);
+                font-family: var(--font-mono);
+            }
+
+            .stat-lbl {
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+            }
+
+            /* Review Questions Section */
+            .review-item {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .review-item.correct {
+                border-left: 6px solid var(--success);
+            }
+
+            .review-item.incorrect {
+                border-left: 6px solid var(--danger);
+            }
+
+            .explanation-box {
+                background: var(--bg-primary);
+                border: 1px solid var(--border);
+                padding: 16px;
+                border-radius: 8px;
+                margin-top: 16px;
+                font-size: 0.95rem;
+            }
+
+            .explanation-box h4 {
+                color: var(--accent);
+                margin-bottom: 8px;
+            }
+
+            .explanation-box ol {
+                margin-left: 20px;
+                margin-top: 8px;
+            }
+
+            /* Banker's Calculator Playground */
+            .calc-section {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 24px;
+            }
+
+            .calc-inputs {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, min × max(250px, 1fr));
+                gap: 16px;
+                margin-bottom: 16px;
+            }
+
+            textarea {
+                width: 100%;
+                height: 100px;
+                background: var(--bg-primary);
+                border: 1px solid var(--border);
+                color: var(--text-primary);
+                padding: 10px;
+                border-radius: 6px;
+                font-family: var(--font-mono);
+                font-size: 0.9rem;
+            }
+
+            .hidden {
+                display: none !important;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <div class="header-titles">
+                <h1>Operating Systems – Chapter 8</h1>
+                <p>Deadlocks & Resource Allocation Exam Simulator</p>
+            </div>
+            <div class="header-controls">
+                <div class="timer-badge" id="timerBadge">⏱️ <span id="timerDisplay">20:00</span></div><button
+                    class="btn-icon" id="themeToggle" title="Toggle Light/Dark Theme">🌙</button>
+            </div>
+        </header>
+        <div class="container">
+            < !-- Navigation Tabs -->
+                <div class="nav-tabs"><button class="tab-btn active" id="tabQuizBtn" onclick="switchTab('quiz')">📝 Exam
+                        Simulator</button><button class="tab-btn hidden" id="tabResultsBtn"
+                        onclick="switchTab('results')">📊 Score Review</button><button class="tab-btn" id="tabCalcBtn"
+                        onclick="switchTab('calc')">🧮 Banker's Algorithm Sandbox</button>
+                </div>
+                < !-- Progress Bar -->
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    < !-- EXAM TAB CONTENT -->
+                        <div id="quizTab">
+                            <div class="quiz-grid">
+                                < !-- Left Column: Current Question -->
+                                    <div class="card">
+                                        <div class="question-meta"><span class="badge badge-topic" id="qTopic">Banker's
+                                                Algorithm</span>
+                                            <span class="badge badge-medium" id="qDifficulty">Medium</span><span
+                                                class="badge"
+                                                style="background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--border)"
+                                                id="qType">Calculation</span><span
+                                                style="margin-left: auto; font-size: 0.85rem; color: var(--text-secondary);"
+                                                id="qNumText">Question 1 of 20</span>
+                                        </div>
+                                        <div class="question-text" id="qText"></div>
+                                        <div id="qMatrixContainer"></div>
+                                        <div class="options-list" id="qOptions"></div>
+                                        <div class="quiz-actions"><button class="btn btn-secondary" id="prevBtn"
+                                                onclick="navigate(-1)">← Previous</button><button
+                                                class="btn btn-warning" id="flagBtn" onclick="toggleFlag()">★ Flag for
+                                                Review</button><button class="btn btn-primary" id="nextBtn"
+                                                onclick="navigate(1)">Next →</button><button class="btn btn-submit"
+                                                id="submitBtn" onclick="confirmSubmit()">Submit Exam 🚀</button></div>
+                                    </div>
+                                    < !-- Right Column: Question Palette Sidebar -->
+                                        <div class="card">
+                                            <h3>Question Palette</h3>
+                                            <p
+                                                style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">
+                                                Click a question number to jump directly.</p>
+                                            <div class="palette-grid" id="paletteGrid"></div>
+                                            <div
+                                                style="margin-top: 24px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px;">
+                                                <div style="display: flex; align-items: center; gap: 8px;"><span
+                                                        style="width: 12px; height: 12px; background: var(--accent); border-radius: 2px;"></span>Answered
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px;"><span
+                                                        style="width: 12px; height: 12px; background: var(--bg-card); border: 2px solid var(--accent); border-radius: 2px;"></span>Current
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px;"><span
+                                                        style="color: var(--warning);">★</span>Flagged for Review </div>
+                                            </div>
+                                        </div>
+                            </div>
+                        </div>
+                        < !-- RESULTS TAB CONTENT -->
+                            <div id="resultsTab" class="hidden">
+                                <div class="results-summary">
+                                    <div class="stat-card">
+                                        <div class="stat-val" id="resScore">0 / 20</div>
+                                        <div class="stat-lbl">Final Score</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-val" id="resPercent">0%</div>
+                                        <div class="stat-lbl">Percentage</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-val" id="resTime">00:00</div>
+                                        <div class="stat-lbl">Time Spent</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-val" id="resStatus" style="font-size: 1.5rem;">-</div>
+                                        <div class="stat-lbl">Exam Result</div>
+                                    </div>
+                                </div>
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <h3>Detailed Answer Explanations</h3>
+                                    <div style="display: flex; gap: 8px;"><button class="btn btn-secondary"
+                                            onclick="filterReview('all')">All</button><button class="btn btn-secondary"
+                                            onclick="filterReview('correct')">Correct</button><button
+                                            class="btn btn-secondary"
+                                            onclick="filterReview('incorrect')">Incorrect</button></div>
+                                </div>
+                                <div id="reviewContainer"></div>
+                            </div>
+                            < !-- BANKER'S CALC SANDBOX TAB -->
+                                <div id="calcTab" class="hidden">
+                                    <div class="calc-section">
+                                        <h2>🧮 Interactive Banker's Algorithm Calculator</h2>
+                                        <p style="color: var(--text-secondary); margin-bottom: 16px;">Enter custom
+                                            matrices to compute the Need matrix,
+                                            run the Safety Algorithm,
+                                            and find safe sequences step-by-step.</p>
+                                        <div class="calc-inputs">
+                                            <div><label><strong>Available Vector (A B C)</strong></label><input
+                                                    type="text" id="sandboxAvail" value="3 3 2"
+                                                    style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border); color:var(--text-primary); border-radius:6px; margin-top:4px;">
+                                            </div>
+                                            <div><label><strong>Allocation Matrix
+                                                        (Row=Process)</strong></label><textarea id="sandboxAlloc">0 1 0
 2 0 0
 3 0 2
 2 1 1
-0 0 2</textarea></div><div><label><strong>Max Matrix (Row=Process)</strong></label><textarea id="sandboxMax">7 5 3
+0 0 2</textarea></div>
+                                            <div><label><strong>Max Matrix (Row=Process)</strong></label><textarea
+                                                    id="sandboxMax">7 5 3
 3 2 2
 9 0 2
 4 2 2
-5 3 3</textarea></div></div><button class="btn btn-primary" onclick="runSandbox()">Run Safety Algorithm ⚡</button><div id="sandboxOutput" style="margin-top:20px;"></div></div></div></div><script> // COMPLETE 20-QUESTION BANK BASED STRICTLY ON SILBERSCHATZ CHAPTER 8
+5 3 3</textarea></div>
+                                        </div><button class="btn btn-primary" onclick="runSandbox()">Run Safety
+                                            Algorithm ⚡</button>
+                                        <div id="sandboxOutput" style="margin-top:20px;"></div>
+                                    </div>
+                                </div>
+        </div>
+        <script> // COMPLETE 20-QUESTION BANK BASED STRICTLY ON SILBERSCHATZ CHAPTER 8
 
-const questionsData=[ {
+            const questionsData = [{
 
-    id: 1,
-    topic: "Banker's Algorithm",
-    type: "Calculation",
-    difficulty: "Easy",
-    question: "Given a system with 3 processes (P0, P1, P2) and 3 resource types (A, B, C), consider the following allocation and maximum matrices:\nWhat is the Need matrix for processes P0, P1, and P2?",
-    matrixData: {
-        headers: ["Process", "Allocation (A B C)", "Max (A B C)"],
-            rows: [ ["P0", "1 2 1", "4 3 3"],
-            ["P1", "2 0 1", "3 2 2"],
-            ["P2", "0 1 2", "1 3 4"]]
-    }
+                id: 1,
+                topic: "Banker's Algorithm",
+                type: "Calculation",
+                difficulty: "Easy",
+                question: "Given a system with 3 processes (P0, P1, P2) and 3 resource types (A, B, C), consider the following allocation and maximum matrices:\nWhat is the Need matrix for processes P0, P1, and P2?",
+                matrixData: {
+                    headers: ["Process", "Allocation (A B C)", "Max (A B C)"],
+                    rows: [["P0", "1 2 1", "4 3 3"],
+                    ["P1", "2 0 1", "3 2 2"],
+                    ["P2", "0 1 2", "1 3 4"]]
+                }
 
-    ,
-    options: [ "P0: [3, 1, 2], P1: [1, 2, 1], P2: [1, 2, 2]",
-    "P0: [5, 5, 4], P1: [5, 2, 3], P2: [1, 4, 6]",
-    "P0: [3, 1, 2], P1: [1, 2, 1], P2: [1, 2, 1]",
-    "P0: [4, 1, 2], P1: [1, 2, 1], P2: [1, 2, 2]"
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Step-by-Step Solution:</b><br>"+"Formula: <code>Need[i] = Max[i] - Allocation[i]</code><br>"+"<ol>"+"<li><b>P0 Need:</b> [4-1, 3-2, 3-1] = <b>[3, 1, 2]</b></li>"+"<li><b>P1 Need:</b> [3-2, 2-0, 2-1] = <b>[1, 2, 1]</b></li>"+"<li><b>P2 Need:</b> [1-0, 3-1, 4-2] = <b>[1, 2, 2]</b></li>"+"</ol>"
-}
-
-,
-{
-
-id: 2,
-topic: "Banker's Algorithm",
-type: "Safe Sequence",
-difficulty: "Medium",
-question: "Consider a system with 5 processes (P0..P4) and 3 resource types (A, B, C).\nAvailable = [3, 3, 2].\nWhich of the following represents a valid safe sequence?",
-matrixData: {
-    headers: ["Process", "Allocation", "Max"],
-        rows: [ ["P0", "0 1 0", "7 5 3"],
-        ["P1", "2 0 0", "3 2 2"],
-        ["P2", "3 0 2", "9 0 2"],
-        ["P3", "2 1 1", "4 2 2"],
-        ["P4", "0 0 2", "5 3 3"]]
-}
-
-,
-options: [ "<P1, P3, P4, P0, P2>",
-"<P0, P1, P2, P3, P4>",
-"<P3, P1, P0, P2, P4>",
-"<P1, P4, P2, P0, P3>"
-],
-correctAnswer: 0,
-explanation: "<b>Step-by-Step Execution of Safety Algorithm:</b><br>"+"Initial Available = [3, 3, 2]. Need = Max - Allocation.<br>"+"Need Matrix: P0=[7,4,3], P1=[1,2,2], P2=[6,0,0], P3=[2,1,1], P4=[5,3,1].<br><ol>"+"<li><b>Check P1:</b> Need[1] = [1,2,2] ≤ Work [3,3,2] → P1 completes! Work = [3,3,2] + [2,0,0] = <b>[5,3,2]</b>.</li>"+"<li><b>Check P3:</b> Need[3] = [2,1,1] ≤ Work [5,3,2] → P3 completes! Work = [5,3,2] + [2,1,1] = <b>[7,4,3]</b>.</li>"+"<li><b>Check P4:</b> Need[4] = [5,3,1] ≤ Work [7,4,3] → P4 completes! Work = [7,4,3] + [0,0,2] = <b>[7,4,5]</b>.</li>"+"<li><b>Check P0:</b> Need[0] = [7,4,3] ≤ Work [7,4,5] → P0 completes! Work = [7,4,5] + [0,1,0] = <b>[7,5,5]</b>.</li>"+"<li><b>Check P2:</b> Need[2] = [6,0,0] ≤ Work [7,5,5] → P2 completes! Work = [7,5,5] + [3,0,2] = <b>[10,5,7]</b>.</li>"+"</ol>All processes finish cleanly. The valid safe sequence is <b>&lt;P1, P3, P4, P0, P2&gt;</b>."
-}
-
-,
-{
-id: 3,
-    topic: "Banker's Algorithm",
-    type: "Resource Request",
-    difficulty: "Hard",
-    question: "Using the system state from Question 2 (Available = [3, 3, 2], P1 Allocation = [2, 0, 0], P1 Need = [1, 2, 2]), suppose Process P1 makes a request Request1 = [1, 0, 2]. Should the system grant this request immediately?",
-    options: [ "Yes, because after pretending to allocate Request1, the system remains in a safe state with sequence <P1, P3, P4, P0, P2>.",
-    "No, because Request1 exceeds currently Available resources [3, 3, 2].",
-    "No, because granting Request1 leaves the system in an unsafe state where no process can execute.",
-    "No, because Request1 exceeds P1's maximum claim Need."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Step-by-Step Resource Request Algorithm:</b><br>" + "<ol>" + "<li><b>Test 1: Request1 ≤ Need1</b> → [1,0,2] ≤ [1,2,2] (True).</li>" + "<li><b>Test 2: Request1 ≤ Available</b> → [1,0,2] ≤ [3,3,2] (True).</li>" + "<li><b>Pretend State Allocation:</b><br>" + "• Available' = [3,3,2] - [1,0,2] = <b>[2,3,0]</b><br>" + "• Allocation1' = [2,0,0] + [1,0,2] = <b>[3,0,2]</b><br>" + "• Need1' = [1,2,2] - [1,0,2] = <b>[0,2,0]</b></li>" + "<li><b>Safety Check on New State:</b><br>" + "P1 Need [0,2,0] ≤ Work [2,3,0] → P1 finishes! Work = [2,3,0] + [3,0,2] = [5,3,2].<br>" + "Then P3 [2,1,1] ≤ [5,3,2] finishes, followed by P4, P0, P2.<br>" + "The state is SAFE! Therefore, the request is <b>granted immediately</b>.</li>" + "</ol>"
-}
-
-,
-{
-id: 4,
-    topic: "Banker's Algorithm",
-    type: "Resource Request",
-    difficulty: "Hard",
-    question: "From the initial state in Question 2 (Available = [3, 3, 2]), suppose instead that Process P4 requests Request4 = [3, 3, 0]. Can this request be granted immediately?",
-    options: [ "Yes, because Request4 ≤ Available and Request4 ≤ Need4.",
-    "No, because Request4 exceeds P4's maximum claim.",
-    "No, because granting Request4 leaves Available = [0, 0, 2], leaving the system in an UNSAFE state where no process can satisfy Need ≤ Work.",
-    "Yes, because P4 will immediately finish and return all resources."
-    ],
-    correctAnswer: 2,
-    explanation: "<b>Step-by-Step Analysis:</b><br>" + "<ol>" + "<li>Request4 = [3, 3, 0] ≤ Need4 [5, 3, 1] (True) and ≤ Available [3, 3, 2] (True).</li>" + "<li>Pretend Allocation: Available' = [3,3,2] - [3,3,0] = <b>[0, 0, 2]</b>.</li>" + "<li>Test Safety with Work = [0, 0, 2]:<br>" + "• P0 Need [7,4,3] ≤ [0,0,2] ? False<br>" + "• P1 Need [1,2,2] ≤ [0,0,2] ? False (Need[0]=1 > 0)<br>" + "• P2 Need [6,0,0] ≤ [0,0,2] ? False<br>" + "• P3 Need [2,1,1] ≤ [0,0,2] ? False<br>" + "• P4 Need' [2,0,1] ≤ [0,0,2] ? False (Need[0]=2 > 0)</li>" + "<li>NO process can run! The system enters an <b>UNSAFE state</b>. Thus, P4 must wait.</li>" + "</ol>"
-}
-
-,
-{
-id: 5,
-    topic: "Resource Allocation",
-    type: "Calculation",
-    difficulty: "Medium",
-    question: "A system has 4 processes (P0..P3) and 3 resource types (A, B, C).\nAllocation Matrix:\nP0: [2, 1, 1], P1: [1, 0, 2], P2: [3, 2, 1], P3: [0, 2, 0].\nCurrently Available vector = [2, 1, 2].\nWhat is the Total Vector of System Resources (existing instances of A, B, C)?",
-    options: [ "A = 8, B = 6, C = 6",
-    "A = 6, B = 5, C = 4",
-    "A = 7, B = 5, C = 6",
-    "A = 9, B = 6, C = 6"
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Step-by-Step Solution:</b><br>" + "Formula: <code>Total Resources = Available + Sum(Allocated Resources)</code><br>" + "<ol>" + "<li>Sum of Allocation for A = 2 + 1 + 3 + 0 = <b>6</b></li>" + "<li>Sum of Allocation for B = 1 + 0 + 2 + 2 = <b>5</b></li>" + "<li>Sum of Allocation for C = 1 + 2 + 1 + 0 = <b>4</b></li>" + "<li>Total Allocation Vector = [6, 5, 4]</li>" + "<li>Total System Resources = [2, 1, 2] + [6, 5, 4] = <b>[8, 6, 6]</b>.</li>" + "</ol>"
-}
-
-,
-{
-
-id: 6,
-topic: "Deadlock Detection",
-type: "Deadlock Detection",
-difficulty: "Hard",
-question: "Consider a system with 5 processes (P0..P4) and 3 resource types (A, B, C).\nAvailable = [0, 0, 0].\nWhich processes are currently deadlocked?",
-matrixData: {
-    headers: ["Process", "Allocation (A B C)", "Request (A B C)"],
-        rows: [ ["P0", "0 1 0", "0 0 0"],
-        ["P1", "2 0 0", "2 0 2"],
-        ["P2", "3 0 3", "0 0 1"],
-        ["P3", "2 1 1", "1 0 0"],
-        ["P4", "0 0 2", "0 0 2"]]
-}
-
-,
-options: [ "The system is not deadlocked; all processes can complete.",
-"Processes P1, P2, P3, P4 are deadlocked.",
-"Processes P0, P1, P3 are deadlocked.",
-"Only process P4 is deadlocked."
-],
-correctAnswer: 1,
-explanation: "<b>Deadlock Detection Algorithm Execution:</b><br>"+"<ol>"+"<li>Initialize Work = [0, 0, 0].</li>"+"<li>P0 has Request [0,0,0] ≤ Work [0,0,0]. P0 finishes! Work becomes Work + Allocation(P0) = [0,0,0] + [0,1,0] = <b>[0,1,0]</b>. Finish[0]=true.</li>"+"<li>Evaluate remaining processes against Work = [0,1,0]:<br>"+"• P1 Request [2,0,2] ≤ [0,1,0] ? False<br>"+"• P2 Request [0,0,1] ≤ [0,1,0] ? False<br>"+"• P3 Request [1,0,0] ≤ [0,1,0] ? False<br>"+"• P4 Request [0,0,2] ≤ [0,1,0] ? False</li>"+"<li>No other process can satisfy Request ≤ Work. Finish[1..4] = false.<br>"+"Therefore, processes <b>P1, P2, P3, P4 are deadlocked</b>.</li>"+"</ol>"
-}
-
-,
-{
-id: 7,
-    topic: "Deadlock Detection",
-    type: "Deadlock Detection",
-    difficulty: "Medium",
-    question: "In the deadlocked system state from Question 6 (where Work = [0, 1, 0] and P1, P2, P3, P4 are waiting), if Process P2 is terminated and its allocated resources [3, 0, 3] are reclaimed by the system, what happens?",
-    options: [ "All remaining processes (P1, P3, P4) can now finish cleanly without deadlock in sequence <P1, P3, P4>.",
-    "The system remains deadlocked because P1 still needs A=2, C=2.",
-    "Only P3 can finish; P1 and P4 remain deadlocked.",
-    "The system enters an unrecoverable crash state."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Step-by-Step Recovery Evaluation:</b><br>" + "<ol>" + "<li>Reclaiming P2's allocation [3,0,3] updates Work: Work = [0,1,0] + [3,0,3] = <b>[3,1,3]</b>.</li>" + "<li>Check P1: Request1 [2,0,2] ≤ Work [3,1,3] → P1 completes! Work = [3,1,3] + [2,0,0] = <b>[5,1,3]</b>.</li>" + "<li>Check P3: Request3 [1,0,0] ≤ Work [5,1,3] → P3 completes! Work = [5,1,3] + [2,1,1] = <b>[7,2,4]</b>.</li>" + "<li>Check P4: Request4 [0,0,2] ≤ Work [7,2,4] → P4 completes!</li>" + "<li>All processes complete successfully! The deadlock is completely resolved.</li>" + "</ol>"
-}
-
-,
-{
-id: 8,
-    topic: "Deadlock Concepts",
-    type: "Calculation",
-    difficulty: "Medium",
-    question: "A system has m units of a single resource type, shared by n processes. Each process requires at most k units of the resource. What is the maximum number of processes n for which the system is GUARANTEED to be deadlock-free?",
-    options: [ "n ≤ ⌊ (m - 1) / (k - 1) ⌋",
-    "n ≤ m / k",
-    "n ≤ (m + 1) / k",
-    "n ≤ m * (k - 1)"
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Mathematical Proof:</b><br>" + "To avoid deadlock in the worst-case scenario, every process holds (k - 1) resources and is waiting for 1 additional resource.<br>" + "• Total resources held by n processes in worst case = <code>n * (k - 1)</code>.<br>" + "• To guarantee at least 1 process can get its final resource and finish, total available resources <code>m</code> must satisfy:<br>" + "<code>m ≥ n * (k - 1) + 1</code><br>" + "<code>m - 1 ≥ n * (k - 1)</code> → <b>n ≤ ⌊ (m - 1) / (k - 1) ⌋</b>."
-}
-
-,
-{
-id: 9,
-    topic: "Deadlock Prevention",
-    type: "Calculation",
-    difficulty: "Easy",
-    question: "Suppose a system has 10 units of a resource and 3 processes (P1, P2, P3), each with a maximum demand of 4 units. Is deadlock possible in this system?",
-    options: [ "Deadlock is impossible because with 10 units, worst-case allocation (3 processes × 3 units = 9) leaves 1 free unit to complete a process.",
-    "Deadlock is possible if each process holds 3 units and requests 1 more.",
-    "Deadlock is guaranteed because total max demand (12) exceeds total resources (10).",
-    "Deadlock is impossible only if at least 12 units of resources are present."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Explanation:</b><br>" + "Worst-case allocation where no process can finish: Each process holds <code>max - 1 = 4 - 1 = 3</code> units.<br>" + "Total allocated resources in worst case = 3 processes × 3 units = <b>9 units</b>.<br>" + "Since the system has 10 units, <code>10 - 9 = 1</code> unit remains free.<br>" + "This free unit can be given to ANY process, enabling it to reach 4 units, finish, and release all 4 units to the system.<br>" + "Therefore, deadlock is <b>IMPOSSIBLE</b>."
-}
-
-,
-{
-id: 10,
-    topic: "Resource Allocation Graph",
-    type: "Resource Allocation Graph",
-    difficulty: "Medium",
-    question: "Consider a Resource-Allocation Graph (RAG) where every resource type has EXACTLY 1 single instance. Which statement regarding cycles in this graph is TRUE?",
-    options: [ "A cycle in the graph is a necessary and sufficient condition for a deadlock.",
-    "A cycle in the graph is a necessary condition, but NOT a sufficient condition for a deadlock.",
-    "A cycle guarantees that no deadlock can ever occur.",
-    "A cycle only indicates deadlock if the graph contains claim edges."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Chapter 8 Rule:</b><br>" + "• If a Resource-Allocation Graph contains <b>single instances</b> of each resource type, a cycle is <b>BOTH a necessary AND sufficient condition</b> for deadlock.<br>" + "• If resource types have <b>multiple instances</b>, a cycle is necessary but NOT sufficient (a cycle may exist without deadlock)."
-}
-
-,
-{
-id: 11,
-    topic: "Resource Allocation Graph",
-    type: "Resource Allocation Graph",
-    difficulty: "Medium",
-    question: "In a Resource-Allocation Graph where resource types have MULTIPLE instances, a cycle is detected. What can be concluded about the system state?",
-    options: [ "A deadlock MAY exist, but the cycle alone is not sufficient proof of a deadlock.",
-    "The system is definitely in a deadlock state.",
-    "The system is guaranteed to be in a safe state.",
-    "All processes in the cycle are terminated automatically."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Explanation:</b><br>" + "With multiple instances per resource type, a cycle indicates the <i>possibility</i> of deadlock, but processes outside the cycle might hold instances of the resource and eventually release them, breaking the potential deadlock. Thus, a cycle is necessary but NOT sufficient."
-}
-
-,
-{
-id: 12,
-    topic: "Deadlock Avoidance vs Prevention",
-    type: "Comparison",
-    difficulty: "Medium",
-    question: "What is the key fundamental difference between Deadlock Prevention and Deadlock Avoidance?",
-    options: [ "Prevention ensures that at least one of the 4 necessary deadlock conditions never holds; Avoidance uses dynamic info (such as max resource claims) to keep the system in a safe state.",
-    "Prevention dynamically checks requests at runtime; Avoidance restricts how requests can be made.",
-    "Prevention is used for multithreaded apps; Avoidance is used for single-threaded kernel tasks.",
-    "Prevention always terminates deadlocked processes; Avoidance preempts resources."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Core Definitions (Silberschatz Ch 8):</b><br>" + "• <b>Deadlock Prevention:</b> Structural protocols that negate at least one of the 4 necessary conditions (Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait).<br>" + "• <b>Deadlock Avoidance:</b> Requires a priori dynamic information (maximum resource needs) to dynamically check allocation states and ensure the system never enters an unsafe state."
-}
-
-,
-{
-id: 13,
-topic: "Deadlock Characterization",
-type: "Scenario",
-difficulty: "Easy",
-question: "Process P0 holds resource R1 while waiting for resource R2. Process P1 holds R2 while waiting for R3, and Process P2 holds R3 while waiting for R1. Which necessary deadlock condition is illustrated?",
-options: [ "Circular Wait",
-"Mutual Exclusion",
-"Hold and Wait",
-"No Preemption"
-],
-correctAnswer: 0,
-explanation: "<b>Explanation:</b><br>"+"This closed loop of waiting (P0 → P1 → P2 → P0) directly illustrates the <b>Circular Wait</b> condition, where an ordered set of waiting processes {P0, P1, ..., Pn} exists such that P0 is waiting for a resource held by P1, P1 waits for P2, and Pn waits for P0."
-}
-
-,
-{
-id: 14,
-    topic: "Deadlock Prevention",
-    type: "Conceptual",
-    difficulty: "Medium",
-    question: "One protocol to prevent Circular Wait is to define a global one-to-one function F: R → N mapping each resource type to an integer, requiring processes to request resources in strictly increasing order of enumeration. Why does this prevent circular wait?",
-    options: [ "It prevents a process holding resource Ri from requesting Rj if F(Rj) ≤ F(Ri), making a closed circular chain × mathematically impossible.",
-    "It forces all resources to be sharable across all threads simultaneously.",
-    "It automatically preempts any resource held for more than 10 seconds.",
-    "It allows processes to hold resources indefinitely without waiting."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Proof by Contradiction:</b><br>" + "Suppose a circular wait chain P0 → P1 → ... → Pn → P0 exists. This requires:<br>" + "F(R0) < F(R1) < F(R2) < ... < F(Rn) < F(R0).<br>" + "This implies <code>F(R0) < F(R0)</code>, which is a mathematical impossibility! Hence, circular wait cannot occur."
-}
-
-,
-{
-id: 15,
-    topic: "Safe vs Unsafe State",
-    type: "Conceptual",
-    difficulty: "Easy",
-    question: "Which statement accurately describes a Safe State in Operating Systems?",
-    options: [ "A state is safe if there exists a safe sequence of processes <P1, P2, ..., Pn> such that each process's remaining requests can be satisfied by currently available resources plus resources held by all preceding processes.",
-    "A state is safe if no process requests any resources for the remainder of execution.",
-    "A state is safe only if all resources are currently unallocated and free.",
-    "A state is safe if all process threads are running in kernel mode."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Definition:</b><br>" + "A state is safe if the OS can allocate resources to each process (up to its max claim) in some order and still avoid deadlock. This execution order is called a <b>safe sequence</b>."
-}
-
-,
-{
-id: 16,
-    topic: "Safe vs Unsafe State",
-    type: "Conceptual",
-    difficulty: "Easy",
-    question: "What is the exact relationship between Safe States, Unsafe States, and Deadlock States?",
-    options: [ "A safe state guarantees no deadlock; an unsafe state is NOT a deadlock state itself, but MAY lead to a deadlock state.",
-    "Safe states and deadlock states overlap; unsafe states are completely separate.",
-    "An unsafe state is strictly identical to a deadlock state.",
-    "All safe states are deadlock states."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>State Relationships (Silberschatz Ch 8):</b><br>" + "• Safe State ⇒ No Deadlock.<br>" + "• Unsafe State ⇒ Potential for Deadlock (if processes request their maximum claims).<br>" + "• Deadlock State is a strict subset of Unsafe States."
-}
-
-,
-{
-id: 17,
-    topic: "Banker's Algorithm",
-    type: "Definition",
-    difficulty: "Easy",
-    question: "In Banker's Algorithm with n processes and m resource types, what are the exact dimensions of the Allocation, Max, and Need matrices?",
-    options: [ "n × m for Allocation, Max, and Need.",
-    "m × n for Allocation, n × n for Max, m × m for Need.",
-    "1 × m vectors for all three matrices.",
-    "n × n × matrices for all three."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Banker's Data Structures:</b><br>" + "• <b>Available:</b> Vector of length <code>m</code>.<br>" + "• <b>Max:</b> Matrix of dimension <code>n × m</code>.<br>" + "• <b>Allocation:</b> Matrix of dimension <code>n × m</code>.<br>" + "• <b>Need:</b> Matrix of dimension <code>n × m</code>."
-}
-
-,
-{
-id: 18,
-    topic: "Deadlock Detection",
-    type: "Algorithm",
-    difficulty: "Medium",
-    question: "In the Deadlock Detection Algorithm for multiple resource instances, how is the Finish array initialized in Step 1?",
-    options: [ "For i = 0..n-1, if Allocation[i] != 0, then Finish[i] = false; otherwise Finish[i] = true.",
-    "Finish[i] = false for all i = 0, 1, ..., n-1.",
-    "Finish[i] = true for all processes that have active threads.",
-    "Finish[i] is initialized to the number of available resource types."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Detection Algorithm Step 1:</b><br>" + "If a process holds <b>no resources</b> (<code>Allocation[i] == 0</code>), it cannot be involved in a deadlock, so <code>Finish[i]</code> is initialized to <b>true</b>. If it holds resources, <code>Finish[i] = false</code>."
-}
-
-,
-{
-id: 19,
-    topic: "Deadlock Recovery",
-    type: "Conceptual",
-    difficulty: "Medium",
-    question: "When recovering from deadlock using Resource Preemption, how can the OS prevent Starvation of a victim process?",
-    options: [ "By including the number of times a process has been selected as a victim in its preemption cost factor.",
-    "By permanently terminating any process selected as a victim more than once.",
-    "By ensuring resources are never preempted under any circumstances.",
-    "By assigning static priorities that never change during execution."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Starvation Prevention:</b><br>" + "If victim selection is strictly cost-based, the same process might be picked repeatedly. To prevent starvation, the number of rollbacks/preemptions is included in the cost factor, increasing its priority after each preemption."
-}
-
-,
-{
-id: 20,
-    topic: "Banker's Algorithm",
-    type: "Banker's Algorithm",
-    difficulty: "Hard",
-    question: "Consider a system with 3 processes (P0, P1, P2) and 3 resource types (A, B, C) with Total System Resources = [10, 5, 7].\nAllocation: P0=[0,1,0], P1=[2,0,0], P2=[3,0,2].\nMax: P0=[7,5,3], P1=[3,2,2], P2=[9,0,2].\n1. What is Currently Available?\n2. If P0 requests Request0 = [0, 2, 0], can it be granted?",
-    options: [ "Available = [5, 4, 5]; Request is GRANTED because the resulting state is safe with sequence <P1, P0, P2>.",
-    "Available = [5, 4, 5]; Request MUST be denied because P0 exceeds its Max claim.",
-    "Available = [5, 4, 5]; Request can be granted, but system immediately enters an unsafe state.",
-    "Available = [5, 4, 5]; Request is denied because P0 must wait for P2 to finish."
-    ],
-    correctAnswer: 0,
-    explanation: "<b>Step-by-Step Multi-Step Solution:</b><br>" + "<ol>" + "<li><b>Sum Allocation:</b> [0+2+3, 1+0+0, 0+0+2] = [5, 1, 2].</li>" + "<li><b>Available Vector:</b> Total [10,5,7] - Sum Alloc [5,1,2] = <b>[5, 4, 5]</b>.</li>" + "<li><b>Need Matrix:</b> P0=[7,4,3], P1=[1,2,2], P2=[6,0,0].</li>" + "<li><b>Evaluate Request0 = [0,2,0]:</b><br>" + "• [0,2,0] ≤ Need0 [7,4,3] (True) and ≤ Available [5,4,5] (True).<br>" + "• Pretend Allocation: Available' = [5,2,5], Allocation0' = [0,3,0], Need0' = [7,2,3].</li>" + "<li><b>Safety Check on Pretend State (Work = [5,2,5]):</b><br>" + "• P1 Need [1,2,2] ≤ Work [5,2,5] → P1 completes! Work = [5,2,5] + [2,0,0] = [7,2,5].<br>" + "• P0 Need' [7,2,3] ≤ Work [7,2,5] → P0 completes! Work = [7,2,5] + [0,3,0] = [7,5,5].<br>" + "• P2 Need [6,0,0] ≤ Work [7,5,5] → P2 completes!<br>" + "State is SAFE! Request is <b>GRANTED</b> with sequence &lt;P1, P0, P2&gt;.</li>" + "</ol>"
-}
-
-];
-
-// STATE VARIABLES
-let currentIndex=0;
-let userAnswers=new Array(questionsData.length).fill(null);
-let flaggedQuestions=new Array(questionsData.length).fill(false);
-let timerSeconds=20 * 60; // 20 minutes
-let timerInterval=null;
-let examSubmitted=false;
-let timeSpentSeconds=0;
-
-// INIT FUNCTION
-window.addEventListener('DOMContentLoaded', ()=> {
-        initPalette();
-        renderQuestion();
-        startTimer();
-    });
-
-// THEME TOGGLE
-document.getElementById('themeToggle').addEventListener('click', ()=> {
-        const body=document.body;
-
-        if (body.getAttribute('data-theme')==='light') {
-            body.removeAttribute('data-theme');
-            document.getElementById('themeToggle').innerText='🌙';
-        }
-
-        else {
-            body.setAttribute('data-theme', 'light');
-            document.getElementById('themeToggle').innerText='☀️';
-        }
-    });
-
-// TIMER LOGIC
-function startTimer() {
-    timerInterval=setInterval(()=> {
-            if (timerSeconds <=0) {
-                clearInterval(timerInterval);
-                autoSubmit();
-                return;
+                ,
+                options: ["P0: [3, 1, 2], P1: [1, 2, 1], P2: [1, 2, 2]",
+                    "P0: [5, 5, 4], P1: [5, 2, 3], P2: [1, 4, 6]",
+                    "P0: [3, 1, 2], P1: [1, 2, 1], P2: [1, 2, 1]",
+                    "P0: [4, 1, 2], P1: [1, 2, 1], P2: [1, 2, 2]"
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Step-by-Step Solution:</b><br>" + "Formula: <code>Need[i] = Max[i] - Allocation[i]</code><br>" + "<ol>" + "<li><b>P0 Need:</b> [4-1, 3-2, 3-1] = <b>[3, 1, 2]</b></li>" + "<li><b>P1 Need:</b> [3-2, 2-0, 2-1] = <b>[1, 2, 1]</b></li>" + "<li><b>P2 Need:</b> [1-0, 3-1, 4-2] = <b>[1, 2, 2]</b></li>" + "</ol>"
             }
 
-            timerSeconds--;
-            timeSpentSeconds++;
-            updateTimerDisplay();
-        }
+                ,
+            {
 
-        , 1000);
-}
+                id: 2,
+                topic: "Banker's Algorithm",
+                type: "Safe Sequence",
+                difficulty: "Medium",
+                question: "Consider a system with 5 processes (P0..P4) and 3 resource types (A, B, C).\nAvailable = [3, 3, 2].\nWhich of the following represents a valid safe sequence?",
+                matrixData: {
+                    headers: ["Process", "Allocation", "Max"],
+                    rows: [["P0", "0 1 0", "7 5 3"],
+                    ["P1", "2 0 0", "3 2 2"],
+                    ["P2", "3 0 2", "9 0 2"],
+                    ["P3", "2 1 1", "4 2 2"],
+                    ["P4", "0 0 2", "5 3 3"]]
+                }
 
-function updateTimerDisplay() {
-    const mins=Math.floor(timerSeconds / 60);
-    const secs=timerSeconds % 60;
+                ,
+                options: ["<P1, P3, P4, P0, P2>",
+                    "<P0, P1, P2, P3, P4>",
+                    "<P3, P1, P0, P2, P4>",
+                    "<P1, P4, P2, P0, P3>"
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Step-by-Step Execution of Safety Algorithm:</b><br>" + "Initial Available = [3, 3, 2]. Need = Max - Allocation.<br>" + "Need Matrix: P0=[7,4,3], P1=[1,2,2], P2=[6,0,0], P3=[2,1,1], P4=[5,3,1].<br><ol>" + "<li><b>Check P1:</b> Need[1] = [1,2,2] ≤ Work [3,3,2] → P1 completes! Work = [3,3,2] + [2,0,0] = <b>[5,3,2]</b>.</li>" + "<li><b>Check P3:</b> Need[3] = [2,1,1] ≤ Work [5,3,2] → P3 completes! Work = [5,3,2] + [2,1,1] = <b>[7,4,3]</b>.</li>" + "<li><b>Check P4:</b> Need[4] = [5,3,1] ≤ Work [7,4,3] → P4 completes! Work = [7,4,3] + [0,0,2] = <b>[7,4,5]</b>.</li>" + "<li><b>Check P0:</b> Need[0] = [7,4,3] ≤ Work [7,4,5] → P0 completes! Work = [7,4,5] + [0,1,0] = <b>[7,5,5]</b>.</li>" + "<li><b>Check P2:</b> Need[2] = [6,0,0] ≤ Work [7,5,5] → P2 completes! Work = [7,5,5] + [3,0,2] = <b>[10,5,7]</b>.</li>" + "</ol>All processes finish cleanly. The valid safe sequence is <b>&lt;P1, P3, P4, P0, P2&gt;</b>."
+            }
 
-    const formatted=`${String(mins).padStart(2, '0')}
+                ,
+            {
+                id: 3,
+                topic: "Banker's Algorithm",
+                type: "Resource Request",
+                difficulty: "Hard",
+                question: "Using the system state from Question 2 (Available = [3, 3, 2], P1 Allocation = [2, 0, 0], P1 Need = [1, 2, 2]), suppose Process P1 makes a request Request1 = [1, 0, 2]. Should the system grant this request immediately?",
+                options: ["Yes, because after pretending to allocate Request1, the system remains in a safe state with sequence <P1, P3, P4, P0, P2>.",
+                    "No, because Request1 exceeds currently Available resources [3, 3, 2].",
+                    "No, because granting Request1 leaves the system in an unsafe state where no process can execute.",
+                    "No, because Request1 exceeds P1's maximum claim Need."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Step-by-Step Resource Request Algorithm:</b><br>" + "<ol>" + "<li><b>Test 1: Request1 ≤ Need1</b> → [1,0,2] ≤ [1,2,2] (True).</li>" + "<li><b>Test 2: Request1 ≤ Available</b> → [1,0,2] ≤ [3,3,2] (True).</li>" + "<li><b>Pretend State Allocation:</b><br>" + "• Available' = [3,3,2] - [1,0,2] = <b>[2,3,0]</b><br>" + "• Allocation1' = [2,0,0] + [1,0,2] = <b>[3,0,2]</b><br>" + "• Need1' = [1,2,2] - [1,0,2] = <b>[0,2,0]</b></li>" + "<li><b>Safety Check on New State:</b><br>" + "P1 Need [0,2,0] ≤ Work [2,3,0] → P1 finishes! Work = [2,3,0] + [3,0,2] = [5,3,2].<br>" + "Then P3 [2,1,1] ≤ [5,3,2] finishes, followed by P4, P0, P2.<br>" + "The state is SAFE! Therefore, the request is <b>granted immediately</b>.</li>" + "</ol>"
+            }
+
+                ,
+            {
+                id: 4,
+                topic: "Banker's Algorithm",
+                type: "Resource Request",
+                difficulty: "Hard",
+                question: "From the initial state in Question 2 (Available = [3, 3, 2]), suppose instead that Process P4 requests Request4 = [3, 3, 0]. Can this request be granted immediately?",
+                options: ["Yes, because Request4 ≤ Available and Request4 ≤ Need4.",
+                    "No, because Request4 exceeds P4's maximum claim.",
+                    "No, because granting Request4 leaves Available = [0, 0, 2], leaving the system in an UNSAFE state where no process can satisfy Need ≤ Work.",
+                    "Yes, because P4 will immediately finish and return all resources."
+                ],
+                correctAnswer: 2,
+                explanation: "<b>Step-by-Step Analysis:</b><br>" + "<ol>" + "<li>Request4 = [3, 3, 0] ≤ Need4 [5, 3, 1] (True) and ≤ Available [3, 3, 2] (True).</li>" + "<li>Pretend Allocation: Available' = [3,3,2] - [3,3,0] = <b>[0, 0, 2]</b>.</li>" + "<li>Test Safety with Work = [0, 0, 2]:<br>" + "• P0 Need [7,4,3] ≤ [0,0,2] ? False<br>" + "• P1 Need [1,2,2] ≤ [0,0,2] ? False (Need[0]=1 > 0)<br>" + "• P2 Need [6,0,0] ≤ [0,0,2] ? False<br>" + "• P3 Need [2,1,1] ≤ [0,0,2] ? False<br>" + "• P4 Need' [2,0,1] ≤ [0,0,2] ? False (Need[0]=2 > 0)</li>" + "<li>NO process can run! The system enters an <b>UNSAFE state</b>. Thus, P4 must wait.</li>" + "</ol>"
+            }
+
+                ,
+            {
+                id: 5,
+                topic: "Resource Allocation",
+                type: "Calculation",
+                difficulty: "Medium",
+                question: "A system has 4 processes (P0..P3) and 3 resource types (A, B, C).\nAllocation Matrix:\nP0: [2, 1, 1], P1: [1, 0, 2], P2: [3, 2, 1], P3: [0, 2, 0].\nCurrently Available vector = [2, 1, 2].\nWhat is the Total Vector of System Resources (existing instances of A, B, C)?",
+                options: ["A = 8, B = 6, C = 6",
+                    "A = 6, B = 5, C = 4",
+                    "A = 7, B = 5, C = 6",
+                    "A = 9, B = 6, C = 6"
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Step-by-Step Solution:</b><br>" + "Formula: <code>Total Resources = Available + Sum(Allocated Resources)</code><br>" + "<ol>" + "<li>Sum of Allocation for A = 2 + 1 + 3 + 0 = <b>6</b></li>" + "<li>Sum of Allocation for B = 1 + 0 + 2 + 2 = <b>5</b></li>" + "<li>Sum of Allocation for C = 1 + 2 + 1 + 0 = <b>4</b></li>" + "<li>Total Allocation Vector = [6, 5, 4]</li>" + "<li>Total System Resources = [2, 1, 2] + [6, 5, 4] = <b>[8, 6, 6]</b>.</li>" + "</ol>"
+            }
+
+                ,
+            {
+
+                id: 6,
+                topic: "Deadlock Detection",
+                type: "Deadlock Detection",
+                difficulty: "Hard",
+                question: "Consider a system with 5 processes (P0..P4) and 3 resource types (A, B, C).\nAvailable = [0, 0, 0].\nWhich processes are currently deadlocked?",
+                matrixData: {
+                    headers: ["Process", "Allocation (A B C)", "Request (A B C)"],
+                    rows: [["P0", "0 1 0", "0 0 0"],
+                    ["P1", "2 0 0", "2 0 2"],
+                    ["P2", "3 0 3", "0 0 1"],
+                    ["P3", "2 1 1", "1 0 0"],
+                    ["P4", "0 0 2", "0 0 2"]]
+                }
+
+                ,
+                options: ["The system is not deadlocked; all processes can complete.",
+                    "Processes P1, P2, P3, P4 are deadlocked.",
+                    "Processes P0, P1, P3 are deadlocked.",
+                    "Only process P4 is deadlocked."
+                ],
+                correctAnswer: 1,
+                explanation: "<b>Deadlock Detection Algorithm Execution:</b><br>" + "<ol>" + "<li>Initialize Work = [0, 0, 0].</li>" + "<li>P0 has Request [0,0,0] ≤ Work [0,0,0]. P0 finishes! Work becomes Work + Allocation(P0) = [0,0,0] + [0,1,0] = <b>[0,1,0]</b>. Finish[0]=true.</li>" + "<li>Evaluate remaining processes against Work = [0,1,0]:<br>" + "• P1 Request [2,0,2] ≤ [0,1,0] ? False<br>" + "• P2 Request [0,0,1] ≤ [0,1,0] ? False<br>" + "• P3 Request [1,0,0] ≤ [0,1,0] ? False<br>" + "• P4 Request [0,0,2] ≤ [0,1,0] ? False</li>" + "<li>No other process can satisfy Request ≤ Work. Finish[1..4] = false.<br>" + "Therefore, processes <b>P1, P2, P3, P4 are deadlocked</b>.</li>" + "</ol>"
+            }
+
+                ,
+            {
+                id: 7,
+                topic: "Deadlock Detection",
+                type: "Deadlock Detection",
+                difficulty: "Medium",
+                question: "In the deadlocked system state from Question 6 (where Work = [0, 1, 0] and P1, P2, P3, P4 are waiting), if Process P2 is terminated and its allocated resources [3, 0, 3] are reclaimed by the system, what happens?",
+                options: ["All remaining processes (P1, P3, P4) can now finish cleanly without deadlock in sequence <P1, P3, P4>.",
+                    "The system remains deadlocked because P1 still needs A=2, C=2.",
+                    "Only P3 can finish; P1 and P4 remain deadlocked.",
+                    "The system enters an unrecoverable crash state."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Step-by-Step Recovery Evaluation:</b><br>" + "<ol>" + "<li>Reclaiming P2's allocation [3,0,3] updates Work: Work = [0,1,0] + [3,0,3] = <b>[3,1,3]</b>.</li>" + "<li>Check P1: Request1 [2,0,2] ≤ Work [3,1,3] → P1 completes! Work = [3,1,3] + [2,0,0] = <b>[5,1,3]</b>.</li>" + "<li>Check P3: Request3 [1,0,0] ≤ Work [5,1,3] → P3 completes! Work = [5,1,3] + [2,1,1] = <b>[7,2,4]</b>.</li>" + "<li>Check P4: Request4 [0,0,2] ≤ Work [7,2,4] → P4 completes!</li>" + "<li>All processes complete successfully! The deadlock is completely resolved.</li>" + "</ol>"
+            }
+
+                ,
+            {
+                id: 8,
+                topic: "Deadlock Concepts",
+                type: "Calculation",
+                difficulty: "Medium",
+                question: "A system has m units of a single resource type, shared by n processes. Each process requires at most k units of the resource. What is the maximum number of processes n for which the system is GUARANTEED to be deadlock-free?",
+                options: ["n ≤ ⌊ (m - 1) / (k - 1) ⌋",
+                    "n ≤ m / k",
+                    "n ≤ (m + 1) / k",
+                    "n ≤ m * (k - 1)"
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Mathematical Proof:</b><br>" + "To avoid deadlock in the worst-case scenario, every process holds (k - 1) resources and is waiting for 1 additional resource.<br>" + "• Total resources held by n processes in worst case = <code>n * (k - 1)</code>.<br>" + "• To guarantee at least 1 process can get its final resource and finish, total available resources <code>m</code> must satisfy:<br>" + "<code>m ≥ n * (k - 1) + 1</code><br>" + "<code>m - 1 ≥ n * (k - 1)</code> → <b>n ≤ ⌊ (m - 1) / (k - 1) ⌋</b>."
+            }
+
+                ,
+            {
+                id: 9,
+                topic: "Deadlock Prevention",
+                type: "Calculation",
+                difficulty: "Easy",
+                question: "Suppose a system has 10 units of a resource and 3 processes (P1, P2, P3), each with a maximum demand of 4 units. Is deadlock possible in this system?",
+                options: ["Deadlock is impossible because with 10 units, worst-case allocation (3 processes × 3 units = 9) leaves 1 free unit to complete a process.",
+                    "Deadlock is possible if each process holds 3 units and requests 1 more.",
+                    "Deadlock is guaranteed because total max demand (12) exceeds total resources (10).",
+                    "Deadlock is impossible only if at least 12 units of resources are present."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Explanation:</b><br>" + "Worst-case allocation where no process can finish: Each process holds <code>max - 1 = 4 - 1 = 3</code> units.<br>" + "Total allocated resources in worst case = 3 processes × 3 units = <b>9 units</b>.<br>" + "Since the system has 10 units, <code>10 - 9 = 1</code> unit remains free.<br>" + "This free unit can be given to ANY process, enabling it to reach 4 units, finish, and release all 4 units to the system.<br>" + "Therefore, deadlock is <b>IMPOSSIBLE</b>."
+            }
+
+                ,
+            {
+                id: 10,
+                topic: "Resource Allocation Graph",
+                type: "Resource Allocation Graph",
+                difficulty: "Medium",
+                question: "Consider a Resource-Allocation Graph (RAG) where every resource type has EXACTLY 1 single instance. Which statement regarding cycles in this graph is TRUE?",
+                options: ["A cycle in the graph is a necessary and sufficient condition for a deadlock.",
+                    "A cycle in the graph is a necessary condition, but NOT a sufficient condition for a deadlock.",
+                    "A cycle guarantees that no deadlock can ever occur.",
+                    "A cycle only indicates deadlock if the graph contains claim edges."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Chapter 8 Rule:</b><br>" + "• If a Resource-Allocation Graph contains <b>single instances</b> of each resource type, a cycle is <b>BOTH a necessary AND sufficient condition</b> for deadlock.<br>" + "• If resource types have <b>multiple instances</b>, a cycle is necessary but NOT sufficient (a cycle may exist without deadlock)."
+            }
+
+                ,
+            {
+                id: 11,
+                topic: "Resource Allocation Graph",
+                type: "Resource Allocation Graph",
+                difficulty: "Medium",
+                question: "In a Resource-Allocation Graph where resource types have MULTIPLE instances, a cycle is detected. What can be concluded about the system state?",
+                options: ["A deadlock MAY exist, but the cycle alone is not sufficient proof of a deadlock.",
+                    "The system is definitely in a deadlock state.",
+                    "The system is guaranteed to be in a safe state.",
+                    "All processes in the cycle are terminated automatically."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Explanation:</b><br>" + "With multiple instances per resource type, a cycle indicates the <i>possibility</i> of deadlock, but processes outside the cycle might hold instances of the resource and eventually release them, breaking the potential deadlock. Thus, a cycle is necessary but NOT sufficient."
+            }
+
+                ,
+            {
+                id: 12,
+                topic: "Deadlock Avoidance vs Prevention",
+                type: "Comparison",
+                difficulty: "Medium",
+                question: "What is the key fundamental difference between Deadlock Prevention and Deadlock Avoidance?",
+                options: ["Prevention ensures that at least one of the 4 necessary deadlock conditions never holds; Avoidance uses dynamic info (such as max resource claims) to keep the system in a safe state.",
+                    "Prevention dynamically checks requests at runtime; Avoidance restricts how requests can be made.",
+                    "Prevention is used for multithreaded apps; Avoidance is used for single-threaded kernel tasks.",
+                    "Prevention always terminates deadlocked processes; Avoidance preempts resources."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Core Definitions (Silberschatz Ch 8):</b><br>" + "• <b>Deadlock Prevention:</b> Structural protocols that negate at least one of the 4 necessary conditions (Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait).<br>" + "• <b>Deadlock Avoidance:</b> Requires a priori dynamic information (maximum resource needs) to dynamically check allocation states and ensure the system never enters an unsafe state."
+            }
+
+                ,
+            {
+                id: 13,
+                topic: "Deadlock Characterization",
+                type: "Scenario",
+                difficulty: "Easy",
+                question: "Process P0 holds resource R1 while waiting for resource R2. Process P1 holds R2 while waiting for R3, and Process P2 holds R3 while waiting for R1. Which necessary deadlock condition is illustrated?",
+                options: ["Circular Wait",
+                    "Mutual Exclusion",
+                    "Hold and Wait",
+                    "No Preemption"
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Explanation:</b><br>" + "This closed loop of waiting (P0 → P1 → P2 → P0) directly illustrates the <b>Circular Wait</b> condition, where an ordered set of waiting processes {P0, P1, ..., Pn} exists such that P0 is waiting for a resource held by P1, P1 waits for P2, and Pn waits for P0."
+            }
+
+                ,
+            {
+                id: 14,
+                topic: "Deadlock Prevention",
+                type: "Conceptual",
+                difficulty: "Medium",
+                question: "One protocol to prevent Circular Wait is to define a global one-to-one function F: R → N mapping each resource type to an integer, requiring processes to request resources in strictly increasing order of enumeration. Why does this prevent circular wait?",
+                options: ["It prevents a process holding resource Ri from requesting Rj if F(Rj) ≤ F(Ri), making a closed circular chain × mathematically impossible.",
+                    "It forces all resources to be sharable across all threads simultaneously.",
+                    "It automatically preempts any resource held for more than 10 seconds.",
+                    "It allows processes to hold resources indefinitely without waiting."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Proof by Contradiction:</b><br>" + "Suppose a circular wait chain P0 → P1 → ... → Pn → P0 exists. This requires:<br>" + "F(R0) < F(R1) < F(R2) < ... < F(Rn) < F(R0).<br>" + "This implies <code>F(R0) < F(R0)</code>, which is a mathematical impossibility! Hence, circular wait cannot occur."
+            }
+
+                ,
+            {
+                id: 15,
+                topic: "Safe vs Unsafe State",
+                type: "Conceptual",
+                difficulty: "Easy",
+                question: "Which statement accurately describes a Safe State in Operating Systems?",
+                options: ["A state is safe if there exists a safe sequence of processes <P1, P2, ..., Pn> such that each process's remaining requests can be satisfied by currently available resources plus resources held by all preceding processes.",
+                    "A state is safe if no process requests any resources for the remainder of execution.",
+                    "A state is safe only if all resources are currently unallocated and free.",
+                    "A state is safe if all process threads are running in kernel mode."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Definition:</b><br>" + "A state is safe if the OS can allocate resources to each process (up to its max claim) in some order and still avoid deadlock. This execution order is called a <b>safe sequence</b>."
+            }
+
+                ,
+            {
+                id: 16,
+                topic: "Safe vs Unsafe State",
+                type: "Conceptual",
+                difficulty: "Easy",
+                question: "What is the exact relationship between Safe States, Unsafe States, and Deadlock States?",
+                options: ["A safe state guarantees no deadlock; an unsafe state is NOT a deadlock state itself, but MAY lead to a deadlock state.",
+                    "Safe states and deadlock states overlap; unsafe states are completely separate.",
+                    "An unsafe state is strictly identical to a deadlock state.",
+                    "All safe states are deadlock states."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>State Relationships (Silberschatz Ch 8):</b><br>" + "• Safe State ⇒ No Deadlock.<br>" + "• Unsafe State ⇒ Potential for Deadlock (if processes request their maximum claims).<br>" + "• Deadlock State is a strict subset of Unsafe States."
+            }
+
+                ,
+            {
+                id: 17,
+                topic: "Banker's Algorithm",
+                type: "Definition",
+                difficulty: "Easy",
+                question: "In Banker's Algorithm with n processes and m resource types, what are the exact dimensions of the Allocation, Max, and Need matrices?",
+                options: ["n × m for Allocation, Max, and Need.",
+                    "m × n for Allocation, n × n for Max, m × m for Need.",
+                    "1 × m vectors for all three matrices.",
+                    "n × n × matrices for all three."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Banker's Data Structures:</b><br>" + "• <b>Available:</b> Vector of length <code>m</code>.<br>" + "• <b>Max:</b> Matrix of dimension <code>n × m</code>.<br>" + "• <b>Allocation:</b> Matrix of dimension <code>n × m</code>.<br>" + "• <b>Need:</b> Matrix of dimension <code>n × m</code>."
+            }
+
+                ,
+            {
+                id: 18,
+                topic: "Deadlock Detection",
+                type: "Algorithm",
+                difficulty: "Medium",
+                question: "In the Deadlock Detection Algorithm for multiple resource instances, how is the Finish array initialized in Step 1?",
+                options: ["For i = 0..n-1, if Allocation[i] != 0, then Finish[i] = false; otherwise Finish[i] = true.",
+                    "Finish[i] = false for all i = 0, 1, ..., n-1.",
+                    "Finish[i] = true for all processes that have active threads.",
+                    "Finish[i] is initialized to the number of available resource types."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Detection Algorithm Step 1:</b><br>" + "If a process holds <b>no resources</b> (<code>Allocation[i] == 0</code>), it cannot be involved in a deadlock, so <code>Finish[i]</code> is initialized to <b>true</b>. If it holds resources, <code>Finish[i] = false</code>."
+            }
+
+                ,
+            {
+                id: 19,
+                topic: "Deadlock Recovery",
+                type: "Conceptual",
+                difficulty: "Medium",
+                question: "When recovering from deadlock using Resource Preemption, how can the OS prevent Starvation of a victim process?",
+                options: ["By including the number of times a process has been selected as a victim in its preemption cost factor.",
+                    "By permanently terminating any process selected as a victim more than once.",
+                    "By ensuring resources are never preempted under any circumstances.",
+                    "By assigning static priorities that never change during execution."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Starvation Prevention:</b><br>" + "If victim selection is strictly cost-based, the same process might be picked repeatedly. To prevent starvation, the number of rollbacks/preemptions is included in the cost factor, increasing its priority after each preemption."
+            }
+
+                ,
+            {
+                id: 20,
+                topic: "Banker's Algorithm",
+                type: "Banker's Algorithm",
+                difficulty: "Hard",
+                question: "Consider a system with 3 processes (P0, P1, P2) and 3 resource types (A, B, C) with Total System Resources = [10, 5, 7].\nAllocation: P0=[0,1,0], P1=[2,0,0], P2=[3,0,2].\nMax: P0=[7,5,3], P1=[3,2,2], P2=[9,0,2].\n1. What is Currently Available?\n2. If P0 requests Request0 = [0, 2, 0], can it be granted?",
+                options: ["Available = [5, 4, 5]; Request is GRANTED because the resulting state is safe with sequence <P1, P0, P2>.",
+                    "Available = [5, 4, 5]; Request MUST be denied because P0 exceeds its Max claim.",
+                    "Available = [5, 4, 5]; Request can be granted, but system immediately enters an unsafe state.",
+                    "Available = [5, 4, 5]; Request is denied because P0 must wait for P2 to finish."
+                ],
+                correctAnswer: 0,
+                explanation: "<b>Step-by-Step Multi-Step Solution:</b><br>" + "<ol>" + "<li><b>Sum Allocation:</b> [0+2+3, 1+0+0, 0+0+2] = [5, 1, 2].</li>" + "<li><b>Available Vector:</b> Total [10,5,7] - Sum Alloc [5,1,2] = <b>[5, 4, 5]</b>.</li>" + "<li><b>Need Matrix:</b> P0=[7,4,3], P1=[1,2,2], P2=[6,0,0].</li>" + "<li><b>Evaluate Request0 = [0,2,0]:</b><br>" + "• [0,2,0] ≤ Need0 [7,4,3] (True) and ≤ Available [5,4,5] (True).<br>" + "• Pretend Allocation: Available' = [5,2,5], Allocation0' = [0,3,0], Need0' = [7,2,3].</li>" + "<li><b>Safety Check on Pretend State (Work = [5,2,5]):</b><br>" + "• P1 Need [1,2,2] ≤ Work [5,2,5] → P1 completes! Work = [5,2,5] + [2,0,0] = [7,2,5].<br>" + "• P0 Need' [7,2,3] ≤ Work [7,2,5] → P0 completes! Work = [7,2,5] + [0,3,0] = [7,5,5].<br>" + "• P2 Need [6,0,0] ≤ Work [7,5,5] → P2 completes!<br>" + "State is SAFE! Request is <b>GRANTED</b> with sequence &lt;P1, P0, P2&gt;.</li>" + "</ol>"
+            }
+
+            ];
+
+            // STATE VARIABLES
+            let currentIndex = 0;
+            let userAnswers = new Array(questionsData.length).fill(null);
+            let flaggedQuestions = new Array(questionsData.length).fill(false);
+            let timerSeconds = 20 * 60; // 20 minutes
+            let timerInterval = null;
+            let examSubmitted = false;
+            let timeSpentSeconds = 0;
+
+            // INIT FUNCTION
+            window.addEventListener('DOMContentLoaded', () => {
+                initPalette();
+                renderQuestion();
+                startTimer();
+            });
+
+            // THEME TOGGLE
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                const body = document.body;
+
+                if (body.getAttribute('data-theme') === 'light') {
+                    body.removeAttribute('data-theme');
+                    document.getElementById('themeToggle').innerText = '🌙';
+                }
+
+                else {
+                    body.setAttribute('data-theme', 'light');
+                    document.getElementById('themeToggle').innerText = '☀️';
+                }
+            });
+
+            // TIMER LOGIC
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        autoSubmit();
+                        return;
+                    }
+
+                    timerSeconds--;
+                    timeSpentSeconds++;
+                    updateTimerDisplay();
+                }
+
+                    , 1000);
+            }
+
+            function updateTimerDisplay() {
+                const mins = Math.floor(timerSeconds / 60);
+                const secs = timerSeconds % 60;
+
+                const formatted = `${String(mins).padStart(2, '0')}
 
     :${String(secs).padStart(2, '0')}
 
     `;
-    const display=document.getElementById('timerDisplay');
-    const badge=document.getElementById('timerBadge');
-    display.innerText=formatted;
+                const display = document.getElementById('timerDisplay');
+                const badge = document.getElementById('timerBadge');
+                display.innerText = formatted;
 
-    if (timerSeconds <=180 && timerSeconds > 60) {
-        badge.className='timer-badge warning';
-    }
+                if (timerSeconds <= 180 && timerSeconds > 60) {
+                    badge.className = 'timer-badge warning';
+                }
 
-    else if (timerSeconds <=60) {
-        badge.className='timer-badge danger';
-    }
-}
+                else if (timerSeconds <= 60) {
+                    badge.className = 'timer-badge danger';
+                }
+            }
 
-// TAB SWITCHING
-function switchTab(tab) {
-    document.getElementById('tabQuizBtn').classList.remove('active');
-    document.getElementById('tabResultsBtn').classList.remove('active');
-    document.getElementById('tabCalcBtn').classList.remove('active');
+            // TAB SWITCHING
+            function switchTab(tab) {
+                document.getElementById('tabQuizBtn').classList.remove('active');
+                document.getElementById('tabResultsBtn').classList.remove('active');
+                document.getElementById('tabCalcBtn').classList.remove('active');
 
-    document.getElementById('quizTab').classList.add('hidden');
-    document.getElementById('resultsTab').classList.add('hidden');
-    document.getElementById('calcTab').classList.add('hidden');
-    document.getElementById('progressContainer').classList.add('hidden');
+                document.getElementById('quizTab').classList.add('hidden');
+                document.getElementById('resultsTab').classList.add('hidden');
+                document.getElementById('calcTab').classList.add('hidden');
+                document.getElementById('progressContainer').classList.add('hidden');
 
-    if (tab==='quiz') {
-        document.getElementById('tabQuizBtn').classList.add('active');
-        document.getElementById('quizTab').classList.remove('hidden');
-        document.getElementById('progressContainer').classList.remove('hidden');
-    }
+                if (tab === 'quiz') {
+                    document.getElementById('tabQuizBtn').classList.add('active');
+                    document.getElementById('quizTab').classList.remove('hidden');
+                    document.getElementById('progressContainer').classList.remove('hidden');
+                }
 
-    else if (tab==='results') {
-        document.getElementById('tabResultsBtn').classList.add('active');
-        document.getElementById('resultsTab').classList.remove('hidden');
-    }
+                else if (tab === 'results') {
+                    document.getElementById('tabResultsBtn').classList.add('active');
+                    document.getElementById('resultsTab').classList.remove('hidden');
+                }
 
-    else if (tab==='calc') {
-        document.getElementById('tabCalcBtn').classList.add('active');
-        document.getElementById('calcTab').classList.remove('hidden');
-    }
-}
+                else if (tab === 'calc') {
+                    document.getElementById('tabCalcBtn').classList.add('active');
+                    document.getElementById('calcTab').classList.remove('hidden');
+                }
+            }
 
-// INIT PALETTE
-function initPalette() {
-    const palette=document.getElementById('paletteGrid');
-    palette.innerHTML='';
+            // INIT PALETTE
+            function initPalette() {
+                const palette = document.getElementById('paletteGrid');
+                palette.innerHTML = '';
 
-    for (let i=0; i < questionsData.length; i++) {
-        const btn=document.createElement('button');
-        btn.className='palette-btn';
+                for (let i = 0; i < questionsData.length; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'palette-btn';
 
-        btn.id=`palette-btn-${i}
+                    btn.id = `palette-btn-${i}
 
         `;
-        btn.innerText=i+1;
-        btn.onclick=()=>jumpToQuestion(i);
-        palette.appendChild(btn);
-    }
+                    btn.innerText = i + 1;
+                    btn.onclick = () => jumpToQuestion(i);
+                    palette.appendChild(btn);
+                }
 
-    updatePaletteUI();
-}
+                updatePaletteUI();
+            }
 
-function updatePaletteUI() {
-    for (let i=0; i < questionsData.length; i++) {
-        const btn=document.getElementById(`palette-btn-${i}
+            function updatePaletteUI() {
+                for (let i = 0; i < questionsData.length; i++) {
+                    const btn = document.getElementById(`palette-btn-${i}
 
             `);
-        btn.className='palette-btn';
-        if (i===currentIndex) btn.classList.add('current');
-        if (userAnswers[i] !==null) btn.classList.add('answered');
-        if (flaggedQuestions[i]) btn.classList.add('flagged');
-    }
-}
+                    btn.className = 'palette-btn';
+                    if (i === currentIndex) btn.classList.add('current');
+                    if (userAnswers[i] !== null) btn.classList.add('answered');
+                    if (flaggedQuestions[i]) btn.classList.add('flagged');
+                }
+            }
 
-// RENDER QUESTION
-function renderQuestion() {
-    const q=questionsData[currentIndex];
+            // RENDER QUESTION
+            function renderQuestion() {
+                const q = questionsData[currentIndex];
 
-    document.getElementById('qTopic').innerText=q.topic;
-    document.getElementById('qDifficulty').innerText=q.difficulty;
+                document.getElementById('qTopic').innerText = q.topic;
+                document.getElementById('qDifficulty').innerText = q.difficulty;
 
-    document.getElementById('qDifficulty').className=`badge badge-${q.difficulty.toLowerCase()}
+                document.getElementById('qDifficulty').className = `badge badge-${q.difficulty.toLowerCase()}
 
     `;
-    document.getElementById('qType').innerText=q.type;
+                document.getElementById('qType').innerText = q.type;
 
-    document.getElementById('qNumText').innerText=`Question ${currentIndex+1}
+                document.getElementById('qNumText').innerText = `Question ${currentIndex + 1}
 
     of ${questionsData.length}
 
     `;
 
-    document.getElementById('qText').innerText=q.question;
+                document.getElementById('qText').innerText = q.question;
 
-    // Matrix table
-    const matrixBox=document.getElementById('qMatrixContainer');
-    matrixBox.innerHTML='';
+                // Matrix table
+                const matrixBox = document.getElementById('qMatrixContainer');
+                matrixBox.innerHTML = '';
 
-    if (q.matrixData) {
-        let html='<div class="matrix-container"><table class="matrix-table"><thead><tr>';
+                if (q.matrixData) {
+                    let html = '<div class="matrix-container"><table class="matrix-table"><thead><tr>';
 
-        q.matrixData.headers.forEach(h=> html +=`<th>${h}
+                    q.matrixData.headers.forEach(h => html += `<th>${h}
 
             </th>`);
-        html+='</tr></thead><tbody>';
+                    html += '</tr></thead><tbody>';
 
-        q.matrixData.rows.forEach(r=> {
-                html +='<tr>';
+                    q.matrixData.rows.forEach(r => {
+                        html += '<tr>';
 
-                r.forEach(c=> html +=`<td>${c}
+                        r.forEach(c => html += `<td>${c}
 
                     </td>`);
-                html +='</tr>';
-            });
-        html+='</tbody></table></div>';
-        matrixBox.innerHTML=html;
-    }
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div>';
+                    matrixBox.innerHTML = html;
+                }
 
-    // Options
-    const optionsBox=document.getElementById('qOptions');
-    optionsBox.innerHTML='';
+                // Options
+                const optionsBox = document.getElementById('qOptions');
+                optionsBox.innerHTML = '';
 
-    q.options.forEach((opt, idx)=> {
-            const div=document.createElement('div');
+                q.options.forEach((opt, idx) => {
+                    const div = document.createElement('div');
 
-            div.className=`option-item ${userAnswers[currentIndex]===idx ? 'selected' : ''}
+                    div.className = `option-item ${userAnswers[currentIndex] === idx ? 'selected' : ''}
 
             `;
-            div.onclick=()=> selectOption(idx);
+                    div.onclick = () => selectOption(idx);
 
-            const radio=document.createElement('input');
-            radio.type='radio';
-            radio.name='qOptionRadio';
-            radio.checked=userAnswers[currentIndex]===idx;
-            radio.disabled=examSubmitted;
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'qOptionRadio';
+                    radio.checked = userAnswers[currentIndex] === idx;
+                    radio.disabled = examSubmitted;
 
-            const label=document.createElement('span');
+                    const label = document.createElement('span');
 
-            label.innerText=`${String.fromCharCode(65 + idx)}
+                    label.innerText = `${String.fromCharCode(65 + idx)}
 
             . ${opt}
 
             `;
 
-            div.appendChild(radio);
-            div.appendChild(label);
-            optionsBox.appendChild(div);
-        });
+                    div.appendChild(radio);
+                    div.appendChild(label);
+                    optionsBox.appendChild(div);
+                });
 
-    // Buttons state
-    document.getElementById('prevBtn').disabled=currentIndex===0;
-    document.getElementById('nextBtn').disabled=currentIndex===questionsData.length - 1;
-    document.getElementById('flagBtn').innerText=flaggedQuestions[currentIndex] ? '★ Unflag' : '★ Flag for Review';
+                // Buttons state
+                document.getElementById('prevBtn').disabled = currentIndex === 0;
+                document.getElementById('nextBtn').disabled = currentIndex === questionsData.length - 1;
+                document.getElementById('flagBtn').innerText = flaggedQuestions[currentIndex] ? '★ Unflag' : '★ Flag for Review';
 
-    // Progress bar
-    const progress=((userAnswers.filter(a=> a !==null).length) / questionsData.length) * 100;
+                // Progress bar
+                const progress = ((userAnswers.filter(a => a !== null).length) / questionsData.length) * 100;
 
-    document.getElementById('progressFill').style.width=`${progress}
+                document.getElementById('progressFill').style.width = `${progress}
 
     %`;
 
-    updatePaletteUI();
-}
+                updatePaletteUI();
+            }
 
-function selectOption(idx) {
-    if (examSubmitted) return;
-    userAnswers[currentIndex]=idx;
-    renderQuestion();
-}
+            function selectOption(idx) {
+                if (examSubmitted) return;
+                userAnswers[currentIndex] = idx;
+                renderQuestion();
+            }
 
-function toggleFlag() {
-    flaggedQuestions[currentIndex]= !flaggedQuestions[currentIndex];
-    renderQuestion();
-}
+            function toggleFlag() {
+                flaggedQuestions[currentIndex] = !flaggedQuestions[currentIndex];
+                renderQuestion();
+            }
 
-function navigate(direction) {
-    const newIdx=currentIndex+direction;
+            function navigate(direction) {
+                const newIdx = currentIndex + direction;
 
-    if (newIdx >=0 && newIdx < questionsData.length) {
-        currentIndex=newIdx;
-        renderQuestion();
-    }
-}
+                if (newIdx >= 0 && newIdx < questionsData.length) {
+                    currentIndex = newIdx;
+                    renderQuestion();
+                }
+            }
 
-function jumpToQuestion(idx) {
-    currentIndex=idx;
-    renderQuestion();
-}
+            function jumpToQuestion(idx) {
+                currentIndex = idx;
+                renderQuestion();
+            }
 
-function confirmSubmit() {
-    const unanswered=userAnswers.filter(a=> a===null).length;
-    let msg="Are you sure you want to submit your exam?";
+            function confirmSubmit() {
+                const unanswered = userAnswers.filter(a => a === null).length;
+                let msg = "Are you sure you want to submit your exam?";
 
-    if (unanswered > 0) {
-        msg=`You have ${unanswered}
+                if (unanswered > 0) {
+                    msg = `You have ${unanswered}
 
         unanswered question(s). Are you sure you want to submit?`;
-    }
+                }
 
-    if (confirm(msg)) {
-        submitExam();
-    }
-}
-
-function autoSubmit() {
-    alert("⏱️ Time is up! Your exam is being submitted automatically.");
-    submitExam();
-}
-
-// SUBMIT & CALCULATE SCORE
-function submitExam() {
-    clearInterval(timerInterval);
-    examSubmitted=true;
-
-    // Lock buttons
-    document.getElementById('submitBtn').disabled=true;
-
-    // Calculate score
-    let score=0;
-
-    userAnswers.forEach((ans, idx)=> {
-            if (ans===questionsData[idx].correctAnswer) {
-                score++;
+                if (confirm(msg)) {
+                    submitExam();
+                }
             }
-        });
 
-    const percentage=Math.round((score / questionsData.length) * 100);
-    const minsSpent=Math.floor(timeSpentSeconds / 60);
-    const secsSpent=timeSpentSeconds % 60;
+            function autoSubmit() {
+                alert("⏱️ Time is up! Your exam is being submitted automatically.");
+                submitExam();
+            }
 
-    const formattedTime=`${String(minsSpent).padStart(2, '0')}
+            // SUBMIT & CALCULATE SCORE
+            function submitExam() {
+                clearInterval(timerInterval);
+                examSubmitted = true;
+
+                // Lock buttons
+                document.getElementById('submitBtn').disabled = true;
+
+                // Calculate score
+                let score = 0;
+
+                userAnswers.forEach((ans, idx) => {
+                    if (ans === questionsData[idx].correctAnswer) {
+                        score++;
+                    }
+                });
+
+                const percentage = Math.round((score / questionsData.length) * 100);
+                const minsSpent = Math.floor(timeSpentSeconds / 60);
+                const secsSpent = timeSpentSeconds % 60;
+
+                const formattedTime = `${String(minsSpent).padStart(2, '0')}
 
     :${String(secsSpent).padStart(2, '0')}
 
     `;
 
-    // Update Results Tab
-    document.getElementById('resScore').innerText=`${score}
+                // Update Results Tab
+                document.getElementById('resScore').innerText = `${score}
 
     / ${questionsData.length}
 
     `;
 
-    document.getElementById('resPercent').innerText=`${percentage}
+                document.getElementById('resPercent').innerText = `${percentage}
 
     %`;
-    document.getElementById('resTime').innerText=formattedTime;
+                document.getElementById('resTime').innerText = formattedTime;
 
-    const statusBox=document.getElementById('resStatus');
+                const statusBox = document.getElementById('resStatus');
 
-    if (percentage >=80) {
-        statusBox.innerText="PASSED (Distinction) 🏆";
-        statusBox.style.color="var(--success)";
-    }
+                if (percentage >= 80) {
+                    statusBox.innerText = "PASSED (Distinction) 🏆";
+                    statusBox.style.color = "var(--success)";
+                }
 
-    else if (percentage >=60) {
-        statusBox.innerText="PASSED 🎓";
-        statusBox.style.color="var(--warning)";
-    }
+                else if (percentage >= 60) {
+                    statusBox.innerText = "PASSED 🎓";
+                    statusBox.style.color = "var(--warning)";
+                }
 
-    else {
-        statusBox.innerText="NEEDS REVISION 📚";
-        statusBox.style.color="var(--danger)";
-    }
+                else {
+                    statusBox.innerText = "NEEDS REVISION 📚";
+                    statusBox.style.color = "var(--danger)";
+                }
 
-    renderReview('all');
+                renderReview('all');
 
-    // Show Results Tab
-    document.getElementById('tabResultsBtn').classList.remove('hidden');
-    switchTab('results');
-}
+                // Show Results Tab
+                document.getElementById('tabResultsBtn').classList.remove('hidden');
+                switchTab('results');
+            }
 
-// RENDER REVIEW
-function renderReview(filter) {
-    const container=document.getElementById('reviewContainer');
-    container.innerHTML='';
+            // RENDER REVIEW
+            function renderReview(filter) {
+                const container = document.getElementById('reviewContainer');
+                container.innerHTML = '';
 
-    questionsData.forEach((q, idx)=> {
-            const userAns=userAnswers[idx];
-            const isCorrect=userAns===q.correctAnswer;
-            const isUnanswered=userAns===null;
+                questionsData.forEach((q, idx) => {
+                    const userAns = userAnswers[idx];
+                    const isCorrect = userAns === q.correctAnswer;
+                    const isUnanswered = userAns === null;
 
-            if (filter==='correct' && !isCorrect) return;
-            if (filter==='incorrect' && isCorrect) return;
+                    if (filter === 'correct' && !isCorrect) return;
+                    if (filter === 'incorrect' && isCorrect) return;
 
-            const item=document.createElement('div');
+                    const item = document.createElement('div');
 
-            item.className=`review-item ${isCorrect ? 'correct' : 'incorrect'}
+                    item.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}
 
             `;
 
-            let html=` <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;" > <h4>Question ${idx + 1}
+                    let html = ` <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;" > <h4>Question ${idx + 1}
 
             : ${q.topic}
 
@@ -1228,155 +1352,158 @@ function renderReview(filter) {
 
             </p> `;
 
-            if (q.matrixData) {
-                html +='<div class="matrix-container"><table class="matrix-table"><thead><tr>';
+                    if (q.matrixData) {
+                        html += '<div class="matrix-container"><table class="matrix-table"><thead><tr>';
 
-                q.matrixData.headers.forEach(h=> html +=`<th>${h}
+                        q.matrixData.headers.forEach(h => html += `<th>${h}
 
                     </th>`);
-                html +='</tr></thead><tbody>';
+                        html += '</tr></thead><tbody>';
 
-                q.matrixData.rows.forEach(r=> {
-                        html +='<tr>';
+                        q.matrixData.rows.forEach(r => {
+                            html += '<tr>';
 
-                        r.forEach(c=> html +=`<td>${c}
+                            r.forEach(c => html += `<td>${c}
 
                             </td>`);
-                        html +='</tr>';
-                    });
-                html +='</tbody></table></div>';
-            }
-
-            html +=`<div style="margin:12px 0; font-size:0.9rem;" >`;
-
-            q.options.forEach((opt, oIdx)=> {
-                    let style="padding:6px 12px; border-radius:6px; margin-bottom:4px;";
-
-                    if (oIdx===q.correctAnswer) {
-                        style +="background:var(--success-bg); color:var(--success); font-weight:700;";
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table></div>';
                     }
 
-                    else if (oIdx===userAns && !isCorrect) {
-                        style +="background:var(--danger-bg); color:var(--danger); text-decoration:line-through;";
-                    }
+                    html += `<div style="margin:12px 0; font-size:0.9rem;" >`;
 
-                    html +=`<div style="${style}" >${String.fromCharCode(65 + oIdx)}
+                    q.options.forEach((opt, oIdx) => {
+                        let style = "padding:6px 12px; border-radius:6px; margin-bottom:4px;";
+
+                        if (oIdx === q.correctAnswer) {
+                            style += "background:var(--success-bg); color:var(--success); font-weight:700;";
+                        }
+
+                        else if (oIdx === userAns && !isCorrect) {
+                            style += "background:var(--danger-bg); color:var(--danger); text-decoration:line-through;";
+                        }
+
+                        html += `<div style="${style}" >${String.fromCharCode(65 + oIdx)}
 
                     . ${opt}
 
                     </div>`;
-                });
-            html +=`</div>`;
+                    });
+                    html += `</div>`;
 
-            html +=` <div class="explanation-box" > <h4>💡 Step-by-Step Explanation</h4> <div>${q.explanation}
+                    html += ` <div class="explanation-box" > <h4>💡 Step-by-Step Explanation</h4> <div>${q.explanation}
 
             </div> </div> `;
 
-            item.innerHTML=html;
-            container.appendChild(item);
-        });
-}
-
-function filterReview(type) {
-    renderReview(type);
-}
-
-// BANKER'S CALC SANDBOX LOGIC
-function runSandbox() {
-    try {
-        const availStr = document.getElementById('sandboxAvail').value.trim();
-        const allocStr = document.getElementById('sandboxAlloc').value.trim();
-        const maxStr = document.getElementById('sandboxMax').value.trim();
-
-        if (!availStr || !allocStr || !maxStr) {
-            alert("Please fill in all inputs (Available vector, Allocation × matrix, Max matrix).");
-            return;
-        }
-
-        const avail = availStr.split(/\s+/).map(Number);
-        const allocRows = allocStr.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.split(/\s+/).map(Number));
-        const maxRows = maxStr.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.split(/\s+/).map(Number));
-
-        const numP = allocRows.length;
-        const numR = avail.length;
-
-        // Matrix Dimension Validation
-        if (maxRows.length !== numP) {
-            alert(`Dimension Mismatch Error: Allocation × matrix has ${numP} rows (processes), but Max matrix has ${maxRows.length} rows.`);
-            return;
-        }
-
-        for (let i = 0; i < numP; i++) {
-            if (allocRows[i].length !== numR) {
-                alert(`Dimension Mismatch Error: Process P${i} Allocation row has ${allocRows[i].length} values, but Available vector has ${numR} resources.`);
-                return;
+                    item.innerHTML = html;
+                    container.appendChild(item);
+                });
             }
-            if (maxRows[i].length !== numR) {
-                alert(`Dimension Mismatch Error: Process P${i} Max row has ${maxRows[i].length} values, but Available vector has ${numR} resources.`);
-                return;
+
+            function filterReview(type) {
+                renderReview(type);
             }
-        }
 
-        // Calculate Need
-        const need = [];
-        for (let i = 0; i < numP; i++) {
-            const row = [];
-            for (let j = 0; j < numR; j++) {
-                row.push(maxRows[i][j] - allocRows[i][j]);
-            }
-            need.push(row);
-        }
+            // BANKER'S CALC SANDBOX LOGIC
+            function runSandbox() {
+                try {
+                    const availStr = document.getElementById('sandboxAvail').value.trim();
+                    const allocStr = document.getElementById('sandboxAlloc').value.trim();
+                    const maxStr = document.getElementById('sandboxMax').value.trim();
 
-        // Safety Algorithm
-        let work = [...avail];
-        let finish = new Array(numP).fill(false);
-        let safeSeq = [];
-        let logs = [];
+                    if (!availStr || !allocStr || !maxStr) {
+                        alert("Please fill in all inputs (Available vector, Allocation × matrix, Max matrix).");
+                        return;
+                    }
 
-        logs.push(`<b>Calculated Need Matrix:</b><br>` + need.map((r, i) => `P${i}: [${r.join(', ')}]`).join('<br>'));
-        logs.push(`<b>Initial Work Vector:</b> [${work.join(', ')}]`);
+                    const avail = availStr.split(/\s+/).map(Number);
+                    const allocRows = allocStr.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.split(/\s+/).map(Number));
+                    const maxRows = maxStr.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.split(/\s+/).map(Number));
 
-        let count = 0;
-        while (count < numP) {
-            let found = false;
+                    const numP = allocRows.length;
+                    const numR = avail.length;
 
-            for (let i = 0; i < numP; i++) {
-                if (!finish[i]) {
-                    // Check Need <= Work
-                    let canProceed = true;
-                    for (let j = 0; j < numR; j++) {
-                        if (need[i][j] > work[j]) {
-                            canProceed = false;
-                            break;
+                    // Matrix Dimension Validation
+                    if (maxRows.length !== numP) {
+                        alert(`Dimension Mismatch Error: Allocation × matrix has ${numP} rows (processes), but Max matrix has ${maxRows.length} rows.`);
+                        return;
+                    }
+
+                    for (let i = 0; i < numP; i++) {
+                        if (allocRows[i].length !== numR) {
+                            alert(`Dimension Mismatch Error: Process P${i} Allocation row has ${allocRows[i].length} values, but Available vector has ${numR} resources.`);
+                            return;
+                        }
+                        if (maxRows[i].length !== numR) {
+                            alert(`Dimension Mismatch Error: Process P${i} Max row has ${maxRows[i].length} values, but Available vector has ${numR} resources.`);
+                            return;
                         }
                     }
 
-                    if (canProceed) {
+                    // Calculate Need
+                    const need = [];
+                    for (let i = 0; i < numP; i++) {
+                        const row = [];
                         for (let j = 0; j < numR; j++) {
-                            work[j] += allocRows[i][j];
+                            row.push(maxRows[i][j] - allocRows[i][j]);
                         }
-                        finish[i] = true;
-                        safeSeq.push(`P${i}`);
-                        logs.push(`• <b>P${i}</b> satisfied (Need [${need[i].join(', ')}] ≤ Work) → Completes! New Work=[${work.join(', ')}]`);
-                        found = true;
-                        count++;
+                        need.push(row);
                     }
+
+                    // Safety Algorithm
+                    let work = [...avail];
+                    let finish = new Array(numP).fill(false);
+                    let safeSeq = [];
+                    let logs = [];
+
+                    logs.push(`<b>Calculated Need Matrix:</b><br>` + need.map((r, i) => `P${i}: [${r.join(', ')}]`).join('<br>'));
+                    logs.push(`<b>Initial Work Vector:</b> [${work.join(', ')}]`);
+
+                    let count = 0;
+                    while (count < numP) {
+                        let found = false;
+
+                        for (let i = 0; i < numP; i++) {
+                            if (!finish[i]) {
+                                // Check Need <= Work
+                                let canProceed = true;
+                                for (let j = 0; j < numR; j++) {
+                                    if (need[i][j] > work[j]) {
+                                        canProceed = false;
+                                        break;
+                                    }
+                                }
+
+                                if (canProceed) {
+                                    for (let j = 0; j < numR; j++) {
+                                        work[j] += allocRows[i][j];
+                                    }
+                                    finish[i] = true;
+                                    safeSeq.push(`P${i}`);
+                                    logs.push(`• <b>P${i}</b> satisfied (Need [${need[i].join(', ')}] ≤ Work) → Completes! New Work=[${work.join(', ')}]`);
+                                    found = true;
+                                    count++;
+                                }
+                            }
+                        }
+
+                        if (!found) break;
+                    }
+
+                    const out = document.getElementById('sandboxOutput');
+
+                    if (count === numP) {
+                        out.innerHTML = `<div style="background:var(--success-bg); border:1px solid var(--success); padding:16px; border-radius:8px; color:var(--success);"><h3>✓ System is in a SAFE STATE !</h3><p><b>Safe Sequence: </b> &lt; ${safeSeq.join(' → ')} &gt;</p><div style="margin-top:12px; color:var(--text-primary);">${logs.join('<br>')}</div></div>`;
+                    } else {
+                        out.innerHTML = `<div style="background:var(--danger-bg); border:1px solid var(--danger); padding:16px; border-radius:8px; color:var(--danger);"><h3>❌ System is in an UNSAFE STATE !</h3><p>No valid safe sequence could be found for all processes.</p><div style="margin-top:12px; color:var(--text-primary);">${logs.join('<br>')}</div></div>`;
+                    }
+                } catch (err) {
+                    alert("Error parsing input matrices. Please check numbers formatting.");
                 }
             }
 
-            if (!found) break;
-        }
+        </script>
+    </body>
 
-        const out = document.getElementById('sandboxOutput');
-
-        if (count === numP) {
-            out.innerHTML = `<div style="background:var(--success-bg); border:1px solid var(--success); padding:16px; border-radius:8px; color:var(--success);"><h3>✓ System is in a SAFE STATE !</h3><p><b>Safe Sequence: </b> &lt; ${safeSeq.join(' → ')} &gt;</p><div style="margin-top:12px; color:var(--text-primary);">${logs.join('<br>')}</div></div>`;
-        } else {
-            out.innerHTML = `<div style="background:var(--danger-bg); border:1px solid var(--danger); padding:16px; border-radius:8px; color:var(--danger);"><h3>❌ System is in an UNSAFE STATE !</h3><p>No valid safe sequence could be found for all processes.</p><div style="margin-top:12px; color:var(--text-primary);">${logs.join('<br>')}</div></div>`;
-        }
-    } catch (err) {
-        alert("Error parsing input matrices. Please check numbers formatting.");
-    }
-}
-
-</script></body></html>
+    </html>
