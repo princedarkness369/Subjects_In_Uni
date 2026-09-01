@@ -410,7 +410,7 @@ header {
 /* Results Screen */
 .results-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, min × max(200px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -482,7 +482,7 @@ header {
 
 .calc-inputs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, min × max(250px, 1fr));
     gap: 16px;
     margin-bottom: 16px;
 }
@@ -509,7 +509,15 @@ textarea {
  <div id="calcTab" class="hidden"><div class="calc-section"><h2>🧮 Interactive Banker's Algorithm Calculator</h2>
  <p style="color: var(--text-secondary); margin-bottom: 16px;">Enter custom matrices to compute the Need matrix,
 run the Safety Algorithm,
-and find safe sequences step-by-step.</p><div class="calc-inputs"><div><label><strong>Available Vector (A B C)</strong></label><input type="text" id="sandboxAvail" value="3 3 2" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border); color:var(--text-primary); border-radius:6px; margin-top:4px;"></div><div><label><strong>Allocation Matrix (Row=Process)</strong></label><textarea id="sandboxAlloc">0 1 0 2 0 0 3 0 2 2 1 1 0 0 2</textarea></div><div><label><strong>Max Matrix (Row=Process)</strong></label><textarea id="sandboxMax">7 5 3 3 2 2 9 0 2 4 2 2 5 3 3</textarea></div></div><button class="btn btn-primary" onclick="runSandbox()">Run Safety Algorithm ⚡</button><div id="sandboxOutput" style="margin-top:20px;"></div></div></div></div><script> // COMPLETE 20-QUESTION BANK BASED STRICTLY ON SILBERSCHATZ CHAPTER 8
+and find safe sequences step-by-step.</p><div class="calc-inputs"><div><label><strong>Available Vector (A B C)</strong></label><input type="text" id="sandboxAvail" value="3 3 2" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border); color:var(--text-primary); border-radius:6px; margin-top:4px;"></div><div><label><strong>Allocation Matrix (Row=Process)</strong></label><textarea id="sandboxAlloc">0 1 0
+2 0 0
+3 0 2
+2 1 1
+0 0 2</textarea></div><div><label><strong>Max Matrix (Row=Process)</strong></label><textarea id="sandboxMax">7 5 3
+3 2 2
+9 0 2
+4 2 2
+5 3 3</textarea></div></div><button class="btn btn-primary" onclick="runSandbox()">Run Safety Algorithm ⚡</button><div id="sandboxOutput" style="margin-top:20px;"></div></div></div></div><script> // COMPLETE 20-QUESTION BANK BASED STRICTLY ON SILBERSCHATZ CHAPTER 8
 
 const questionsData=[ {
 
@@ -756,7 +764,7 @@ id: 14,
     type: "Conceptual",
     difficulty: "Medium",
     question: "One protocol to prevent Circular Wait is to define a global one-to-one function F: R → N mapping each resource type to an integer, requiring processes to request resources in strictly increasing order of enumeration. Why does this prevent circular wait?",
-    options: [ "It prevents a process holding resource Ri from requesting Rj if F(Rj) ≤ F(Ri), making a closed circular chain mathematically impossible.",
+    options: [ "It prevents a process holding resource Ri from requesting Rj if F(Rj) ≤ F(Ri), making a closed circular chain × mathematically impossible.",
     "It forces all resources to be sharable across all threads simultaneously.",
     "It automatically preempts any resource held for more than 10 seconds.",
     "It allows processes to hold resources indefinitely without waiting."
@@ -807,7 +815,7 @@ id: 17,
     options: [ "n × m for Allocation, Max, and Need.",
     "m × n for Allocation, n × n for Max, m × m for Need.",
     "1 × m vectors for all three matrices.",
-    "n × n matrices for all three."
+    "n × n × matrices for all three."
     ],
     correctAnswer: 0,
     explanation: "<b>Banker's Data Structures:</b><br>" + "• <b>Available:</b> Vector of length <code>m</code>.<br>" + "• <b>Max:</b> Matrix of dimension <code>n × m</code>.<br>" + "• <b>Allocation:</b> Matrix of dimension <code>n × m</code>.<br>" + "• <b>Need:</b> Matrix of dimension <code>n × m</code>."
@@ -915,13 +923,9 @@ function updateTimerDisplay() {
     const mins=Math.floor(timerSeconds / 60);
     const secs=timerSeconds % 60;
 
-    const formatted=`$ {
-        String(mins).padStart(2, '0')
-    }
+    const formatted=`${String(mins).padStart(2, '0')}
 
-    :$ {
-        String(secs).padStart(2, '0')
-    }
+    :${String(secs).padStart(2, '0')}
 
     `;
     const display=document.getElementById('timerDisplay');
@@ -974,9 +978,7 @@ function initPalette() {
         const btn=document.createElement('button');
         btn.className='palette-btn';
 
-        btn.id=`palette-btn-$ {
-            i
-        }
+        btn.id=`palette-btn-${i}
 
         `;
         btn.innerText=i+1;
@@ -989,9 +991,7 @@ function initPalette() {
 
 function updatePaletteUI() {
     for (let i=0; i < questionsData.length; i++) {
-        const btn=document.getElementById(`palette-btn-$ {
-                i
-            }
+        const btn=document.getElementById(`palette-btn-${i}
 
             `);
         btn.className='palette-btn';
@@ -1008,20 +1008,14 @@ function renderQuestion() {
     document.getElementById('qTopic').innerText=q.topic;
     document.getElementById('qDifficulty').innerText=q.difficulty;
 
-    document.getElementById('qDifficulty').className=`badge badge-$ {
-        q.difficulty.toLowerCase()
-    }
+    document.getElementById('qDifficulty').className=`badge badge-${q.difficulty.toLowerCase()}
 
     `;
     document.getElementById('qType').innerText=q.type;
 
-    document.getElementById('qNumText').innerText=`Question $ {
-        currentIndex+1
-    }
+    document.getElementById('qNumText').innerText=`Question ${currentIndex+1}
 
-    of $ {
-        questionsData.length
-    }
+    of ${questionsData.length}
 
     `;
 
@@ -1034,9 +1028,7 @@ function renderQuestion() {
     if (q.matrixData) {
         let html='<div class="matrix-container"><table class="matrix-table"><thead><tr>';
 
-        q.matrixData.headers.forEach(h=> html +=`<th>$ {
-                h
-            }
+        q.matrixData.headers.forEach(h=> html +=`<th>${h}
 
             </th>`);
         html+='</tr></thead><tbody>';
@@ -1044,9 +1036,7 @@ function renderQuestion() {
         q.matrixData.rows.forEach(r=> {
                 html +='<tr>';
 
-                r.forEach(c=> html +=`<td>$ {
-                        c
-                    }
+                r.forEach(c=> html +=`<td>${c}
 
                     </td>`);
                 html +='</tr>';
@@ -1062,9 +1052,7 @@ function renderQuestion() {
     q.options.forEach((opt, idx)=> {
             const div=document.createElement('div');
 
-            div.className=`option-item $ {
-                userAnswers[currentIndex]===idx ? 'selected' : ''
-            }
+            div.className=`option-item ${userAnswers[currentIndex]===idx ? 'selected' : ''}
 
             `;
             div.onclick=()=> selectOption(idx);
@@ -1077,13 +1065,9 @@ function renderQuestion() {
 
             const label=document.createElement('span');
 
-            label.innerText=`$ {
-                String.fromCharCode(65 + idx)
-            }
+            label.innerText=`${String.fromCharCode(65 + idx)}
 
-            . $ {
-                opt
-            }
+            . ${opt}
 
             `;
 
@@ -1100,9 +1084,7 @@ function renderQuestion() {
     // Progress bar
     const progress=((userAnswers.filter(a=> a !==null).length) / questionsData.length) * 100;
 
-    document.getElementById('progressFill').style.width=`$ {
-        progress
-    }
+    document.getElementById('progressFill').style.width=`${progress}
 
     %`;
 
@@ -1139,9 +1121,7 @@ function confirmSubmit() {
     let msg="Are you sure you want to submit your exam?";
 
     if (unanswered > 0) {
-        msg=`You have $ {
-            unanswered
-        }
+        msg=`You have ${unanswered}
 
         unanswered question(s). Are you sure you want to submit?`;
     }
@@ -1177,30 +1157,20 @@ function submitExam() {
     const minsSpent=Math.floor(timeSpentSeconds / 60);
     const secsSpent=timeSpentSeconds % 60;
 
-    const formattedTime=`$ {
-        String(minsSpent).padStart(2, '0')
-    }
+    const formattedTime=`${String(minsSpent).padStart(2, '0')}
 
-    :$ {
-        String(secsSpent).padStart(2, '0')
-    }
+    :${String(secsSpent).padStart(2, '0')}
 
     `;
 
     // Update Results Tab
-    document.getElementById('resScore').innerText=`$ {
-        score
-    }
+    document.getElementById('resScore').innerText=`${score}
 
-    / $ {
-        questionsData.length
-    }
+    / ${questionsData.length}
 
     `;
 
-    document.getElementById('resPercent').innerText=`$ {
-        percentage
-    }
+    document.getElementById('resPercent').innerText=`${percentage}
 
     %`;
     document.getElementById('resTime').innerText=formattedTime;
@@ -1244,36 +1214,24 @@ function renderReview(filter) {
 
             const item=document.createElement('div');
 
-            item.className=`review-item $ {
-                isCorrect ? 'correct' : 'incorrect'
-            }
+            item.className=`review-item ${isCorrect ? 'correct' : 'incorrect'}
 
             `;
 
-            let html=` <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;" > <h4>Question $ {
-                idx + 1
-            }
+            let html=` <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;" > <h4>Question ${idx + 1}
 
-            : $ {
-                q.topic
-            }
+            : ${q.topic}
 
-            </h4> <span class="badge ${isCorrect ? 'badge-easy' : 'badge-hard'}" > $ {
-                isCorrect ? '✓ Correct' : (isUnanswered ? '⚪ Unanswered' : '✗ Incorrect')
-            }
+            </h4> <span class="badge ${isCorrect ? 'badge-easy' : 'badge-hard'}" > ${isCorrect ? '✓ Correct' : (isUnanswered ? '⚪ Unanswered' : '✗ Incorrect')}
 
-            </span> </div> <p style="font-weight:600; margin-bottom:12px;" >$ {
-                q.question
-            }
+            </span> </div> <p style="font-weight:600; margin-bottom:12px;" >${q.question}
 
             </p> `;
 
             if (q.matrixData) {
                 html +='<div class="matrix-container"><table class="matrix-table"><thead><tr>';
 
-                q.matrixData.headers.forEach(h=> html +=`<th>$ {
-                        h
-                    }
+                q.matrixData.headers.forEach(h=> html +=`<th>${h}
 
                     </th>`);
                 html +='</tr></thead><tbody>';
@@ -1281,9 +1239,7 @@ function renderReview(filter) {
                 q.matrixData.rows.forEach(r=> {
                         html +='<tr>';
 
-                        r.forEach(c=> html +=`<td>$ {
-                                c
-                            }
+                        r.forEach(c=> html +=`<td>${c}
 
                             </td>`);
                         html +='</tr>';
@@ -1304,21 +1260,15 @@ function renderReview(filter) {
                         style +="background:var(--danger-bg); color:var(--danger); text-decoration:line-through;";
                     }
 
-                    html +=`<div style="${style}" >$ {
-                        String.fromCharCode(65 + oIdx)
-                    }
+                    html +=`<div style="${style}" >${String.fromCharCode(65 + oIdx)}
 
-                    . $ {
-                        opt
-                    }
+                    . ${opt}
 
                     </div>`;
                 });
             html +=`</div>`;
 
-            html +=` <div class="explanation-box" > <h4>💡 Step-by-Step Explanation</h4> <div>$ {
-                q.explanation
-            }
+            html +=` <div class="explanation-box" > <h4>💡 Step-by-Step Explanation</h4> <div>${q.explanation}
 
             </div> </div> `;
 
@@ -1334,132 +1284,97 @@ function filterReview(type) {
 // BANKER'S CALC SANDBOX LOGIC
 function runSandbox() {
     try {
-        const availStr=document.getElementById('sandboxAvail').value.trim();
-        const allocStr=document.getElementById('sandboxAlloc').value.trim();
-        const maxStr=document.getElementById('sandboxMax').value.trim();
+        const availStr = document.getElementById('sandboxAvail').value.trim();
+        const allocStr = document.getElementById('sandboxAlloc').value.trim();
+        const maxStr = document.getElementById('sandboxMax').value.trim();
 
-        const avail=availStr.split(/\s+/).map(Number);
-        const allocRows=allocStr.split('\n').map(r=> r.trim().split(/\s+/).map(Number));
-        const maxRows=maxStr.split('\n').map(r=> r.trim().split(/\s+/).map(Number));
+        if (!availStr || !allocStr || !maxStr) {
+            alert("Please fill in all inputs (Available vector, Allocation × matrix, Max matrix).");
+            return;
+        }
 
-        const numP=allocRows.length;
-        const numR=avail.length;
+        const avail = availStr.split(/\s+/).map(Number);
+        const allocRows = allocStr.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.split(/\s+/).map(Number));
+        const maxRows = maxStr.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.split(/\s+/).map(Number));
+
+        const numP = allocRows.length;
+        const numR = avail.length;
+
+        // Matrix Dimension Validation
+        if (maxRows.length !== numP) {
+            alert(`Dimension Mismatch Error: Allocation × matrix has ${numP} rows (processes), but Max matrix has ${maxRows.length} rows.`);
+            return;
+        }
+
+        for (let i = 0; i < numP; i++) {
+            if (allocRows[i].length !== numR) {
+                alert(`Dimension Mismatch Error: Process P${i} Allocation row has ${allocRows[i].length} values, but Available vector has ${numR} resources.`);
+                return;
+            }
+            if (maxRows[i].length !== numR) {
+                alert(`Dimension Mismatch Error: Process P${i} Max row has ${maxRows[i].length} values, but Available vector has ${numR} resources.`);
+                return;
+            }
+        }
 
         // Calculate Need
-        const need=[];
-
-        for (let i=0; i < numP; i++) {
-            const row=[];
-
-            for (let j=0; j < numR; j++) {
+        const need = [];
+        for (let i = 0; i < numP; i++) {
+            const row = [];
+            for (let j = 0; j < numR; j++) {
                 row.push(maxRows[i][j] - allocRows[i][j]);
             }
-
             need.push(row);
         }
 
         // Safety Algorithm
-        let work=[...avail];
-        let finish=new Array(numP).fill(false);
-        let safeSeq=[];
-        let logs=[];
+        let work = [...avail];
+        let finish = new Array(numP).fill(false);
+        let safeSeq = [];
+        let logs = [];
 
-        logs.push(`<b>Calculated Need Matrix:</b><br>` + need.map((r, i)=> `P$ {
-                    i
-                }
+        logs.push(`<b>Calculated Need Matrix:</b><br>` + need.map((r, i) => `P${i}: [${r.join(', ')}]`).join('<br>'));
+        logs.push(`<b>Initial Work Vector:</b> [${work.join(', ')}]`);
 
-                : [$ {
-                    r.join(', ')
-                }
-
-                ]`).join('<br>'));
-
-        logs.push(`<b>Initial Work Vector:</b> [$ {
-                work.join(', ')
-            }
-
-            ]`);
-
-        let count=0;
-
+        let count = 0;
         while (count < numP) {
-            let found=false;
+            let found = false;
 
-            for (let i=0; i < numP; i++) {
-                if ( !finish[i]) {
+            for (let i = 0; i < numP; i++) {
+                if (!finish[i]) {
                     // Check Need <= Work
-                    let canProceed=true;
-
-                    for (let j=0; j < numR; j++) {
+                    let canProceed = true;
+                    for (let j = 0; j < numR; j++) {
                         if (need[i][j] > work[j]) {
-                            canProceed=false;
+                            canProceed = false;
                             break;
                         }
                     }
 
                     if (canProceed) {
-                        for (let j=0; j < numR; j++) {
-                            work[j]+=allocRows[i][j];
+                        for (let j = 0; j < numR; j++) {
+                            work[j] += allocRows[i][j];
                         }
-
-                        finish[i]=true;
-
-                        safeSeq.push(`P$ {
-                                i
-                            }
-
-                            `);
-
-                        logs.push(`• <b>P$ {
-                                i
-                            }
-
-                            </b> satisfied (Need [$ {
-                                    need[i].join(', ')
-                                }
-
-                                ] ≤ Work) → Completes ! New Work=[$ {
-                                work.join(', ')
-                            }
-
-                            ]`);
-                        found=true;
+                        finish[i] = true;
+                        safeSeq.push(`P${i}`);
+                        logs.push(`• <b>P${i}</b> satisfied (Need [${need[i].join(', ')}] ≤ Work) → Completes! New Work=[${work.join(', ')}]`);
+                        found = true;
                         count++;
                     }
                 }
             }
 
-            if ( !found) break;
+            if (!found) break;
         }
 
-        const out=document.getElementById('sandboxOutput');
+        const out = document.getElementById('sandboxOutput');
 
-        if (count===numP) {
-            out.innerHTML=` <div style="background:var(--success-bg); border:1px solid var(--success); padding:16px; border-radius:8px; color:var(--success);"><h3>✓ System is in a SAFE STATE !</h3><p><b>Safe Sequence: </b> &lt;
-
-            $ {
-                safeSeq.join(' → ')
-            }
-
-            &gt;
-
-            </p><div style="margin-top:12px; color:var(--text-primary);">$ {
-                logs.join('<br>')
-            }
-
-            </div></div>`;
+        if (count === numP) {
+            out.innerHTML = `<div style="background:var(--success-bg); border:1px solid var(--success); padding:16px; border-radius:8px; color:var(--success);"><h3>✓ System is in a SAFE STATE !</h3><p><b>Safe Sequence: </b> &lt; ${safeSeq.join(' → ')} &gt;</p><div style="margin-top:12px; color:var(--text-primary);">${logs.join('<br>')}</div></div>`;
+        } else {
+            out.innerHTML = `<div style="background:var(--danger-bg); border:1px solid var(--danger); padding:16px; border-radius:8px; color:var(--danger);"><h3>❌ System is in an UNSAFE STATE !</h3><p>No valid safe sequence could be found for all processes.</p><div style="margin-top:12px; color:var(--text-primary);">${logs.join('<br>')}</div></div>`;
         }
-
-        else {
-            out.innerHTML=` <div style="background:var(--danger-bg); border:1px solid var(--danger); padding:16px; border-radius:8px; color:var(--danger);"><h3>❌ System is in an UNSAFE STATE !</h3><p>No valid safe sequence could be found for all processes.</p><div style="margin-top:12px; color:var(--text-primary);">$ {
-                logs.join('<br>')
-            }
-
-            </div></div>`;
-        }
-    }
-
-    catch (err) {
+    } catch (err) {
         alert("Error parsing input matrices. Please check numbers formatting.");
     }
 }
