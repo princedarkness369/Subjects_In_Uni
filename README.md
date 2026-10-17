@@ -3,7 +3,6 @@
 [![GitHub Repo](https://img.shields.io/badge/Repository-princedarkness369%2FSubjects__In__Uni-blue?logo=github)](https://github.com/princedarkness369/Subjects_In_Uni)
 [![Platform - Browser](https://img.shields.io/badge/Platform-Web%20%2F%20Browser-orange?logo=googlechrome)](#-how-to-use)
 [![Tech - HTML5 / CSS3 / JS](https://img.shields.io/badge/Stack-HTML5%20%7C%20CSS3%20%7C%20JS-yellow?logo=javascript)](#-courses-overview)
-[![Framework - React / Vite](https://img.shields.io/badge/Framework-React%2018%20%7C%20Vite%20%7C%20Tailwind-61DAFB?logo=react)](#-information-retrieval-ir)
 [![Backend - PHP & MySQL](https://img.shields.io/badge/Backend-PHP%20%7C%20MySQL-777BB4?logo=php)](#-php--mysql-web-development)
 
 An all-in-one university revision portal and interactive exam preparation suite. This repository features self-grading exam simulators, comprehensive study hubs, interactive flashcards, and chapter-by-chapter quizzes for core Computer Science courses.
@@ -20,7 +19,6 @@ An all-in-one university revision portal and interactive exam preparation suite.
   - [3. PHP & MySQL](#3--php--mysql-web-development)
 - [Repository Structure](#-repository-structure)
 - [How to Use](#-how-to-use)
-- [Study Guide Web App (Vite + React)](#-study-guide-web-app-vite--react)
 - [License & Acknowledgements](#-license--acknowledgements)
 
 ---
@@ -70,10 +68,11 @@ Focuses on classic search engine architectures, vector representations, relevanc
 | Module / Topic | Resource | Key Concepts Covered |
 | :--- | :--- | :--- |
 | **Master Study Hub** | [`IR/Summry IR/ir-summary.html`](./IR/Summry%20IR/ir-summary.html) | Central study guide covering inverted index pipelines, tokenization, lemmatization, Porter stemmer, stop words, and dictionary data structures. |
-| **Lecture 6: Scoring & Vector Space** | [`IR/ir chp6/lecture6-exam.html`](./IR/ir%20chp6/lecture6-exam.html) | Term Frequency ($TF$), Inverse Document Frequency ($IDF$), $TF\text{-}IDF$ weighting, Vector Space Model, Cosine Similarity, document length normalization. |
+| **Exam 1: Scoring & Vector Space** | [`IR/1/index.html`](./IR/1/index.html) | CS276 Lecture 6 Exam: Term Frequency ($TF$), Inverse Document Frequency ($IDF$), $TF\text{-}IDF$ weighting, Vector Space Model, Cosine Similarity, document length normalization. |
+| **Exam 2: Tokens & Terms** | [`IR/2/index.html`](./IR/2/index.html) | IR Midterm Practice: Tokenization challenges, term vocabulary, stemming, stopping, normalization, case folding, accent handling, and vocabulary sizing. |
+| **Exam 3: Evaluation Measures** | [`IR/3/index.html`](./IR/3/index.html) | IR Evaluation Measures Exam: Precision, Recall, F-measure ($F_1$), Precision at $k$ ($P@k$), Mean Average Precision (MAP), Normalized Discounted Cumulative Gain (NDCG), and evaluation benchmarks. |
 | **IR & LLMs Practice Exam** | [`IR/final/ir-llm-practice-exam.html`](./IR/final/ir-llm-practice-exam.html) | Modern Information Retrieval, dense vs. sparse embeddings, Bi-encoders/Cross-encoders, BERT/Transformer architectures for search, Retrieval-Augmented Generation (RAG). |
 | **Interactive Exam Simulator** | [`IR/ir-exam/index.html`](./IR/ir-exam/index.html) | Modular exam testing system with customizable question banks and instant score evaluation. |
-| **React Study Guide Application** | [`IR/ir-study-guide/`](./IR/ir-study-guide/) | Full-featured web app built with React, Vite, Tailwind CSS, and Framer Motion containing searchable concept grids, flashcards, and comparison tables. |
 
 ---
 
@@ -113,21 +112,32 @@ Subjects_In_Uni/
 │       └── chapter_9.html                # Chapter 9 Memory Management
 │
 ├── IR/                                   # Information Retrieval
+│   ├── 1/                                # Exam 1: Scoring, Term Weighting & Vector Space Model
+│   │   ├── index.html
+│   │   ├── questions.js
+│   │   ├── script.js
+│   │   └── style.css
+│   ├── 2/                                # Exam 2: Tokens & Terms Midterm Practice
+│   │   ├── index.html
+│   │   ├── questions.js
+│   │   ├── script.js
+│   │   └── style.css
+│   ├── 3/                                # Exam 3: Evaluation Measures Practice Exam
+│   │   ├── index.html
+│   │   ├── questions.js
+│   │   ├── script.js
+│   │   └── style.css
 │   ├── Summry IR/
 │   │   └── ir-summary.html               # Master Study Hub & Summaries
 │   ├── final/
 │   │   └── ir-llm-practice-exam.html     # IR & LLM Practice Exam
 │   ├── ir chp6/
 │   │   └── lecture6-exam.html            # TF-IDF & Scoring Quiz
-│   ├── ir-exam/                          # Modular Quiz Engine
-│   │   ├── index.html
-│   │   ├── questions.js
-│   │   ├── script.js
-│   │   └── style.css
-│   └── ir-study-guide/                   # Vite + React + Tailwind Web App
-│       ├── package.json
-│       ├── vite.config.ts
-│       └── README.md
+│   └── ir-exam/                          # Modular Quiz Engine
+│       ├── index.html
+│       ├── questions.js
+│       ├── script.js
+│       └── style.css
 │
 ├── PHP/                                  # PHP & MySQL Web Development
 │   ├── open_to_php/
@@ -150,7 +160,7 @@ Subjects_In_Uni/
 
 ## 💻 How to Use
 
-### Quick Start (Standalone HTML Simulators)
+### Standalone HTML Simulators
 1. Clone the repository:
    ```bash
    git clone https://github.com/princedarkness369/Subjects_In_Uni.git
@@ -169,23 +179,6 @@ Subjects_In_Uni/
      ```bash
      xdg-open OS/final/chapter_8.html
      ```
-
----
-
-## ⚡ Study Guide Web App (Vite + React)
-
-For the interactive Information Retrieval study portal in `IR/ir-study-guide`:
-
-```bash
-cd IR/ir-study-guide
-npm install
-npm run dev
-```
-
-Visit `http://localhost:5173` to explore:
-- Filterable concept cards and keyword search.
-- Interactive flashcards with shuffle mode.
-- Side-by-side comparison tables (e.g., *Precision vs. Recall*, *Boolean vs. Ranked Retrieval*).
 
 ---
 

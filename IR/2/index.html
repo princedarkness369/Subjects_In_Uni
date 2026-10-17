@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IR Midterm Practice — Tokens &amp; Terms</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ HEADER ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">IR</span>
+      <div class="brand-text">
+        <span class="brand-title">Information Retrieval</span>
+        <span class="brand-sub">Ch. 2–3 · Tokens &amp; Terms Practice Exam</span>
+      </div>
+    </div>
+    <button id="darkModeToggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg id="iconMoon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
+      <svg id="iconSun" viewBox="0 0 24 24" width="20" height="20" style="display:none"><path fill="currentColor" d="M12 4.5a1 1 0 0 1-1-1V2a1 1 0 1 1 2 0v1.5a1 1 0 0 1-1 1Zm0 15a1 1 0 0 1 1 1V22a1 1 0 1 1-2 0v-1.5a1 1 0 0 1 1-1ZM4.5 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1.5a1 1 0 0 1 1 1Zm17.5 0a1 1 0 0 1-1 1h-1.5a1 1 0 1 1 0-2H21a1 1 0 0 1 1 1ZM5.64 5.64a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 1 1-1.41 1.41L5.64 7.05a1 1 0 0 1 0-1.41Zm10.25 10.25a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 0 1-1.41 1.41l-1.06-1.06a1 1 0 0 1 0-1.41ZM18.36 5.64a1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06a1 1 0 0 1 1.41 0ZM8.11 15.89a1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06a1 1 0 0 1 1.41 0ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"/></svg>
+    </button>
+  </header>
+
+  <main class="stage">
+
+    <!-- ============ START SCREEN ============ -->
+    <section id="screen-start" class="screen active">
+      <div class="card start-card">
+        <h1>Ready for your practice exam?</h1>
+        <p class="muted">20 randomly-selected questions from a bank covering Tokenization (Ch. 2) and Terms (Ch. 3) — hyphenation, apostrophes, multi-word expressions, numbers, internationalization, stop words, normalization, case folding, expansion, thesauri, and Soundex.</p>
+
+        <div class="rules-grid">
+          <div class="rule"><strong id="bankCount">—</strong><span>question bank</span></div>
+          <div class="rule"><strong>20</strong><span>questions per exam</span></div>
+          <div class="rule"><strong>20:00</strong><span>minute timer</span></div>
+          <div class="rule"><strong>7 / 8 / 5</strong><span>easy / medium / hard</span></div>
+        </div>
+
+        <ul class="bullets">
+          <li>Every attempt shuffles a fresh set of questions and answer order.</li>
+          <li>You can move freely between Next / Previous — your answers are saved.</li>
+          <li>Full explanations and topic references are shown in Review mode after you finish.</li>
+        </ul>
+
+        <button id="startBtn" class="btn btn-primary btn-lg">Start Exam</button>
+      </div>
+    </section>
+
+    <!-- ============ EXAM SCREEN ============ -->
+    <section id="screen-exam" class="screen">
+      <div class="exam-topbar">
+        <div class="progress-wrap">
+          <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+          <div class="progress-meta">
+            <span id="qCounter">Question 1 / 20</span>
+            <span id="answeredCounter">0 answered</span>
+          </div>
+        </div>
+        <div id="timer" class="timer">20:00</div>
+      </div>
+
+      <div class="card question-card">
+        <div class="q-meta">
+          <span id="qDifficulty" class="badge badge-medium">Medium</span>
+          <span id="qTopic" class="topic-chip">Topic</span>
+        </div>
+        <h2 id="qText" class="q-text">Question text goes here</h2>
+        <div id="options" class="options"></div>
+      </div>
+
+      <div class="exam-nav">
+        <button id="prevBtn" class="btn btn-ghost">◀ Previous</button>
+        <div class="dots" id="qDots"></div>
+        <button id="nextBtn" class="btn btn-ghost">Next ▶</button>
+      </div>
+      <button id="finishBtn" class="btn btn-primary btn-lg finish-btn">Finish Exam</button>
+    </section>
+
+    <!-- ============ RESULTS SCREEN ============ -->
+    <section id="screen-results" class="screen">
+      <div class="card results-card">
+        <div class="grade-hero">
+          <div id="gradeCircle" class="grade-circle">A+</div>
+          <div class="score-text">
+            <span id="scoreFraction" class="score-fraction">18 / 20</span>
+            <span id="scorePercent" class="score-percent">90%</span>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat"><span id="statCorrect" class="stat-num correct">0</span><span>Correct</span></div>
+          <div class="stat"><span id="statWrong" class="stat-num wrong">0</span><span>Wrong</span></div>
+          <div class="stat"><span id="statUnanswered" class="stat-num">0</span><span>Unanswered</span></div>
+          <div class="stat"><span id="statTime" class="stat-num">0:00</span><span>Time Taken</span></div>
+        </div>
+        <div class="results-actions">
+          <button id="reviewBtn" class="btn btn-primary">Review Answers</button>
+          <button id="restartBtn" class="btn btn-ghost">Restart Exam</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REVIEW SCREEN ============ -->
+    <section id="screen-review" class="screen">
+      <div class="review-header">
+        <h1>Review</h1>
+        <button id="restartBtn2" class="btn btn-primary">Restart Exam</button>
+      </div>
+      <div id="reviewList" class="review-list"></div>
+    </section>
+
+  </main>
+
+  <footer class="foot">Practice questions generated from Chapter 2 (Tokens) and Chapter 3 (Terms) lecture slides only.</footer>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IR Evaluation Measures — Practice Exam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-mark">IR</span>
+      <span class="brand-text">Evaluation Measures <em>Practicum</em></span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <!-- ============ SCREEN: START ============ -->
+  <section class="screen" id="screen-start">
+    <div class="start-card">
+      <div class="start-eyebrow">Session 3 &middot; Evaluation in Information Retrieval</div>
+      <h1 class="start-title">Test what you actually understand,<br>not what you memorized.</h1>
+      <p class="start-sub">20 questions, drawn at random from a bank of 135 &mdash; every attempt is a different exam. Built strictly from the lecture: precision, recall, F-measure, rank-based measures, AP/MAP, and DCG/NDCG.</p>
+
+      <div class="start-stats">
+        <div class="stat">
+          <span class="stat-num" id="statBankSize">135</span>
+          <span class="stat-label">questions in bank</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">20</span>
+          <span class="stat-label">min. on the clock</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">21</span>
+          <span class="stat-label">lecture concepts</span>
+        </div>
+      </div>
+
+      <div class="start-meta">
+        <div class="meta-row"><span class="meta-dot dot-easy"></span> Easy</div>
+        <div class="meta-row"><span class="meta-dot dot-medium"></span> Medium</div>
+        <div class="meta-row"><span class="meta-dot dot-hard"></span> Hard</div>
+      </div>
+
+      <button class="btn btn-primary btn-start" id="btnStart">Begin exam</button>
+      <p class="start-footnote">Questions and answer choices are shuffled every attempt. Your progress autosaves as you navigate.</p>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: EXAM ============ -->
+  <section class="screen" id="screen-exam" hidden>
+    <div class="exam-shell">
+
+      <div class="exam-header">
+        <div class="exam-progress-wrap">
+          <div class="exam-progress-track">
+            <div class="exam-progress-fill" id="progressFill"></div>
+          </div>
+          <div class="exam-progress-labels">
+            <span id="questionCounter">Question 1 of 20</span>
+            <span id="answeredCounter">0 answered</span>
+          </div>
+        </div>
+        <div class="timer" id="timer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span id="timerText">20:00</span>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-meta">
+          <span class="pill pill-topic" id="qTopic">Topic</span>
+          <span class="pill pill-diff" id="qDifficulty">Medium</span>
+        </div>
+        <h2 class="question-text" id="qText">Question text goes here</h2>
+        <div class="options" id="optionsList"></div>
+      </div>
+
+      <div class="exam-nav">
+        <button class="btn btn-ghost" id="btnPrev">&larr; Previous</button>
+        <div class="exam-nav-right">
+          <button class="btn btn-ghost" id="btnFlagJump">Jump to unanswered</button>
+          <button class="btn btn-primary" id="btnNext">Next &rarr;</button>
+          <button class="btn btn-finish" id="btnFinish" hidden>Finish exam</button>
+        </div>
+      </div>
+
+      <div class="qgrid" id="qgrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: RESULTS ============ -->
+  <section class="screen" id="screen-results" hidden>
+    <div class="results-shell">
+      <div class="results-hero">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 160 160" class="score-ring">
+            <circle cx="80" cy="80" r="70" class="ring-track"/>
+            <circle cx="80" cy="80" r="70" class="ring-fill" id="ringFill"/>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-score" id="scoreFraction">0/20</span>
+            <span class="ring-pct" id="scorePercent">0%</span>
+          </div>
+        </div>
+        <div class="results-headline">
+          <div class="grade-badge" id="gradeBadge">A+</div>
+          <p class="results-sub" id="resultsMessage">Nice work.</p>
+        </div>
+      </div>
+
+      <div class="results-stats">
+        <div class="rstat">
+          <span class="rstat-num rstat-correct" id="statCorrect">0</span>
+          <span class="rstat-label">Correct</span>
+        </div>
+        <div class="rstat">
+          <span class="rstat-num rstat-wrong" id="statWrong">0</span>
+          <span class="rstat-label">Wrong</span>
+        </div>
+        <div class="rstat">
+          <span class="rstat-num" id="statTime">00:00</span>
+          <span class="rstat-label">Time taken</span>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn btn-primary" id="btnReview">Review answers</button>
+        <button class="btn btn-ghost" id="btnRestart">Start a new exam</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: REVIEW ============ -->
+  <section class="screen" id="screen-review" hidden>
+    <div class="review-shell">
+      <div class="review-header">
+        <h2>Review</h2>
+        <button class="btn btn-ghost" id="btnBackToResults">&larr; Back to results</button>
+      </div>
+      <div id="reviewList" class="review-list"></div>
+      <div class="review-footer">
+        <button class="btn btn-primary" id="btnRestart2">Start a new exam</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
